@@ -22,8 +22,6 @@ def check_proposal(raw):
     confidence = proposal.get("confidence")
     if not isinstance(confidence, (int, float)) or not 0 <= confidence <= 1:
         problems.append("confidence missing or not between 0 and 1")
-    if proposal.get("action") == "rename" and not proposal.get("new_name"):
-        problems.append("rename proposed without a new name")
     return proposal, problems
 
 

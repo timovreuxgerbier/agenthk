@@ -25,23 +25,31 @@ OLLAMA_URL = "http://localhost:11434/api/chat"
 CALL_TIMEOUT_SECONDS = 300
 
 # ---- Run limits (proposal: 10 files, 15 calls, 5 minutes) -----------------
+# Enforced by harness/caps.py. A run stops cleanly when any limit is reached.
 DEFAULT_MAX_FILES = 3
+MAX_FILES_PER_RUN = 10
+MAX_CALLS_PER_RUN = 15
+MAX_RUN_SECONDS = 300
 CONFIDENCE_FLOOR = 0.6       # below this a proposal is flagged as a guess
 
 # ---- The proposal contract -----------------------------------------------
-ACTIONS = ["keep_image", "keep_text", "rename", "to_be_deleted", "sensitive"]
+# "rename" is parked until Build Arc step 1.4 (Raaghavi): no code renames yet, and as
+# the last action in spec.md's order the model almost never reached it (Nov 10).
+ACTIONS = ["keep_image", "keep_text", "to_be_deleted", "sensitive"]
 IMAGE_TYPES = [".png", ".jpg", ".jpeg"]
 
-PROPOSAL_FIELDS = ["action", "reason", "why_saved_guess", "new_name", "confidence"]
+PROPOSAL_FIELDS = ["reason", "why_saved_guess", "action", "confidence"]
 
 # The JSON shape the model must answer in. Ollama enforces it.
+# Order matters: the model writes fields top to bottom, so it describes the
+# image (reason) BEFORE it picks the action. Nov 10 runs: with action first it
+# wrote "a school report card with grades" and still chose keep_image.
 PROPOSAL_SHAPE = {
     "type": "object",
     "properties": {
-        "action": {"type": "string", "enum": ACTIONS},
         "reason": {"type": "string"},
         "why_saved_guess": {"type": "string"},
-        "new_name": {"type": "string"},
+        "action": {"type": "string", "enum": ACTIONS},
         "confidence": {"type": "number"},
     },
     "required": PROPOSAL_FIELDS,
