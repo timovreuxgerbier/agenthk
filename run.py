@@ -1,16 +1,17 @@
 # run.py — Housekeeping Agent entry point. The ONLY file that imports from every lane.
 #
 #   python3 run.py                      propose for up to 3 screenshots, default model
-#   python3 run.py gemma4:e2b 30        choose model and how many screenshots
+#   python3 run.py gemma4:e4b 10        choose model and how many screenshots (cap: 10)
 #   python3 run.py score                compare the latest run against golden/golden.csv
 #
 # It moves, renames and deletes NOTHING.
 
+import json
 import sys
 import time
 import urllib.error
 
-from harness import schema, prefilter, context, router, check, trace
+from harness import schema, prefilter, context, router, check, trace, caps
 
 # Windows terminals default to a code page that crashes on emoji in model output.
 sys.stdout.reconfigure(encoding="utf-8")
@@ -37,7 +38,8 @@ def propose(model, max_files):
     if spec_text is None:
         print("Missing spec.md in the project folder.")
         return
-    batch = prefilter.pick_screenshots(max_files)
+    limits = caps.RunCaps()
+    batch = limits.limit_files(prefilter.pick_screenshots(max_files))
     if not batch:
         print("No screenshots found. Put 1 to 3 .png or .jpg files in:")
         print("  " + str(schema.SCREENSHOTS))
@@ -48,9 +50,31 @@ def propose(model, max_files):
     print("Nothing will be moved, renamed or deleted.\n")
     run_start = time.time()
 
+    copies = prefilter.find_copies(batch)
+
     for number, image in enumerate(batch, start=1):
+        if image in copies:
+            print("[" + str(number) + "/" + str(len(batch)) + "] " + image.name + " ... exact copy, no model call")
+            raw = json.dumps({"reason": "Exact copy of " + copies[image] + ".",
+                              "why_saved_guess": "Probably taken twice by accident (a guess).",
+                              "action": "to_be_deleted", "new_name": "", "confidence": 1.0})
+            proposal, problems = check.check_proposal(raw)
+            show(proposal, problems, False)
+            print()
+            trace.write({
+                "run_id": run_id, "time": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "file": image.name, "model": "code: exact copy", "seconds": 0,
+                "raw_output": raw, "check_problems": problems,
+                "flagged": False, "user_decision": None,
+            })
+            continue
+        stop = limits.check()
+        if stop:
+            print("Stopped before " + image.name + ": " + stop + "\n")
+            break
         print("[" + str(number) + "/" + str(len(batch)) + "] " + image.name + " ... thinking")
         started = time.time()
+        limits.record_call()
         try:
             raw = router.ask(model, context.build_messages(spec_text, image))
         except urllib.error.HTTPError as error:
@@ -81,6 +105,7 @@ def propose(model, max_files):
         })
 
     print("Done. Total " + str(round(time.time() - run_start, 1)) + " seconds. Trace saved to trace.jsonl")
+    print(limits.summary())
 
 
 def main():
