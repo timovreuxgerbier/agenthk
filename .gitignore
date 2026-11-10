@@ -218,3 +218,18 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---- Housekeeping Agent: PERSONAL DATA — never commit (public repo) ----
+screenshots/*
+!screenshots/.gitkeep
+golden/*
+!golden/README.md
+trace.jsonl
+last_run.txt
+score_report.txt
+seen.json
+rules.md
+Retained as Images/
+Retained as Text/
+To Be Deleted/
+Sensitive - For Human Review/
