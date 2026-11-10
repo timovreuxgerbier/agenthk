@@ -1,0 +1,48 @@
+# CODEOWNERS — who GitHub asks to review a pull request.
+#
+# When a pull request changes a file listed here, GitHub automatically asks
+# that file's owner to review it, and emails them. You are never asked to
+# review your own pull request.
+#
+# Later lines win over earlier ones. Lanes match CONTRIBUTING.md.
+
+# ---- Fallback: anything not listed below goes to Timo, who merges ----
+*                         @timovreuxgerbier
+
+# ---- Raaghavi · before the model -------------------------------------
+# TODO: replace RAAGHAVI_USERNAME with her GitHub username and remove the "# "
+# from the start of the next four lines. Until then these files fall back to Timo.
+# /harness/prefilter.py   @RAAGHAVI_USERNAME
+# /harness/context.py     @RAAGHAVI_USERNAME
+# /harness/router.py      @RAAGHAVI_USERNAME
+# /spec.md                @RAAGHAVI_USERNAME
+
+# ---- Timo · after the model ------------------------------------------
+/harness/check.py         @timovreuxgerbier
+/harness/caps.py          @timovreuxgerbier
+/harness/execute.py       @timovreuxgerbier
+/harness/rules.py         @timovreuxgerbier
+/eval/cost.py             @timovreuxgerbier
+/tests/                   @timovreuxgerbier
+
+# ---- Sphinx · traces, golden set, guardrails, Quarantine -------------
+/harness/trace.py         @GuardianOfMysteries
+/harness/naming.py        @GuardianOfMysteries
+/eval/naming_report.py    @GuardianOfMysteries
+/tests/test_naming.py     @GuardianOfMysteries
+/harness/guardrails.py    @GuardianOfMysteries
+/eval/score.py            @GuardianOfMysteries
+/golden/                  @GuardianOfMysteries
+/ui/                      @GuardianOfMysteries
+
+# ---- Ana · evaluation ------------------------------------------------
+# TODO: replace ANA_USERNAME with her GitHub username and remove the "# ".
+# /eval/judge.py          @ANA_USERNAME
+# /eval/rubric.md         @ANA_USERNAME
+
+# ---- Shared: team decision. Everyone is asked. -------------------------
+# When Raaghavi and Ana are added above, add them to these four lines too.
+/harness/schema.py        @timovreuxgerbier @GuardianOfMysteries
+/run.py                   @timovreuxgerbier @GuardianOfMysteries
+/CONTRIBUTING.md          @timovreuxgerbier @GuardianOfMysteries
+/.github/CODEOWNERS       @timovreuxgerbier @GuardianOfMysteries
