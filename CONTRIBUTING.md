@@ -26,6 +26,12 @@ Edit your own files freely. If you need a change in someone else's file, ask the
 8. **Never commit personal data.** Screenshots, traces, golden labels and rules are in `.gitignore`. Check `git status` before every commit. If you see a screenshot listed, stop.
 9. **Every behaviour change goes through the golden set.** Run `python3 run.py score` before and after, and paste both pass rates in your PR.
 
+## How you find out about changes to your files
+
+- **Code:** `.github/CODEOWNERS` maps each file to its owner. When a pull request changes your file, GitHub asks you to review it and emails you. Nobody has to remember to tell you.
+- **Everything else:** notes, questions, bugs you noticed, decisions and "this is blocking me" go in the **Team Handoffs** database in our Notion Build Log. Pick the lane of the *file* the note is about, and it lands in that person's inbox tab.
+- **A bug in someone else's file:** leave a Handoff note for its owner. Don't quietly fix it inside your own PR. If the fix is tiny and urgent, fix it, say so in the PR description, and the owner reviews it.
+
 ## Branches
 
 - Never commit straight to `main`.
