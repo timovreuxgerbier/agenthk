@@ -9,12 +9,12 @@ It runs **only on your own computer** through [Ollama](https://ollama.com). Noth
 1. Install Ollama and Python 3.11 or newer. No other packages are needed.
 2. Download a model (the small one is fine for testing):
    ```
-   ollama pull gemma4:e2b
+   ollama pull gemma4:e4b
    ```
 3. Put 1 to 3 screenshots in the `screenshots/` folder.
 4. From this folder, run:
    ```
-   python3 run.py gemma4:e2b
+   python3 run.py gemma4:e4b
    ```
    On Windows, if `python3` isn't found, use `python` instead.
 
@@ -22,7 +22,7 @@ It runs **only on your own computer** through [Ollama](https://ollama.com). Noth
 
 ```
 python3 run.py score          # first time: creates golden/golden.csv for you to fill in
-python3 run.py gemma4:e2b 30  # run on up to 30 screenshots
+python3 run.py gemma4:e4b 10  # run on up to 10 screenshots (the cap)
 python3 run.py score          # pass rate, mistake patterns, confidence check
 ```
 
