@@ -11,17 +11,20 @@ import sys
 import time
 import urllib.error
 
-from harness import schema, prefilter, context, router, check, trace, caps
+from harness import schema, prefilter, context, router, check, trace, caps, naming
 
 # Windows terminals default to a code page that crashes on emoji in model output.
 sys.stdout.reconfigure(encoding="utf-8")
 
 
-def show(proposal, problems, flagged):
+def show(proposal, problems, flagged, file_name):
     if proposal is None:
         print("  REJECTED by code check: " + ", ".join(problems))
         return
     print("  Action:      " + str(proposal.get("action")))
+    new_name = naming.rename_for(proposal, file_name)
+    if new_name:
+        print("  Rename to:   " + new_name + "  (name had no meaning)")
     print("  Reason:      " + str(proposal.get("reason")))
     print("  Why saved:   " + str(proposal.get("why_saved_guess")) + "  (a guess)")
     print("  Confidence:  " + str(proposal.get("confidence")))
@@ -57,7 +60,7 @@ def propose(model, max_files):
                               "why_saved_guess": "Probably taken twice by accident (a guess).",
                               "action": "to_be_deleted", "confidence": 1.0})
             proposal, problems = check.check_proposal(raw)
-            show(proposal, problems, False)
+            show(proposal, problems, False, image.name)
             print()
             trace.write({
                 "run_id": run_id, "time": time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -91,8 +94,11 @@ def propose(model, max_files):
         seconds = round(time.time() - started, 1)
 
         proposal, problems = check.check_proposal(raw)
+        rename_problem = naming.rename_problem(proposal, image.name)
+        if rename_problem:
+            problems.append(rename_problem)
         flagged = check.is_flagged(proposal, problems)
-        show(proposal, problems, flagged)
+        show(proposal, problems, flagged, image.name)
         print("  Took " + str(seconds) + " seconds\n")
 
         trace.write({

@@ -33,21 +33,24 @@ MAX_RUN_SECONDS = 300
 CONFIDENCE_FLOOR = 0.6       # below this a proposal is flagged as a guess
 
 # ---- The proposal contract -----------------------------------------------
-# "rename" is parked until Build Arc step 1.4 (Raaghavi): no code renames yet, and as
-# the last action in spec.md's order the model almost never reached it (Nov 10).
+# Actions say WHERE a screenshot goes. Renaming is not an action: it happens in
+# addition to keeping (team decision, Nov 10). See harness/naming.py.
 ACTIONS = ["keep_image", "keep_text", "to_be_deleted", "sensitive"]
+ACTIONS_THAT_KEEP = ["keep_image", "keep_text"]   # only these can be renamed
 IMAGE_TYPES = [".png", ".jpg", ".jpeg"]
 
-PROPOSAL_FIELDS = ["reason", "why_saved_guess", "action", "confidence"]
+PROPOSAL_FIELDS = ["reason", "new_name", "why_saved_guess", "action", "confidence"]
 
 # The JSON shape the model must answer in. Ollama enforces it.
 # Order matters: the model writes fields top to bottom, so it describes the
 # image (reason) BEFORE it picks the action. Nov 10 runs: with action first it
 # wrote "a school report card with grades" and still chose keep_image.
+# new_name comes right after reason, so the name is drawn from the description.
 PROPOSAL_SHAPE = {
     "type": "object",
     "properties": {
         "reason": {"type": "string"},
+        "new_name": {"type": "string"},
         "why_saved_guess": {"type": "string"},
         "action": {"type": "string", "enum": ACTIONS},
         "confidence": {"type": "number"},

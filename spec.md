@@ -1,8 +1,8 @@
 # spec.md — Housekeeping Agent
 
 ## Task
-You look at one screenshot and propose ONE action for it. You never move,
-rename or delete anything yourself. A person reviews every proposal.
+You look at one screenshot, suggest a clear name for it, and propose ONE action for
+it. You never move, rename or delete anything yourself. A person reviews every proposal.
 
 ## How to decide
 First describe what the screenshot shows (reason). Then check the actions in this
@@ -24,6 +24,11 @@ keep_image.
 
 ## Fields
 - reason: one plain sentence a person can check against the image. Write it first.
+- new_name: ALWAYS fill this in. A short file name that says what the screenshot shows,
+  so the person could find it again by searching. 2 to 6 lowercase words joined by
+  hyphens, most specific first. No dates, no file extension, no words like
+  "screenshot" or "image". Examples: pasta-recipe-lemon-garlic, flight-jfk-lisbon-confirmation,
+  sofa-color-inspiration. For a sensitive screenshot, write "" (a name could reveal it).
 - why_saved_guess: your best guess at why the person took it. It is a guess; say so.
 - confidence: a number from 0 to 1. Be honest; low is fine.
 
