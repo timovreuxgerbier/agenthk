@@ -27,6 +27,9 @@
 
 # ---- Sphinx · traces, golden set, guardrails, Quarantine -------------
 /harness/trace.py         @GuardianOfMysteries
+/harness/naming.py        @GuardianOfMysteries
+/eval/naming_report.py    @GuardianOfMysteries
+/tests/test_naming.py     @GuardianOfMysteries
 /harness/guardrails.py    @GuardianOfMysteries
 /eval/score.py            @GuardianOfMysteries
 /golden/                  @GuardianOfMysteries
