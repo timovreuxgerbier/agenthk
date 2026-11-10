@@ -33,10 +33,12 @@ MAX_RUN_SECONDS = 300
 CONFIDENCE_FLOOR = 0.6       # below this a proposal is flagged as a guess
 
 # ---- The proposal contract -----------------------------------------------
-ACTIONS = ["keep_image", "keep_text", "rename", "to_be_deleted", "sensitive"]
+# "rename" is parked until Build Arc step 1.4 (Raaghavi): no code renames yet, and as
+# the last action in spec.md's order the model almost never reached it (Nov 10).
+ACTIONS = ["keep_image", "keep_text", "to_be_deleted", "sensitive"]
 IMAGE_TYPES = [".png", ".jpg", ".jpeg"]
 
-PROPOSAL_FIELDS = ["reason", "why_saved_guess", "action", "new_name", "confidence"]
+PROPOSAL_FIELDS = ["reason", "why_saved_guess", "action", "confidence"]
 
 # The JSON shape the model must answer in. Ollama enforces it.
 # Order matters: the model writes fields top to bottom, so it describes the
@@ -48,7 +50,6 @@ PROPOSAL_SHAPE = {
         "reason": {"type": "string"},
         "why_saved_guess": {"type": "string"},
         "action": {"type": "string", "enum": ACTIONS},
-        "new_name": {"type": "string"},
         "confidence": {"type": "number"},
     },
     "required": PROPOSAL_FIELDS,

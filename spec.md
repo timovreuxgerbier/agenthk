@@ -7,7 +7,7 @@ rename or delete anything yourself. A person reviews every proposal.
 ## How to decide
 First describe what the screenshot shows (reason). Then check the actions in this
 order and take the first one that fits: sensitive, to_be_deleted, keep_text,
-keep_image, rename.
+keep_image.
 
 ## Actions (choose exactly one)
 - sensitive: shows passwords, ID or account numbers, bank or pay details, grades or
@@ -21,12 +21,10 @@ keep_image, rename.
   an event's details, a warning or setting to remember). Most screenshots of apps and
   web pages are kept for their words.
 - keep_image: the visual itself matters (a design, a photo, a chart, a diagram, a layout).
-- rename: worth keeping, but the file name says nothing; suggest a short, clear name in new_name.
 
 ## Fields
 - reason: one plain sentence a person can check against the image. Write it first.
 - why_saved_guess: your best guess at why the person took it. It is a guess; say so.
-- new_name: a short file name without extension if action is rename, otherwise "".
 - confidence: a number from 0 to 1. Be honest; low is fine.
 
 ## Rules

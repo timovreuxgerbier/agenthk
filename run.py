@@ -24,8 +24,6 @@ def show(proposal, problems, flagged):
     print("  Action:      " + str(proposal.get("action")))
     print("  Reason:      " + str(proposal.get("reason")))
     print("  Why saved:   " + str(proposal.get("why_saved_guess")) + "  (a guess)")
-    if proposal.get("new_name"):
-        print("  New name:    " + str(proposal.get("new_name")))
     print("  Confidence:  " + str(proposal.get("confidence")))
     if problems:
         print("  CODE CHECK:  " + ", ".join(problems))
@@ -57,7 +55,7 @@ def propose(model, max_files):
             print("[" + str(number) + "/" + str(len(batch)) + "] " + image.name + " ... exact copy, no model call")
             raw = json.dumps({"reason": "Exact copy of " + copies[image] + ".",
                               "why_saved_guess": "Probably taken twice by accident (a guess).",
-                              "action": "to_be_deleted", "new_name": "", "confidence": 1.0})
+                              "action": "to_be_deleted", "confidence": 1.0})
             proposal, problems = check.check_proposal(raw)
             show(proposal, problems, False)
             print()
