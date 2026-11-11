@@ -8,6 +8,7 @@ import json
 from collections import Counter
 
 from harness import schema, trace
+from eval import naming_report
 
 
 def make_template():
@@ -53,6 +54,7 @@ def latest_results():
             "action": answer.get("action", "INVALID"),
             "confidence": answer.get("confidence"),
             "reason": answer.get("reason", ""),
+            "new_name": answer.get("new_name", ""),
             "model": entry.get("model", "?"),
         }
     return run_id, results
@@ -83,7 +85,8 @@ def build_report(run_id, results, answers):
     if scored == 0:
         return None
 
-    model = next(iter(results.values()))["model"]
+    models = [r["model"] for r in results.values() if not r["model"].startswith("code:")]
+    model = Counter(models).most_common(1)[0][0] if models else "code only"
     out = ["Run " + str(run_id) + "  model " + model,
            "PASS RATE: " + str(passed) + "/" + str(scored) + " = "
            + str(round(100 * passed / scored)) + "%", ""]
@@ -97,6 +100,7 @@ def build_report(run_id, results, answers):
         out.append("Average confidence when WRONG: " + str(round(sum(wrong_conf) / len(wrong_conf), 2)))
     out.append("(If those two numbers are close, the confidence score is not telling you anything.)")
     out.append("")
+    out += naming_report.build(results, answers)
     return "\n".join(out + lines)
 
 
