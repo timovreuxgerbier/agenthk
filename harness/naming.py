@@ -1,10 +1,11 @@
 # harness/naming.py — Lane: Sphinx (rename measurement), Build Arc step 1.4
 # Renaming is not an action. It happens IN ADDITION to keeping a screenshot.
 # The model always suggests a name; OUR CODE decides whether the file needs one.
+# D18 (S8): a name is applied only when Zippy independently said "none" (gated_rename).
 
 import re
 
-from harness import schema
+from harness import schema, gate
 
 # Words that camera, phone and OS tools put in default file names.
 # Once these, numbers and punctuation are removed, nothing meaningful is left.
@@ -49,11 +50,19 @@ def needs_rename(proposal, file_name):
 
 
 def rename_for(proposal, file_name):
-    """Return the cleaned new name to show the person, or "" if no rename applies.
-    Sensitive screenshots are never renamed: a name could reveal what they contain."""
+    """Return the cleaned new name Pip's proposal implies, or "" if no rename applies.
+    Reads Pip's action only. Use gated_rename to decide what our code applies."""
     if not needs_rename(proposal, file_name):
         return ""
     return clean_name(proposal.get("new_name"))
+
+
+def gated_rename(proposal, file_name, verdict):
+    """D18: the name our code would APPLY. Empty unless Zippy said "none" first.
+    A missing verdict, a lock or a broken Zippy answer all mean: no rename."""
+    if not gate.is_cleared(verdict):
+        return ""
+    return rename_for(proposal, file_name)
 
 
 def rename_problem(proposal, file_name):

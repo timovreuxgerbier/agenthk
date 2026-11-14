@@ -1,12 +1,14 @@
 # harness/schema.py — SHARED. The only vocabulary every lane uses.
-# Changing anything here is a TEAM decision, followed by a golden-set rerun.
+# Changes here are the architect's call (Sphinx, D17), followed by a golden-set rerun.
+# A change that alters what the product does or promises goes to the team first.
 
 from pathlib import Path
 
 # ---- Where things live ---------------------------------------------------
 ROOT = Path(__file__).resolve().parent.parent
 SCREENSHOTS = ROOT / "screenshots"          # the ONLY folder the agent reads
-SPEC = ROOT / "spec.md"                     # task + rules; the agent never edits it
+SPEC = ROOT / "spec.md"                     # Pip's task + rules; the agent never edits it
+ZIPPY_SPEC = ROOT / "zippy.md"              # Zippy's one question; the agent never edits it
 TRACE = ROOT / "trace.jsonl"                # one line per screenshot per run
 GOLDEN = ROOT / "golden" / "golden.csv"     # your labels; outside the read folder
 SCORE_REPORT = ROOT / "golden" / "score_report.txt"
@@ -26,13 +28,32 @@ CALL_TIMEOUT_SECONDS = 300
 
 # ---- Run limits (proposal: 10 files, 15 calls, 5 minutes) -----------------
 # Enforced by harness/caps.py. A run stops cleanly when any limit is reached.
+# Since S8 each screenshot costs 2 calls (Zippy + Pip), so 15 calls cover ~7 files.
 DEFAULT_MAX_FILES = 3
 MAX_FILES_PER_RUN = 10
 MAX_CALLS_PER_RUN = 15
 MAX_RUN_SECONDS = 300
 CONFIDENCE_FLOOR = 0.6       # below this a proposal is flagged as a guess
 
-# ---- The proposal contract -----------------------------------------------
+# ---- Zippy's answer (the sensitivity gate, D18-D20) ------------------------
+# Multiple choice only: no free-text field exists, so Zippy cannot repeat what it saw.
+# Any kind except GATE_CLEAR locks the screenshot: Pip never sees it, no rename.
+GATE_CLEAR = "none"
+GATE_KINDS = [
+    "bank_or_payment", "official_document", "credentials", "private_message",
+    "contact_details", "health_record", "marked_confidential", "nudity_or_children",
+    GATE_CLEAR,
+]
+GATE_SHAPE = {
+    "type": "object",
+    "properties": {
+        "kind": {"type": "string", "enum": GATE_KINDS},
+        "confidence": {"type": "number"},
+    },
+    "required": ["kind", "confidence"],
+}
+
+# ---- Pip's proposal contract ---------------------------------------------
 # Actions say WHERE a screenshot goes. Renaming is not an action: it happens in
 # addition to keeping (team decision, Nov 10). See harness/naming.py.
 ACTIONS = ["keep_image", "keep_text", "to_be_deleted", "sensitive"]
@@ -41,11 +62,10 @@ IMAGE_TYPES = [".png", ".jpg", ".jpeg"]
 
 PROPOSAL_FIELDS = ["reason", "new_name", "why_saved_guess", "action", "confidence"]
 
-# The JSON shape the model must answer in. Ollama enforces it.
+# The JSON shape Pip must answer in. Ollama enforces it.
 # Order matters: the model writes fields top to bottom, so it describes the
-# image (reason) BEFORE it picks the action. Nov 10 runs: with action first it
-# wrote "a school report card with grades" and still chose keep_image.
-# new_name comes right after reason, so the name is drawn from the description.
+# image (reason) BEFORE it picks the action. new_name comes right after reason,
+# so the name is drawn from the description.
 PROPOSAL_SHAPE = {
     "type": "object",
     "properties": {
@@ -59,7 +79,8 @@ PROPOSAL_SHAPE = {
 }
 
 # One trace line. Every lane that writes to the trace uses exactly these keys.
+# "gate" is Zippy's verdict {"kind", "confidence"}; missing in runs before S8.
 TRACE_FIELDS = [
-    "run_id", "time", "file", "model", "seconds",
+    "run_id", "time", "file", "model", "seconds", "gate",
     "raw_output", "check_problems", "flagged", "user_decision",
 ]

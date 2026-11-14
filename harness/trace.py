@@ -1,20 +1,46 @@
 # harness/trace.py — Lane: Sphinx (traces + guardrails)
 # Writes and reads the run record. One JSON line per screenshot per run.
-# Later: redact reason / why_saved_guess for sensitive items (Arc Step 1.8).
+# S8: anything judged sensitive, by Zippy OR Pip, is redacted before it is written:
+# only the action and confidence survive. No description, no name, no why-saved.
 
 import json
 from datetime import datetime
 
-from harness import schema
+from harness import schema, gate
 
 
 def new_run_id():
     return datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
+def _answer(entry):
+    try:
+        answer = json.loads(entry.get("raw_output") or "")
+    except (json.JSONDecodeError, TypeError):
+        return {}
+    return answer if isinstance(answer, dict) else {}
+
+
+def is_sensitive(entry):
+    """True if Zippy locked it or Pip called it sensitive."""
+    return gate.is_locked(entry.get("gate")) or _answer(entry).get("action") == "sensitive"
+
+
+def redact(entry):
+    """Return the entry as it may be stored. Sensitive items keep action + confidence only."""
+    if not is_sensitive(entry):
+        return entry
+    kept = dict(entry)
+    kept["raw_output"] = json.dumps({"action": "sensitive",
+                                     "confidence": _answer(entry).get("confidence")})
+    kept["check_problems"] = []
+    return kept
+
+
 def write(entry):
-    """Append one trace line. Only the keys in schema.TRACE_FIELDS are kept."""
-    line = {key: entry.get(key) for key in schema.TRACE_FIELDS}
+    """Append one trace line, redacted. Only the keys in schema.TRACE_FIELDS are kept."""
+    safe = redact(entry)
+    line = {key: safe.get(key) for key in schema.TRACE_FIELDS}
     with schema.TRACE.open("a", encoding="utf-8") as log:
         log.write(json.dumps(line, ensure_ascii=False) + "\n")
 

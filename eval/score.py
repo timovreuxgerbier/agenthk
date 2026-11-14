@@ -2,13 +2,15 @@
 # Compares the agent's latest run against YOUR answers in golden/golden.csv.
 # First run: creates golden.csv listing every screenshot, for you to fill in.
 # Run it with:  python3 run.py score
+# S8: in a gated run, "action" is the PIPELINE's answer (Zippy's lock wins, else Pip);
+# "pip_action" is Pip's own answer, None when Zippy locked the screenshot first.
 
 import csv
 import json
 from collections import Counter
 
-from harness import schema, trace
-from eval import naming_report, recall
+from harness import schema, trace, gate
+from eval import gate_report, naming_report, recall
 
 
 def make_template():
@@ -50,8 +52,12 @@ def latest_results():
             answer = json.loads(entry["raw_output"])
         except (json.JSONDecodeError, TypeError):
             answer = {}
+        verdict = entry.get("gate")
+        locked = gate.is_locked(verdict)
         results[entry["file"]] = {
-            "action": answer.get("action", "INVALID"),
+            "action": "sensitive" if locked else answer.get("action", "INVALID"),
+            "pip_action": None if locked else answer.get("action", "INVALID"),
+            "gate": verdict,
             "confidence": answer.get("confidence"),
             "reason": answer.get("reason", ""),
             "new_name": answer.get("new_name", ""),
@@ -87,7 +93,9 @@ def build_report(run_id, results, answers):
 
     models = [r["model"] for r in results.values() if not r["model"].startswith("code:")]
     model = Counter(models).most_common(1)[0][0] if models else "code only"
-    out = ["Run " + str(run_id) + "  model " + model,
+    gated = any(r.get("gate") is not None for r in results.values())
+    out = ["Run " + str(run_id) + "  model " + model
+           + ("  (Zippy gate, then Pip: scores are the whole pipeline)" if gated else "  (Pip alone)"),
            "PASS RATE: " + str(passed) + "/" + str(scored) + " = "
            + str(round(100 * passed / scored)) + "%", ""]
     if misses:
@@ -102,6 +110,7 @@ def build_report(run_id, results, answers):
     out.append("")
     if not_run:
         out += [str(not_run) + " labelled screenshot(s) were not in this run (cap or newest-first).", ""]
+    out += gate_report.build(results, answers)
     out += recall.build(results, answers)
     out += naming_report.build(results, answers)
     return "\n".join(out + lines)
