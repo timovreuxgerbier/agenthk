@@ -8,7 +8,7 @@ import json
 from collections import Counter
 
 from harness import schema, trace
-from eval import naming_report
+from eval import naming_report, recall
 
 
 def make_template():
@@ -61,12 +61,12 @@ def latest_results():
 
 
 def build_report(run_id, results, answers):
-    lines, passed, scored = [], 0, 0
+    lines, passed, scored, not_run = [], 0, 0, 0
     misses = Counter()
     right_conf, wrong_conf = [], []
     for name, expected in answers.items():
         if name not in results:
-            lines.append("NOT RUN   " + name)
+            not_run += 1
             continue
         got = results[name]
         scored += 1
@@ -100,6 +100,9 @@ def build_report(run_id, results, answers):
         out.append("Average confidence when WRONG: " + str(round(sum(wrong_conf) / len(wrong_conf), 2)))
     out.append("(If those two numbers are close, the confidence score is not telling you anything.)")
     out.append("")
+    if not_run:
+        out += [str(not_run) + " labelled screenshot(s) were not in this run (cap or newest-first).", ""]
+    out += recall.build(results, answers)
     out += naming_report.build(results, answers)
     return "\n".join(out + lines)
 

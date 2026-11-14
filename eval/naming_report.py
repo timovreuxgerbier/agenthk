@@ -40,8 +40,15 @@ def build(results, answers):
              if expected == "sensitive" and name in results
              and naming.clean_name(results[name].get("new_name"))]
     if leaks:
+        applied = [n for n in leaks if naming.rename_for(results[n], n)]
         lines.append("")
         lines.append("  WARNING: the model named " + str(len(leaks)) + " sensitive screenshot(s).")
-        lines.append("  Our code never applies those names, but the model ignored the rule:")
-        lines += ["    " + name for name in leaks]
+        if applied:
+            lines.append("  PRIVACY: the model did not mark these sensitive, so our code WOULD rename them")
+            lines.append("  (the never-rename-sensitive rule trusts the model's action):")
+            lines += ["    " + naming.rename_for(results[n], n) + "   <-  " + n for n in applied]
+        quiet = [n for n in leaks if n not in applied]
+        if quiet:
+            lines.append("  Marked sensitive, so our code would NOT apply these names:")
+            lines += ["    " + name for name in quiet]
     return lines + [""]
