@@ -3,119 +3,102 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shift — prototype</title>
+<title>Shyft — prototype</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="page">
-<div class="window" role="region" aria-label="Shift app window">
-  <div class="chrome" aria-hidden="true"><span></span><span></span><span></span><p>Shift</p></div>
-  <svg class="trace" viewBox="0 0 1280 160" preserveAspectRatio="none" aria-hidden="true"><path d="M0 110 C 200 50, 340 150, 560 100 S 900 40, 1080 100 S 1240 130, 1280 80" fill="none" stroke="#2FD38A" stroke-width="3" opacity=".45"/></svg>
+<div class="window" role="region" aria-label="Shyft app window">
+  <div class="chrome" aria-hidden="true"><span></span><span></span><span></span><p>Shyft</p></div>
+  <svg class="trace" id="trace" viewBox="0 0 1280 140" preserveAspectRatio="none" aria-hidden="true"><path d="M0 100 C 200 50, 340 130, 560 90 S 900 40, 1080 90 S 1240 110, 1280 70" fill="none" stroke="#2FD38A" stroke-width="2.5"/></svg>
 
-  <!-- 1 WELCOME -->
+  <!-- WELCOME -->
   <section class="screen center" id="s-welcome">
-    <div class="row" style="gap:18px">
-      <svg width="132" height="44" viewBox="0 0 132 44" role="img" aria-label="Shift logo"><polygon points="22,6 40,38 4,38" fill="#F7C531" stroke="#F7C531" stroke-width="7" stroke-linejoin="round"/><polygon points="48,6 84,6 66,38" fill="#E63946" stroke="#E63946" stroke-width="7" stroke-linejoin="round"/><circle cx="66" cy="17" r="4.6" fill="#fff"/><polygon points="110,6 128,38 92,38" fill="#2F7BEA" stroke="#2F7BEA" stroke-width="7" stroke-linejoin="round"/></svg>
-      <h1 style="font-size:64px">Shift</h1>
+    <div class="body">
+      <span id="welcome-buddies"></span>
+      <h1>Your screenshots, sorted</h1>
+      <p class="sub">Pip suggests. You decide. Nothing is deleted, and it all stays on this computer.</p>
+      <button class="main" id="start">Get started</button>
+      <button class="quiet" id="how">How it works</button>
     </div>
-    <p class="card mono" style="padding:10px 16px;margin:0;font-size:15px"><span style="color:var(--trace)">pip@shift ~ %</span> your screenshots, sorted while you sleep</p>
-    <p style="max-width:620px;font-size:21px;margin:0">Hi, I'm Pip. Once a week I go through your new screenshots and suggest what to keep, turn into text, or clear out.</p>
-    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-width:820px;width:100%;text-align:left">
-      <div class="card"><h2>You decide</h2><p class="muted" style="margin:6px 0 0">Nothing moves until you say so.</p></div>
-      <div class="card"><h2>Nothing gets deleted</h2><p class="muted" style="margin:6px 0 0">Things you clear go to a folder you can open anytime.</p></div>
-      <div class="card"><h2>Stays on this computer</h2><p class="muted" style="margin:6px 0 0">Your screenshots never leave it.</p></div>
-    </div>
-    <button class="go" id="start" type="button">Get started</button>
-    <p class="muted" style="margin:0">Setup takes about 5 minutes. You can stop and come back.</p>
   </section>
 
-  <!-- 2 FOLDER -->
+  <!-- SETUP 1 -->
+  <section class="screen" id="s-need" hidden>
+    <div class="body">
+      <p class="eyebrow">Step 1 of 3</p>
+      <h1>Before we start</h1>
+      <p class="sub">Check you have these.</p>
+      <ul class="list" id="needs"></ul>
+    </div>
+    <div class="foot"><button data-go="s-welcome">Back</button><span class="spacer"></span><button class="main" data-go="s-folder">I have these</button></div>
+  </section>
+
+  <!-- SETUP 2 -->
   <section class="screen" id="s-folder" hidden>
-    <div class="narrow" style="display:flex;flex-direction:column;gap:20px">
-      <p class="eyebrow">Setup · step 1 of 2</p>
-      <h1>Where your screenshots go</h1>
-      <p class="sub">I made a folder called <b class="mono" style="color:var(--text)">Screenshots For Sorting</b> in your Pictures. It's the only folder I look at.</p>
-      <div class="card"><h2 style="margin-bottom:10px">Send new screenshots there</h2>
-        <ol class="steps"><li>Press <span class="kbd">⌘</span> <span class="kbd">Shift</span> <span class="kbd">5</span></li><li>Click <b>Options</b>, then <b>Other Location…</b></li><li>Choose <b>Screenshots For Sorting</b></li></ol>
-        <label class="choice" style="margin-top:14px"><input type="checkbox" id="folder-done"><span>I've done this</span></label>
-      </div>
-      <div><h2 style="margin-bottom:10px">What about older screenshots?</h2>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <label class="choice"><input type="radio" name="old" checked><span><b>Not now</b><br><span class="muted">Start fresh with new ones. You can bring old ones in later.</span></span></label>
-          <label class="choice"><input type="radio" name="old"><span><b>My 10 newest</b><br><span class="muted">A small first batch to see how it works.</span></span></label>
-        </div></div>
-      <div class="row"><button class="go" data-go="s-schedule">Continue</button><button data-go="s-welcome">Back</button></div>
+    <div class="body">
+      <p class="eyebrow">Step 2 of 3</p>
+      <h1>Send screenshots to one folder</h1>
+      <p class="sub">Press <span class="kbd">⌘</span> <span class="kbd">Shift</span> <span class="kbd">5</span>, then Options → Other Location → <b style="color:var(--text)">Screenshots For Sorting</b>.</p>
+      <p class="small">It's the only folder Pip looks at.</p>
+    </div>
+    <div class="foot"><button data-go="s-need">Back</button><span class="spacer"></span><button class="main" data-go="s-work">I've done this</button></div>
+  </section>
+
+  <!-- SETUP 3 -->
+  <section class="screen" id="s-work" hidden>
+    <div class="body">
+      <p class="eyebrow">Step 3 of 3 · optional</p>
+      <h1>Tell Pip how you work today</h1>
+      <p class="sub">Why do you take screenshots? Pick any.</p>
+      <div class="chips" id="chips"></div>
+      <label for="work-text" class="small">Anything else? (optional)</label>
+      <textarea id="work-text" placeholder="I screenshot recipes and then can never find them"></textarea>
+      <div class="row"><button id="voice">Record a voice note</button><span class="small" id="voice-note"></span></div>
+    </div>
+    <div class="foot"><button data-go="s-folder">Back</button><span class="small">I'll look every Sunday night.</span><span class="spacer"></span><button class="main" id="finish">Finish setup</button></div>
+  </section>
+
+  <!-- SORTING -->
+  <section class="screen center" id="s-sorting" hidden>
+    <div class="body">
+      <span id="sort-buddies"></span>
+      <h1 id="sort-title">Looking at your screenshots</h1>
+      <p class="sub" id="sort-sub">On this computer. Nothing moves yet.</p>
+      <div class="track" role="progressbar" aria-label="Progress"><div class="fill" id="sort-fill"></div></div>
+      <p class="small" id="sort-count" aria-live="polite">0 of 9</p>
+      <button class="main" id="sort-review" data-review hidden>Start review</button>
+      <button class="quiet" data-go="s-welcome" id="sort-later">Tell me when it's ready</button>
     </div>
   </section>
 
-  <!-- 3 SCHEDULE -->
-  <section class="screen" id="s-schedule" hidden>
-    <div class="narrow" style="display:flex;flex-direction:column;gap:20px">
-      <p class="eyebrow">Setup · step 2 of 2</p>
-      <h1>When should I take a look?</h1>
-      <p class="sub">I work while you sleep, then your suggestions are ready in the morning.</p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <label class="choice"><input type="radio" name="when" checked><span><b>Once a week, Sunday night</b><br><span class="muted">One short review a week. Good for most people.</span></span></label>
-        <label class="choice"><input type="radio" name="when"><span><b>Every night</b><br><span class="muted">Smaller reviews, more often.</span></span></label>
-      </div>
-      <div class="row"><button class="go" id="first-run">Finish and look now</button><button data-go="s-folder">Back</button></div>
-      <p class="muted" style="margin:0">You can change this anytime in Settings, or turn me off.</p>
-    </div>
-  </section>
-
-  <!-- 4 SORTING -->
-  <section class="screen" id="s-sorting" hidden>
-    <div class="split">
-      <div style="display:flex;flex-direction:column;gap:20px">
-        <div class="row" aria-hidden="true" style="align-items:flex-end;gap:20px">
-          <svg class="bud" width="60" height="54" viewBox="0 0 64 58"><polygon points="32,8 56,50 8,50" fill="#F7C531" stroke="#F7C531" stroke-width="10" stroke-linejoin="round"/><path d="M24 36 q8 5 16 0" stroke="#3A2F10" stroke-width="3" fill="none"/></svg>
-          <svg class="bud" width="76" height="66" viewBox="0 0 80 70"><polygon points="10,10 70,10 40,60" fill="#E63946" stroke="#E63946" stroke-width="12" stroke-linejoin="round"/><path d="M31 26 q9 6 18 0" stroke="#fff" stroke-width="3.5" fill="none"/></svg>
-          <svg class="bud" width="60" height="54" viewBox="0 0 64 58"><polygon points="32,8 56,50 8,50" fill="#2F7BEA" stroke="#2F7BEA" stroke-width="10" stroke-linejoin="round"/><path d="M24 36 q8 5 16 0" stroke="#18243D" stroke-width="3" fill="none"/></svg>
-        </div>
-        <p class="eyebrow" id="sort-eyebrow">pip@shift ~ % shift sort</p>
-        <h1 id="sort-title">Looking at your screenshots</h1>
-        <p class="sub" id="sort-sub">On this computer, one at a time. Nothing moves until you say so.</p>
-        <div role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:8px">
-          <div class="track"><div class="fill" id="sort-fill"></div></div>
-          <div class="row muted" style="justify-content:space-between"><span><b id="sort-count" style="color:var(--text)">0</b> of 9 looked at</span><span id="sort-eta">About 2 min left</span></div>
-        </div>
-        <div class="row"><button class="go" id="sort-review" data-review hidden>Start review</button><button id="sort-leave" data-go="s-welcome">Let me know when it's ready</button></div>
-      </div>
-      <div class="card" style="min-height:420px"><p class="mono muted" style="margin:0 0 10px;font-size:13px">So far</p><div id="sort-lines"></div></div>
-    </div>
-  </section>
-
-  <!-- 5 REVIEW (filled by review.js) -->
   <section class="screen" id="s-review" hidden></section>
+  <section class="screen center" id="s-done" hidden></section>
+  <section class="screen center" id="s-state" hidden></section>
 
-  <!-- 6 DONE (filled by review.js) -->
-  <section class="screen" id="s-done" hidden></section>
-
-  <!-- 7 STATES: errors and empty (filled by flow.js from copy.js) -->
-  <section class="screen" id="s-state" hidden></section>
-
-  <!-- How it works window -->
+  <!-- HOW IT WORKS (longer explanations live here) -->
   <div class="overlay" id="overlay">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
-      <div class="row" style="justify-content:space-between"><p class="eyebrow" id="m-step"></p><button id="m-skip" style="min-height:40px">Skip</button></div>
+      <div class="row" style="justify-content:space-between"><p class="eyebrow" id="m-step"></p><button class="quiet" id="m-close" style="min-height:40px">Close</button></div>
       <div class="art" id="m-art" aria-hidden="true"></div>
-      <h2 id="m-title" style="font-size:26px;font-weight:800"></h2>
-      <p id="m-body" style="margin:0;font-size:17px"></p>
-      <div class="row" style="justify-content:space-between"><div class="dots" id="m-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-        <div class="row"><button id="m-back">Back</button><button class="go" id="m-next" style="min-height:48px;font-size:16px">Next</button></div></div>
+      <h2 id="m-title" style="margin:0;font-size:22px"></h2>
+      <p id="m-body" class="sub" style="font-size:16px"></p>
+      <div class="row" style="justify-content:space-between"><div class="dots" id="m-dots" aria-hidden="true"></div>
+        <div class="row"><button id="m-back">Back</button><button class="main" id="m-next">Next</button></div></div>
     </div>
   </div>
 </div>
 
-<nav class="proto" aria-label="Prototype menu (not part of the app)">
-  <span>Prototype only, jump to:</span>
-  <button data-go="s-welcome">Welcome</button><button data-go="s-folder">Folder</button><button data-go="s-schedule">Schedule</button>
+<nav class="proto" id="proto" hidden aria-label="Prototype menu (not part of the app)">
+  <span>Prototype only (press P to hide):</span>
+  <button data-go="s-welcome">Welcome</button><button data-go="s-need">Step 1</button><button data-go="s-folder">Step 2</button><button data-go="s-work">Step 3</button>
   <button id="p-sort">Sorting</button><button data-review>Review</button>
   <button data-state="empty">All caught up</button><button data-state="cap">Paused at 10</button>
-  <button data-state="ollama">Helper closed</button><button data-state="model">First download</button>
+  <button data-state="ollama">Ollama closed</button><button data-state="model">First download</button>
 </nav>
 </div>
 <script src="copy.js"></script>
+<script src="buddies.js"></script>
 <script src="sample_review.js"></script>
 <script src="flow.js"></script>
 <script src="review.js"></script>
