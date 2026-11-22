@@ -33,7 +33,7 @@ def read_existing():
 
 def save(rows):
     schema.GOLDEN.parent.mkdir(exist_ok=True)
-    fields = ["file", "expected_action", "note", "secret"]
+    fields = ["file", "expected_action", "sensitive_kind", "note", "secret"]   # S9: keep the kind column
     with schema.GOLDEN.open("w", newline="", encoding="utf-8") as sheet:
         writer = csv.DictWriter(sheet, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
@@ -68,6 +68,7 @@ def main():
                 return
             if answer[:1] in CHOICES:
                 rows[path.name] = {"file": path.name, "expected_action": CHOICES[answer[:1]],
+                                   "sensitive_kind": rows.get(path.name, {}).get("sensitive_kind", ""),
                                    "note": answer[1:].strip(), "secret": ""}
                 print("  -> " + CHOICES[answer[:1]])
                 break

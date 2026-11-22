@@ -5,7 +5,13 @@
 #   python3 run.py gemma4:e4b 10        choose model and how many (caps: 10 files, 15 calls)
 #   python3 run.py gemma4:e2b all       BATCH: every screenshot in the folder, caps lifted
 #                                       (evaluation runs over a whole test set only)
+#   python3 run.py gemma4:e2b all --zippy gemma4:e4b
+#                                       S10: Zippy on its own model, Pip on the first one.
+#                                       Without --zippy, both buddies use the same model.
 #   python3 run.py score                compare the latest run against golden/golden.csv
+#   python3 run.py score RUN_ID         compare an older run (its id is in trace.jsonl)
+#   python3 run.py cost                 S11: time + tokens + cloud estimate, latest run
+#   python3 run.py cost RUN_ID          the same for an older run (old runs: time only)
 #
 # It moves, renames and deletes NOTHING.
 
@@ -31,7 +37,8 @@ def batch_caps():
     return limits, total
 
 
-def propose(model, max_files, batch_mode=False):
+def propose(model, max_files, batch_mode=False, zippy_model=None):
+    zippy_model = zippy_model or model
     texts = {"pip": context.read_spec(), "zippy": gate.read_instructions()}
     for file_name, text in (("spec.md", texts["pip"]), ("zippy.md", texts["zippy"])):
         if text is None:
@@ -48,7 +55,12 @@ def propose(model, max_files, batch_mode=False):
         return
 
     run_id = trace.new_run_id()
-    print("Run " + run_id + ": " + str(len(batch)) + " screenshot(s), model " + model)
+    who = "model " + model
+    if zippy_model != model:
+        who = "Zippy on " + zippy_model + ", Pip on " + model
+    print("Run " + run_id + ": " + str(len(batch)) + " screenshot(s), " + who)
+    if zippy_model != model:
+        print("Two models: Ollama must keep both loaded. To check, in another window: ollama ps")
     print("Zippy looks first; Pip only sees what Zippy clears.")
     print("Nothing will be moved, renamed or deleted.\n")
     run_start = time.time()
@@ -57,7 +69,8 @@ def propose(model, max_files, batch_mode=False):
     for number, image in enumerate(batch, start=1):
         label = "[" + str(number) + "/" + str(len(batch)) + "] " + image.name
         try:
-            outcome = pipeline.handle(label, image, model, texts, copies, limits, run_id)
+            outcome = pipeline.handle(label, image, model, texts, copies, limits, run_id,
+                                      zippy_model)
         except pipeline.Stopped as problem:
             print("  " + str(problem))
             return
@@ -68,18 +81,44 @@ def propose(model, max_files, batch_mode=False):
     print(limits.summary())
 
 
-def main():
-    args = sys.argv[1:]
-    if args and args[0] == "score":
-        from eval import score
-        score.main()
-        return
+def read_args(args):
+    """Turn the words after run.py into (pip_model, zippy_model, max_files, batch_mode).
+    --zippy MODEL may appear anywhere; without it Zippy uses Pip's model (as before S10)."""
+    args = list(args)
+    zippy_model = None
+    if "--zippy" in args:
+        at = args.index("--zippy")
+        if at + 1 >= len(args):
+            raise ValueError("--zippy needs a model name, for example: --zippy gemma4:e4b")
+        zippy_model = args[at + 1]
+        del args[at:at + 2]
     model = args[0] if args else schema.DEFAULT_MODEL
     batch_mode = len(args) > 1 and args[1].lower() == "all"
     max_files = schema.DEFAULT_MAX_FILES
     if len(args) > 1 and not batch_mode:
-        max_files = int(args[1])          # any number is still clipped to the 10-file cap
-    propose(model, max_files, batch_mode)
+        try:
+            max_files = int(args[1])      # any number is still clipped to the 10-file cap
+        except ValueError:
+            raise ValueError("After the model, write a number or 'all', not: " + args[1])
+    return model, zippy_model or model, max_files, batch_mode
+
+
+def main():
+    args = sys.argv[1:]
+    if args and args[0] == "score":
+        from eval import score
+        score.main(args[1] if len(args) > 1 else None)
+        return
+    if args and args[0] == "cost":
+        from eval import cost
+        cost.main(args[1] if len(args) > 1 else None)
+        return
+    try:
+        model, zippy_model, max_files, batch_mode = read_args(args)
+    except ValueError as problem:
+        print(problem)
+        return
+    propose(model, max_files, batch_mode, zippy_model)
 
 
 if __name__ == "__main__":

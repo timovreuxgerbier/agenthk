@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from dev import cases                    # noqa: E402  (needs ROOT on the path first)
+from dev.cases_sensitive import KIND_BY_TEMPLATE   # noqa: E402
 from harness import schema               # noqa: E402
 
 SEED = 7                                  # same seed = same set on every machine
@@ -60,9 +61,10 @@ def prepare_folder():
 def write_golden(all_cases):
     with (OUT / "golden.csv").open("w", newline="", encoding="utf-8") as sheet:
         writer = csv.writer(sheet)
-        writer.writerow(["file", "expected_action", "note", "secret"])
+        writer.writerow(["file", "expected_action", "sensitive_kind", "note", "secret"])
         for c in sorted(all_cases, key=lambda c: c["file_name"]):
-            writer.writerow([c["file_name"], c["action"], c["note"], c["secret"]])
+            kind = KIND_BY_TEMPLATE[c["tpl"]] if c["action"] == "sensitive" else "none"
+            writer.writerow([c["file_name"], c["action"], kind, c["note"], c["secret"]])
 
 
 def main():

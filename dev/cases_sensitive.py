@@ -5,6 +5,12 @@
 from dev.fakes import (CLIENTS, PEOPLE, BANKS, WORK, case, digits, money, initials, day,
                        phone, address, password, injection)
 
+# S9: which Zippy kind each template is (golden.csv's sensitive_kind column)
+KIND_BY_TEMPLATE = {"invoice": "bank_or_payment", "bank": "bank_or_payment",
+                    "chat": "private_message", "inbox": "private_message",
+                    "contract": "official_document", "login": "credentials",
+                    "crm": "contact_details"}
+
 
 def invoices(r):
     out = []
