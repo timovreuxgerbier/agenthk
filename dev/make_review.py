@@ -8,18 +8,21 @@
 # in the shape of docs/review_contract.md v0.2, so Ana's page shows a REAL run.
 # It is a .js file (not .json) so the page works when opened by double-click.
 # SAFETY: refuses unless the synthetic set is loaded. Real screenshots never go on a page.
-import hashlib
+# S13: the run's screenshots are COPIED into demo/ and the page points at the copies.
+# demo/review.json is written too: apply.py acts on demo/ only, never on a test set.
 import json
+import shutil
 import sys
 from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from harness import naming, schema       # noqa: E402
+from harness import ids, naming, schema  # noqa: E402
 
 ACTIVE = ROOT / "golden" / "active_set.txt"
 OUT = ROOT / "ui" / "review_data.js"
+DEMO = ROOT / "demo"
 DEFAULT_COUNT = 12
 
 
@@ -42,10 +45,16 @@ def run_rows(run_id):
     return run_id, picked
 
 
-def stable_id(path):
-    """Same file in the same place = same id in every run (contract v0.2)."""
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    return hashlib.sha256((str(path.relative_to(ROOT)) + digest).encode()).hexdigest()[:12]
+def demo_copy(file):
+    """Copy one screenshot into demo/ (keeping its date). Never overwrites a different file."""
+    source, copy = schema.SCREENSHOTS / file, DEMO / file
+    if not source.exists():
+        stop(file + " is not in screenshots/. Load the set this run used.")
+    if copy.exists() and ids.file_hash(copy) != ids.file_hash(source):
+        stop("demo/" + file + " exists and is different. Move demo/ to _to_delete/ to start fresh.")
+    if not copy.exists():
+        shutil.copy2(source, copy)
+    return copy
 
 
 def pip_answer(row):
@@ -58,13 +67,11 @@ def pip_answer(row):
 
 def item(row):
     file = row["file"]
-    path = schema.SCREENSHOTS / file
-    if not path.exists():
-        stop(file + " is not in screenshots/. Load the set this run used.")
+    path = demo_copy(file)
     gate = row.get("gate") or {}
     kind = gate.get("kind")
     answer = pip_answer(row)
-    base = {"id": stable_id(path), "file": file,
+    base = {"id": ids.stable_id(path, ROOT), "file": file,
             "file_date": date.fromtimestamp(path.stat().st_mtime).isoformat(),
             "kind": "none", "action": None, "new_name": None, "reason": None,
             "why_saved": None, "confidence": None, "needs_ok": False, "copy_of": None}
@@ -95,15 +102,19 @@ def main():
     run_id = sys.argv[1] if len(sys.argv) > 1 else None
     count = int(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_COUNT
     run_id, rows = run_rows(run_id)
+    DEMO.mkdir(exist_ok=True)
     items = [item(r) for r in rows[:count]]
     states = [i["state"] for i in items]
     review = {"contract": "0.2", "run_id": run_id, "made": rows[0].get("time"),
               "counts": {"total": len(items), "open": states.count("open"),
                          "locked": states.count("locked"), "copies": states.count("copy")},
-              "items": items}
+              "items": items,
+              "models": {"zippy": rows[0].get("zippy_model") or rows[0].get("model"),
+                         "pip": rows[0].get("model"), "address": schema.OLLAMA_URL}}
     # The page shows the image only for open items, and for locked ones only after "Show me".
-    previews = {i["id"]: {"img": "../screenshots/" + i["file"], "label": i["file"]} for i in items}
-    models = (rows[0].get("zippy_model") or rows[0].get("model")) + " / " + rows[0].get("model", "")
+    previews = {i["id"]: {"img": "../demo/" + i["file"], "label": i["file"]} for i in items}
+    models = review["models"]["zippy"] + " / " + review["models"]["pip"]
+    (DEMO / "review.json").write_text(json.dumps(review, indent=1, ensure_ascii=False), encoding="utf-8")
     OUT.write_text(
         "// review_data.js — WRITTEN BY dev/make_review.py. Do not edit by hand.\n"
         "// Real answers from run " + run_id + " (Zippy / Pip: " + models + "), synthetic screenshots.\n"
@@ -113,6 +124,7 @@ def main():
         encoding="utf-8")
     print("Wrote ui/review_data.js from run", run_id + ":", len(items), "items,",
           states.count("open"), "open,", states.count("locked"), "locked,", states.count("copy"), "copies.")
+    print("Copies in demo/, and demo/review.json for apply.py.")
     print("Open ui/index.html in your browser (double-click it).")
 
 
