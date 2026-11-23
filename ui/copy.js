@@ -20,15 +20,6 @@ var KIND_ORDER = ["nudity_or_children", "government_id", "credentials", "health_
 
 var ACTION_WORDS = { keep_image: "Keep as image", keep_text: "Turn into text", to_be_deleted: "Move to To Be Deleted" };
 
-// Setup step 1.
-var NEEDS = [
-  ["A Mac", ""],
-  ["The Ollama app", "free"],
-  ["Rick's two models", "17 GB download"],
-  ["Free disk space", "at least 17 GB"],
-  ["Time", "5 minutes, plus the download"]
-];
-
 // Setup step 3. Quick picks so nobody has to write if they don't want to.
 var WORK_CHIPS = ["To remember things", "Recipes and ideas", "Receipts and proof",
   "I can't find anything", "Too many copies", "No idea why I took them"];

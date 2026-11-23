@@ -25,15 +25,17 @@
     </div>
   </section>
 
-  <!-- SETUP 1 -->
+  <!-- SETUP 1: get Shyft ready (setup.js) -->
   <section class="screen" id="s-need" hidden>
     <div class="body">
       <p class="eyebrow">Step 1 of 3</p>
-      <h1>Before we start</h1>
-      <p class="sub">Check you have these.</p>
-      <ul class="list" id="needs"></ul>
+      <h1>Get Shyft ready</h1>
+      <p class="sub">Rick and Zippy run on this computer. Here's what they need.</p>
+      <ul class="list needs" id="needs" aria-live="polite"></ul>
+      <p class="small" id="need-help"></p>
+      <p class="small" id="need-note" style="color:var(--text-dim,#5E7D6C)"></p>
     </div>
-    <div class="foot"><button data-go="s-welcome">Back</button><span class="spacer"></span><button class="main" data-go="s-folder">I have these</button></div>
+    <div class="foot"><button data-go="s-welcome">Back</button><span class="spacer"></span><button class="main" id="need-main">Get what's missing</button></div>
   </section>
 
   <!-- SETUP 2 -->
@@ -97,6 +99,7 @@
   <button id="p-sort">Sorting</button><button data-review>Review</button>
   <button data-state="empty">All caught up</button><button data-state="cap">Paused at 10</button>
   <button data-state="ollama">Ollama closed</button><button data-state="model">First download</button>
+  <label for="need-pick">Step 1 has:</label><select id="need-pick" onchange="setScenario(this.value)"><option value="nothing">Nothing yet</option><option value="models">Ollama only</option><option value="ready">Everything</option></select>
   <label for="theme-pick">Theme:</label><select id="theme-pick"><option value="auto">Today's date</option><option value="none">None</option><option value="halloween">Halloween</option><option value="muertos">Día de los Muertos</option><option value="hanukkah">Hanukkah</option><option value="winter">Winter holidays</option><option value="newyear">New Year</option></select>
   <label for="theme-night">Hanukkah night:</label><input id="theme-night" type="number" min="1" max="8" value="3" style="width:52px">
 </nav>
@@ -106,6 +109,7 @@
 <script src="themes.js"></script>
 <script src="sample_review.js"></script>
 <script src="flow.js"></script>
+<script src="setup.js"></script>
 <script src="review.js"></script>
 </body>
 </html>

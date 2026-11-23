@@ -30,9 +30,6 @@ function previewTheme() {
 }
 document.getElementById("theme-pick").onchange = previewTheme;
 document.getElementById("theme-night").oninput = previewTheme;
-document.getElementById("needs").innerHTML = NEEDS.map(function (n) {
-  return "<li>" + n[0] + "<span" + (n[1].charAt(0) === "[" ? " class='tbd'" : "") + ">" + n[1] + "</span></li>";
-}).join("");
 document.getElementById("chips").innerHTML = WORK_CHIPS.map(function (c) {
   return "<button type='button' aria-pressed='false'>" + c + "</button>";
 }).join("");

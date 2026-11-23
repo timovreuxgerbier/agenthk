@@ -41,6 +41,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 textarea{font:inherit;font-size:16px;background:var(--card);color:var(--text);border:1px solid var(--line2);border-radius:12px;padding:12px;min-height:84px;resize:vertical;width:100%}
 .track{height:8px;border-radius:4px;background:#10221A;overflow:hidden;width:100%}
 .fill{height:100%;width:0;background:var(--trace);transition:width .5s}
+/* setup step 1: status of each thing Shyft needs */
+.needs li{align-items:center}
+.needs .ok{color:var(--trace);font-weight:700}.needs .miss{color:var(--muted)}.needs .wait{color:var(--text)}
+.needs .dl{display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums;color:var(--text)}
+.needs .dl .track{width:140px;display:block}.needs .dl .fill{display:block}
+#need-help .quiet{min-height:36px;font-size:14px;padding:0 10px}
 /* walkthrough window */
 .overlay{position:absolute;inset:40px 0 0 0;background:rgba(3,6,5,.82);display:none;align-items:center;justify-content:center;z-index:5;padding:24px}
 .overlay.open{display:flex}
