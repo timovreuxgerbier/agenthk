@@ -1,13 +1,13 @@
 # harness/pipeline.py — what happens to ONE screenshot, in order (D20: order A).
-#   1. Zippy (gate.py) looks first. Any kind but "none" LOCKS it: steps 2-3 never run.
-#   2. Exact copy of an older screenshot? Our code says so, no Pip call.
-#   3. Pip (spec.md) describes, names and proposes an action.
-#   4. Code check, the gated rename (D18), one redacted trace line (trace.py).
-# run.py owns the command line and the loop; this file owns the steps.
-# S10: Zippy may run on its own model (zippy_model). The trace records both models
-# and Zippy's own seconds, so a bigger gate's cost is measured, not guessed.
-# S11: after each model call, router.take_usage() collects Ollama's token and time counts
-# for that call, so each buddy's cost lands on its own field of the trace line.
+#   1. look():   Zippy (gate.py) looks first. Any kind but "none" LOCKS it.
+#   2. finish(): a locked file gets its trace line and nothing else. Otherwise: exact copy
+#                of an older screenshot (code, no Pip call), or Pip (spec.md) describes,
+#                names and proposes; then the code check, the gated rename (D18) and one
+#                redacted trace line (trace.py).
+# handle() = look() then finish() for one file: the order before S14 (--one-by-one).
+# S14: harness/batch.py calls look() on a chunk of files, then finish() on the same chunk,
+# so each model loads once per chunk. Same steps, same answers, same trace lines.
+# S10: Zippy may run on its own model. S11: router.take_usage() after each model call.
 
 import json
 import time
@@ -63,16 +63,15 @@ def show(proposal, problems, flagged, file_name, verdict):
 
 
 def _finish(entry, started):
-    entry["seconds"] = round(time.time() - started, 1)
+    """Seconds = Zippy's seconds + this step's, so batching doesn't change the measure."""
+    entry["seconds"] = round(entry["zippy_seconds"] + time.time() - started, 1)
     entry["time"] = time.strftime("%Y-%m-%dT%H:%M:%S")
     trace.write(entry)
     print("  Took " + str(entry["seconds"]) + " seconds\n")
 
 
-def handle(label, image, model, texts, copies, limits, run_id, zippy_model=None):
-    """Run one screenshot through every step. Returns STOP when a cap is reached.
-    model is Pip's model; zippy_model is Zippy's (S10). None means the same as Pip's."""
-    zippy_model = zippy_model or model
+def look(label, image, model, zippy_model, texts, limits, run_id):
+    """Zippy's step for one screenshot. Returns the trace entry so far, or STOP."""
     stop = limits.check()
     if stop:
         print("Stopped before " + image.name + ": " + stop + "\n")
@@ -84,14 +83,25 @@ def handle(label, image, model, texts, copies, limits, run_id, zippy_model=None)
              "zippy_seconds": round(time.time() - started, 1), "gate": verdict,
              "zippy_usage": router.take_usage(), "pip_usage": None,
              "check_problems": [], "flagged": False, "user_decision": None}
-
     if gate.is_locked(verdict):
         print("  Zippy:       LOCKED (" + verdict["kind"] + ", " + str(verdict["confidence"])
               + "). Pip never saw it. No rename.")
+    else:
+        print("  Zippy:       clear (" + str(verdict["confidence"]) + ")")
+    return entry
+
+
+def finish(label, image, entry, model, texts, copies, limits, announce=False):
+    """Everything after Zippy for one screenshot. Returns STOP when a cap is reached.
+    announce=True prints the file's label again (batch.py: Zippy's line was a while ago)."""
+    started = time.time()
+    verdict = entry["gate"]
+    if announce:
+        print(label + " ... " + ("locked, Pip skips it" if gate.is_locked(verdict) else "Pip's turn"))
+    if gate.is_locked(verdict):
         entry["raw_output"] = json.dumps({"action": "sensitive",
                                           "confidence": verdict["confidence"]})
         return _finish(entry, started)
-    print("  Zippy:       clear (" + str(verdict["confidence"]) + ")")
 
     if image in copies:
         print("  Exact copy of " + copies[image] + ", no Pip call")
@@ -123,3 +133,12 @@ def handle(label, image, model, texts, copies, limits, run_id, zippy_model=None)
     show(proposal, problems, flagged, image.name, verdict)
     entry.update({"raw_output": raw, "check_problems": problems, "flagged": flagged})
     return _finish(entry, started)
+
+
+def handle(label, image, model, texts, copies, limits, run_id, zippy_model=None):
+    """Zippy then Pip for one screenshot (the order before S14). Returns STOP at a cap.
+    model is Pip's model; zippy_model is Zippy's (S10). None means the same as Pip's."""
+    entry = look(label, image, model, zippy_model or model, texts, limits, run_id)
+    if entry == STOP:
+        return STOP
+    return finish(label, image, entry, model, texts, copies, limits)
