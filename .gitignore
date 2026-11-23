@@ -233,3 +233,8 @@ Retained as Images/
 Retained as Text/
 To Be Deleted/
 Sensitive - For Human Review/
+
+# ---- Shyft: run output and demo data (may name real files) ----
+run*.txt
+ui/review_data.js
+_to_delete/

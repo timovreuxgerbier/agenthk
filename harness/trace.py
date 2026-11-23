@@ -60,3 +60,8 @@ def latest_run():
         return None, []
     run_id = entries[-1]["run_id"]
     return run_id, [e for e in entries if e["run_id"] == run_id]
+
+
+def run(run_id):
+    """Return (run_id, entries) for one run by id, or (run_id, []) if there is no such run."""
+    return run_id, [e for e in read_all() if e["run_id"] == run_id]

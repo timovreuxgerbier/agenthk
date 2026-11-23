@@ -35,14 +35,17 @@ MAX_CALLS_PER_RUN = 15
 MAX_RUN_SECONDS = 300
 CONFIDENCE_FLOOR = 0.6       # below this a proposal is flagged as a guess
 
-# ---- Zippy's answer (the sensitivity gate, D18-D20) ------------------------
+# ---- Zippy's answer (the sensitivity gate, D18-D21, D23) -------------------
 # Multiple choice only: no free-text field exists, so Zippy cannot repeat what it saw.
 # Any kind except GATE_CLEAR locks the screenshot: Pip never sees it, no rename.
+# D23 (S9): the kinds are a LADDER, most harmful to expose first. When more than one
+# fits, Zippy picks the highest. Order rule: how badly exposure hurts and whether it
+# can be undone (a password can be changed; a licence or SSN number cannot).
 GATE_CLEAR = "none"
 GATE_KINDS = [
-    "bank_or_payment", "official_document", "credentials", "private_message",
-    "contact_details", "health_record", "marked_confidential", "nudity_or_children",
-    GATE_CLEAR,
+    "nudity_or_children", "government_id", "credentials", "health_record",
+    "bank_or_payment", "official_document", "private_message", "contact_details",
+    "marked_confidential", GATE_CLEAR,
 ]
 GATE_SHAPE = {
     "type": "object",
@@ -80,7 +83,12 @@ PROPOSAL_SHAPE = {
 
 # One trace line. Every lane that writes to the trace uses exactly these keys.
 # "gate" is Zippy's verdict {"kind", "confidence"}; missing in runs before S8.
+# S10: "zippy_model" and "zippy_seconds" are Zippy's own model and time (Pip's is "model").
+# S11: "zippy_usage" and "pip_usage" are Ollama's own counts for each buddy's call
+# (tokens read and written, load / read / write seconds). None when that buddy didn't run.
+# Counts only: no text, so they are safe to keep for locked screenshots too.
 TRACE_FIELDS = [
-    "run_id", "time", "file", "model", "seconds", "gate",
+    "run_id", "time", "file", "model", "zippy_model", "seconds", "zippy_seconds", "gate",
+    "zippy_usage", "pip_usage",
     "raw_output", "check_problems", "flagged", "user_decision",
 ]

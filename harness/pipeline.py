@@ -4,6 +4,10 @@
 #   3. Pip (spec.md) describes, names and proposes an action.
 #   4. Code check, the gated rename (D18), one redacted trace line (trace.py).
 # run.py owns the command line and the loop; this file owns the steps.
+# S10: Zippy may run on its own model (zippy_model). The trace records both models
+# and Zippy's own seconds, so a bigger gate's cost is measured, not guessed.
+# S11: after each model call, router.take_usage() collects Ollama's token and time counts
+# for that call, so each buddy's cost lands on its own field of the trace line.
 
 import json
 import time
@@ -65,16 +69,20 @@ def _finish(entry, started):
     print("  Took " + str(entry["seconds"]) + " seconds\n")
 
 
-def handle(label, image, model, texts, copies, limits, run_id):
-    """Run one screenshot through every step. Returns STOP when a cap is reached."""
+def handle(label, image, model, texts, copies, limits, run_id, zippy_model=None):
+    """Run one screenshot through every step. Returns STOP when a cap is reached.
+    model is Pip's model; zippy_model is Zippy's (S10). None means the same as Pip's."""
+    zippy_model = zippy_model or model
     stop = limits.check()
     if stop:
         print("Stopped before " + image.name + ": " + stop + "\n")
         return STOP
     print(label + " ... Zippy is looking")
     started = time.time()
-    verdict = _zippy(model, texts["zippy"], image, limits)
-    entry = {"run_id": run_id, "file": image.name, "model": model, "gate": verdict,
+    verdict = _zippy(zippy_model, texts["zippy"], image, limits)
+    entry = {"run_id": run_id, "file": image.name, "model": model, "zippy_model": zippy_model,
+             "zippy_seconds": round(time.time() - started, 1), "gate": verdict,
+             "zippy_usage": router.take_usage(), "pip_usage": None,
              "check_problems": [], "flagged": False, "user_decision": None}
 
     if gate.is_locked(verdict):
@@ -103,6 +111,7 @@ def handle(label, image, model, texts, copies, limits, run_id):
     limits.record_call()
     try:
         raw = _call(model, router.ask, model, context.build_messages(texts["pip"], image))
+        entry["pip_usage"] = router.take_usage()
     except TimeoutError:
         print("  Pip took over 5 minutes and was stopped. Skipping this one.\n")
         return None
