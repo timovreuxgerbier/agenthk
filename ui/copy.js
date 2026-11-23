@@ -1,6 +1,6 @@
 // copy.js — every sentence a person reads that is NOT Pip's own words.
 // Locked-kind copy is written by people (contract section 3, Raaghavi's lane).
-// These are DRAFTS. Items marked TBD need a real number from Sphinx.
+// These are DRAFTS. Model size (17 GB, two models) confirmed by Sphinx, Nov 17.
 
 var KIND_COPY = {
   nudity_or_children: "Might show a body or a child. I stopped looking.",
@@ -20,13 +20,13 @@ var KIND_ORDER = ["nudity_or_children", "government_id", "credentials", "health_
 
 var ACTION_WORDS = { keep_image: "Keep as image", keep_text: "Turn into text", to_be_deleted: "Move to To Be Deleted" };
 
-// Setup step 1. Values in brackets are placeholders until Sphinx confirms them.
+// Setup step 1.
 var NEEDS = [
   ["A Mac", ""],
   ["The Ollama app", "free"],
-  ["Pip's model", "[size from Sphinx]"],
-  ["Free disk space", "[from Sphinx]"],
-  ["Time", "about 5 minutes"]
+  ["Pip's two models", "17 GB download"],
+  ["Free disk space", "at least 17 GB"],
+  ["Time", "5 minutes, plus the download"]
 ];
 
 // Setup step 3. Quick picks so nobody has to write if they don't want to.
@@ -36,7 +36,7 @@ var WORK_CHIPS = ["To remember things", "Recipes and ideas", "Receipts and proof
 // Friendly versions of what run.py prints in the terminal. One headline, one line.
 var STATES = {
   ollama: { t: "Open the Ollama app", b: "I need it to look at your screenshots. Open it, then try again.", main: "Try again" },
-  model:  { t: "One download, once", b: "Pip's model is [size from Sphinx]. Use Wi-Fi. It only downloads.", main: "Start download" },
+  model:  { t: "One download, once", b: "Pip's two models are 17 GB. Use Wi-Fi. It can take a while.", main: "Start download" },
   empty:  { t: "All caught up", b: "Nothing new. I'll look again Sunday night.", main: "Close" },
   cap:    { t: "10 ready, the rest wait", b: "I look at 10 at a time so it never takes long.", main: "Review these 10" }
 };

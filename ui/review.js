@@ -26,35 +26,48 @@ function preview(it) {
   var p = SAMPLE_PREVIEWS[it.id];
   return "<div class='preview'><span class='small'>" + esc(p[0]) + "</span><div class='bubble'>" + esc(p[1]) + "</div></div>";
 }
+// Each card returns its content (top) and its buttons (bar). The bar always sits in the
+// same place at the bottom. ALL options show; the suggested one glows in its buddy's colour
+// and says "Suggested" in words, so colour is never the only signal. One click decides.
+var ICONS = {
+  keep_image: "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'><rect x='3' y='5' width='18' height='14' rx='2'/><circle cx='9' cy='10' r='2'/><path d='M21 16l-5-5-8 8'/></svg>",
+  keep_text: "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'><path d='M5 6h14M5 11h14M5 16h9'/></svg>",
+  to_be_deleted: "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' aria-hidden='true'><path d='M3 7h6l2 2h10v10H3z'/><path d='M10 14h6M13 11l3 3-3 3'/></svg>"
+};
+function opt(action, label, act, colour, suggested) {
+  return "<button class='opt" + (suggested ? " sugg c-" + colour : "") + "' data-act='" + act + "'>" + ICONS[action] +
+    "<span>" + label + "</span>" + (suggested ? "<span class='tag'>Suggested</span>" : "") + "</button>";
+}
 function details(it) {
-  var g = GROUPS[group(it)], h = "<div class='row'>" + buddy(g[2], 40, "who") + "<span class='pill " + g[0] + "'>" + g[1] + "</span></div>";
-  if (it.state === "locked") return h + "<h1 style='font-size:26px'>" + esc(KIND_COPY[it.kind]) + "</h1>" +
-    "<p class='sub'>Taken " + niceDate(it.file_date) + ". What should happen to it?</p>" +
-    "<div class='row'><button class='main' data-act='keep_image'>Keep it</button><button data-act='to_be_deleted'>Move to To Be Deleted</button><button class='quiet' data-act='skip'>Not now</button></div>";
-  if (it.state === "copy") return h + "<h1 style='font-size:26px'>A copy of another screenshot</h1>" +
-    "<p class='sub'>The original stays. Move this copy to To Be Deleted?</p>" +
-    "<div class='row'><button class='main' data-act='approve'>Yes, move it</button><button data-act='keep_image'>Keep both</button><button class='quiet' data-act='skip'>Not now</button></div>";
-  return h + "<h1 style='font-size:26px'>" + esc(it.reason) + "</h1>" +
+  var gi = group(it), g = GROUPS[gi], colour = ["y", "r", "b"][gi];
+  var h = "<div class='row'>" + buddy(g[2], 40, "who") + "<span class='pill " + g[0] + "'>" + g[1] + "</span></div>";
+  var later = "<button class='quiet' data-act='skip'>Not now</button><span class='spacer'></span>";
+  if (it.state === "locked") return { top: h + "<h1 style='font-size:28px'>" + esc(KIND_COPY[it.kind]) + "</h1>" +
+    "<p class='sub'>Taken " + niceDate(it.file_date) + ". What should happen to it?</p>",
+    bar: later + opt("keep_image", "Keep it", "keep_image", colour, false) + opt("to_be_deleted", ACTION_WORDS.to_be_deleted, "to_be_deleted", colour, false) };
+  if (it.state === "copy") return { top: h + "<h1 style='font-size:28px'>A copy of " + esc(it.copy_of) + "</h1>" +
+    "<p class='sub'>Same picture. The original stays either way.</p>",
+    bar: later + opt("keep_image", "Keep both", "keep_image", colour, false) + opt("to_be_deleted", "Move the copy", "approve", colour, true) };
+  return { top: h + "<p class='reason' style='font-size:20px;color:var(--text)'>" + esc(it.reason) + "</p>" +
     "<div class='guess'><span class='pill pg'>Guess</span> " + esc(it.why_saved) + "</div>" +
-    "<p style='margin:0'>Suggestion: <b>" + ACTION_WORDS[it.action] + "</b></p>" +
-    "<div class='field' id='namebox'" + (it.action === "to_be_deleted" ? " hidden" : "") + "><label for='nm'>Name</label><input id='nm' value='" + esc(it.new_name || "") + "'></div>" +
-    "<div id='changer' hidden>" + ["keep_image", "keep_text", "to_be_deleted"].map(function (a) {
-      return "<label class='choice'><input type='radio' name='act' value='" + a + "'" + (a === it.action ? " checked" : "") + "><span>" + ACTION_WORDS[a] + "</span></label>";
-    }).join("") + "</div>" +
-    "<div class='row' id='btns'><button class='main' data-act='approve'>Yes</button><button data-act='change'>Change</button><button class='quiet' data-act='skip'>Not now</button></div>";
+    "<div class='field' id='namebox'><label for='nm'>Name, if you keep it</label><input id='nm' value='" + esc(it.new_name || "") + "'></div>",
+    bar: later + ["keep_image", "keep_text", "to_be_deleted"].map(function (a) {
+      return opt(a, ACTION_WORDS[a], a === it.action ? "approve" : "to:" + a, colour, a === it.action);
+    }).join("") };
 }
 function card() {
   if (pos >= queue.length) return done();
-  var it = queue[pos], el = document.getElementById("s-review");
+  var it = queue[pos], el = document.getElementById("s-review"), c = details(it);
   el.innerHTML = "<div class='rhead'><div class='row'><span class='sample'>Sample data</span><span class='small'>" + (pos + 1) + " of " + queue.length + "</span></div>" +
     (last ? "<div class='row small'>" + buddy("pip", 26, "saved") + "Saved <button class='quiet' id='undo' style='min-height:36px'>Undo</button></div>" : "") +
     "<button class='quiet' id='stop'>Stop here</button></div>" +
     "<div class='track' style='margin-bottom:24px'><div class='fill' style='width:" + Math.round(pos / queue.length * 100) + "%'></div></div>" +
-    "<div class='rgrid'>" + preview(it) + "<div style='display:flex;flex-direction:column;gap:16px'>" + details(it) + "</div></div>";
+    "<div class='rgrid'>" + preview(it) + "<div style='display:flex;flex-direction:column;gap:16px'>" + c.top + "</div></div>" +
+    "<div class='abar' id='bar'>" + c.bar + "</div>";
   wire(it);
   react(el.querySelector(".saved"), "hop");                       // approved: Pip hops
   react(el.querySelector(".who"), GROUPS[group(it)][3]);           // arriving: locked nods, unsure tilts
-  var m = el.querySelector(".main"); if (m) m.focus();
+  var m = el.querySelector(".abar .sugg") || el.querySelector(".abar .opt"); if (m) m.focus();
 }
 function wire(it) {
   var el = document.getElementById("s-review");
@@ -63,22 +76,15 @@ function wire(it) {
   var sm = document.getElementById("showme"); if (sm) sm.onclick = function () {
     document.getElementById("pv").innerHTML = "<p class='small'>You asked to see it. (The real screenshot appears here.)</p>"; };
   el.querySelectorAll("[data-act]").forEach(function (b) { b.onclick = function () { act(it, b.getAttribute("data-act")); }; });
-  el.querySelectorAll("input[name=act]").forEach(function (r) { r.onchange = function () {
-    document.getElementById("namebox").hidden = r.value === "to_be_deleted"; }; });
 }
 function act(it, a) {
-  var box = document.getElementById("namebox"), nm = document.getElementById("nm");
-  var name = nm && box && !box.hidden ? nm.value.trim() || null : null;
-  if (a === "change") {
-    document.getElementById("changer").hidden = false;
-    document.getElementById("btns").innerHTML = "<button class='main' data-act='save'>Save</button><button class='quiet' data-act='skip'>Not now</button>";
-    wire(it); document.querySelector("#btns .main").focus(); return;
-  }
+  var nm = document.getElementById("nm"), name = nm ? nm.value.trim() || null : null;
   var d = { id: it.id, decision: "approve", action: it.action, new_name: it.state === "open" ? name : null, time: localTime() };
-  if (a === "save") { d.action = document.querySelector("input[name=act]:checked").value; d.decision = "change"; if (d.action === "to_be_deleted") d.new_name = null; }
+  if (a.indexOf("to:") === 0) { d.decision = "change"; d.action = a.slice(3); }
   if (a === "keep_image" || a === "to_be_deleted") { d.decision = "change"; d.action = a; d.new_name = null; }
   if (a === "skip") { d.decision = "skip"; d.action = null; d.new_name = null; }
-  if (d.decision === "approve" && it.state === "open" && name !== it.new_name) d.decision = "change";
+  if (d.action === "to_be_deleted") d.new_name = null;
+  if (d.decision === "approve" && it.state === "open" && d.action !== "to_be_deleted" && name !== it.new_name) d.decision = "change";
   decisions.push(d); last = d; pos++; card();
 }
 function done() {

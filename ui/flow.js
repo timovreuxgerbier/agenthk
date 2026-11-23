@@ -22,8 +22,14 @@ document.addEventListener("keydown", function (e) {
 });
 
 // ---- Welcome + setup content ----
-document.getElementById("welcome-buddies").innerHTML = trio(52);
-document.getElementById("sort-buddies").innerHTML = trio(52);
+applyTheme("auto");
+// Prototype: preview any theme. Hanukkah previews the chosen night (2026 dates).
+function previewTheme() {
+  var id = document.getElementById("theme-pick").value, n = +document.getElementById("theme-night").value || 1;
+  applyTheme(id, id === "hanukkah" ? new Date(2026, 11, 3 + n) : undefined);
+}
+document.getElementById("theme-pick").onchange = previewTheme;
+document.getElementById("theme-night").oninput = previewTheme;
 document.getElementById("needs").innerHTML = NEEDS.map(function (n) {
   return "<li>" + n[0] + "<span" + (n[1].charAt(0) === "[" ? " class='tbd'" : "") + ">" + n[1] + "</span></li>";
 }).join("");

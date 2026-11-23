@@ -49,7 +49,17 @@ textarea{font:inherit;font-size:16px;background:var(--card);color:var(--text);bo
 .dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;background:var(--line2)}.dots i.on{background:var(--trace)}
 .folder{font-size:12px;border:1px solid #2a4a38;border-radius:10px;padding:8px 10px;text-align:center}
 /* review */
-#s-review{padding-bottom:40px}
+#s-review{padding-bottom:0}
+.abar{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:18px 0 24px;margin-top:24px;border-top:1px solid var(--line);background:var(--ground)}
+.abar .spacer{flex:1}
+.opt{display:inline-flex;align-items:center;gap:8px;min-height:58px;padding:0 18px;font-weight:600}
+.opt .tag{font-size:12px;font-weight:800;padding:2px 7px;border-radius:6px;margin-left:2px}
+.opt.sugg{border-width:2px}
+.opt.c-y{background:var(--ybg);border-color:var(--y);color:var(--y)}.opt.c-y .tag{background:var(--y);color:#1A1405}
+.opt.c-r{background:var(--rbg);border-color:var(--r);color:#FF8A91}.opt.c-r .tag{background:var(--r);color:#1A0507}
+.opt.c-b{background:var(--bbg);border-color:var(--b);color:var(--b)}.opt.c-b .tag{background:var(--b);color:#08142A}
+.reason{margin:0;font-size:16px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.preview img{width:100%;max-height:440px;object-fit:contain;border-radius:8px}
 .rhead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
 .rgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:32px;flex:1}
 .preview{background:#0C1712;border:1px solid var(--line);border-radius:14px;min-height:280px;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:22px}
@@ -58,7 +68,6 @@ textarea{font:inherit;font-size:16px;background:var(--card);color:var(--text);bo
 .guess{border:2px dashed #5E7D6C;border-radius:12px;padding:10px 12px;font-size:16px}
 .field{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted)}
 .field input{font:inherit;font-size:16px;background:var(--ground);color:var(--text);border:1px solid var(--line2);border-radius:10px;min-height:44px;padding:0 12px}
-#changer{display:flex;flex-direction:column;gap:6px}#changer[hidden]{display:none}
 .choice{display:flex;gap:10px;align-items:center;padding:10px 14px;border:1px solid var(--line2);border-radius:12px;cursor:pointer}
 .choice:has(input:checked){border-color:var(--trace);background:#0A1A12}
 .choice input{accent-color:var(--trace);width:18px;height:18px}
@@ -76,10 +85,16 @@ textarea{font:inherit;font-size:16px;background:var(--card);color:var(--text);bo
 @keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-14px) scaleX(.94)}70%{transform:translateY(0) scaleY(.9)}100%{transform:none}}
 @keyframes nod{0%,100%{transform:none}30%{transform:translateY(3px) scaleY(.92)}60%{transform:translateY(-2px)}}
 @keyframes tilt{0%,100%{transform:none}30%{transform:rotate(-8deg)}65%{transform:rotate(6deg)}}
+/* themes: small, calm, never on setup or review */
+#scene{min-height:0;display:flex;justify-content:center}
+.flame{transform-box:fill-box;transform-origin:50% 100%;animation:flick 1.8s ease-in-out infinite}
+@keyframes flick{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.86) scaleX(1.06)}}
+.fall{animation:fall 6s linear infinite}@keyframes fall{0%{transform:translateY(-4px)}100%{transform:translateY(4px)}}
+.proto select,.proto input{font:inherit;font-size:13px;background:#111;color:#cdd;border:1px solid #3a3f3d;border-radius:8px;min-height:34px;padding:0 8px}
 /* prototype-only menu: hidden while presenting. Press P to show. */
 .proto{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:#9aa}
 .proto[hidden]{display:none}
 .proto button{min-height:34px;font-size:13px;padding:0 12px;border-color:#3a3f3d;color:#cdd}
 .protoonly{display:none}body.proto-on .protoonly{display:inline-flex}
-@media (prefers-reduced-motion:reduce){.buddy,.buddy .eye,.idle,.hop,.nod,.tilt{animation:none!important}.fill{transition:none}}
+@media (prefers-reduced-motion:reduce){.flame,.fall,.buddy,.buddy .eye,.idle,.hop,.nod,.tilt{animation:none!important}.fill{transition:none}}
 @media (max-width:860px){.rgrid{grid-template-columns:1fr}.screen{padding:28px 24px 0}}
