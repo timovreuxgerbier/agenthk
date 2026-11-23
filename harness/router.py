@@ -1,6 +1,6 @@
 # harness/router.py — Lane: Raaghavi (before the model)
 # Sends one set of messages to one local model and returns its raw answer.
-# Today the router is 1:1 (one model). Later it can choose light / heavy models.
+# The answer shape decides who is speaking: Pip's proposal (default) or Zippy's verdict.
 
 import json
 import urllib.request
@@ -8,13 +8,13 @@ import urllib.request
 from harness import schema
 
 
-def ask(model, messages):
+def ask(model, messages, shape=None):
     """Return the model's raw text answer. Raises urllib errors or TimeoutError on failure."""
     body = {
         "model": model,
         "stream": False,
         "think": False,
-        "format": schema.PROPOSAL_SHAPE,
+        "format": shape or schema.PROPOSAL_SHAPE,
         "options": {"temperature": 0},
         "messages": messages,
     }
