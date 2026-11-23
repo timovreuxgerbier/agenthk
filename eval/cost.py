@@ -6,10 +6,14 @@
 # tokens, not Gemma's, so it gives the right size of the number, not an exact bill.
 # Reads no labels and prints no file names, so it is safe on the Mac (referee) set.
 # Saves golden/cost_<set>_<run>.txt, like score does.
+# Lesson 13 (Nov 22): a SERVER section (context window, GPU or CPU, Ollama version).
+# Nov 23 correction: the TOKENS note used to say Ollama skipped reused prompt starts.
+# Wrong: the spread is image size (Gemma 4 reads ~1 token per 48x48 pixels). Complete.
 
 from collections import Counter
 
 from harness import schema, trace, gate
+from eval import server
 
 # What we compare against. Change the numbers AND the date together, from the price page.
 CLOUD = {"name": "Gemini 3.5 Flash-Lite (standard paid tier)", "checked": "Nov 16, 2026",
@@ -95,8 +99,8 @@ def _token_lines(entries):
     n = len(entries)
     out += ["  Total:  read " + format(total_in, ",") + ", wrote " + format(total_out, ",")
             + " = " + format(round((total_in + total_out) / n), ",") + " tokens per screenshot",
-            "  If a max is far above its average, Ollama reused the start of the prompt from the",
-            "  call before and did not count it again. A cloud bill would count it.", ""]
+            "  Bigger screenshots cost more: the image is most of what a model reads, so the max",
+            "  is far above the average. These counts are complete (checked Nov 22).", ""]
     dollars = cloud_dollars(total_in, total_out)
     per_thousand = dollars / n * 1000
     out += ["CLOUD EQUIVALENT (an estimate, not a bill)",
@@ -119,11 +123,13 @@ def build(run_id, entries):
            + _most_common([e.get("model") for e in entries]),
            str(n) + " screenshots: Zippy locked " + str(locked) + ", " + str(copies)
            + " exact copies (no Pip call), Pip answered " + str(n - locked - copies), ""]
-    out += _time_lines(entries) + _token_lines(entries)
-    local = schema.OLLAMA_URL.startswith(("http://localhost", "http://127.0.0.1"))
+    out += _time_lines(entries) + _token_lines(entries) + server.lines(entries)
+    urls = (schema.OLLAMA_URL, schema.OLLAMA_PS_URL, schema.OLLAMA_VERSION_URL)
+    away = [u for u in urls if not u.startswith(("http://localhost", "http://127.0.0.1"))]
+    local = not away
     out += ["STAYED ON THIS COMPUTER",
             ("  Every model call went to " + schema.OLLAMA_URL + " (this laptop)." if local
-             else "  WARNING: OLLAMA_URL is not this computer: " + schema.OLLAMA_URL),
+             else "  WARNING: not this computer: " + ", ".join(away)),
             "  " + str(n) + " screenshots read, " + str(locked) + " locked as sensitive, 0 uploaded."]
     return "\n".join(out)
 

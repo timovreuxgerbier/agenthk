@@ -5,13 +5,17 @@
 # each part took. We used to throw that away. Now the last call's numbers are kept until
 # the pipeline collects them with take_usage(). ask() still returns only the text, so
 # nothing that calls it (gate.py, pipeline.py, the tests) had to change.
+# Lesson 13 (Nov 22): right after each call, the same numbers also say under which server
+# settings that model ran: its context window, how much of it was on the GPU, and Ollama's
+# version. The Nov 21 baseline could not be explained because nobody wrote these down.
 
 import json
 import urllib.request
 
 from harness import schema
 
-_last_usage = None   # the most recent call's numbers, until take_usage() collects them
+_last_usage = None       # the most recent call's numbers, until take_usage() collects them
+_ollama_version = None   # asked once; Ollama's version does not change during a run
 
 
 def _seconds(reply, key):
@@ -30,6 +34,38 @@ def usage_from(reply):
         "write_seconds": _seconds(reply, "eval_duration"),         # writing the answer
         "ollama_seconds": _seconds(reply, "total_duration"),       # all of it, inside Ollama
     }
+
+
+def _get_json(url):
+    with urllib.request.urlopen(url, timeout=schema.SERVER_TIMEOUT_SECONDS) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def _version():
+    global _ollama_version
+    if _ollama_version is None:
+        try:
+            _ollama_version = _get_json(schema.OLLAMA_VERSION_URL).get("version")
+        except Exception:   # any failure here = "not recorded", never a broken run
+            return None
+    return _ollama_version
+
+
+def server_from(model):
+    """Lesson 13: the settings `model` is running under right now, from Ollama's /api/ps.
+    Ask right after a call, while that model is still loaded. Anything missing stays None."""
+    found = {"context": None, "gpu_share": None, "ollama_version": _version()}
+    try:
+        loaded = _get_json(schema.OLLAMA_PS_URL).get("models") or []
+    except Exception:       # any failure here = "not recorded", never a broken run
+        return found
+    for item in loaded:
+        if model in (item.get("name"), item.get("model")) or item.get("name") == model + ":latest":
+            found["context"] = item.get("context_length")
+            size, vram = item.get("size"), item.get("size_vram")
+            if isinstance(size, (int, float)) and size > 0 and isinstance(vram, (int, float)):
+                found["gpu_share"] = round(vram / size, 2)
+    return found
 
 
 def take_usage():
@@ -58,5 +94,5 @@ def ask(model, messages, shape=None):
     )
     with urllib.request.urlopen(request, timeout=schema.CALL_TIMEOUT_SECONDS) as response:
         reply = json.loads(response.read().decode("utf-8"))
-    _last_usage = usage_from(reply)
+    _last_usage = dict(usage_from(reply), **server_from(model))
     return reply["message"]["content"]

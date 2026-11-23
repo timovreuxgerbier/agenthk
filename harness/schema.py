@@ -23,7 +23,14 @@ OUTPUT_FOLDERS = {
 
 # ---- Model settings ------------------------------------------------------
 DEFAULT_MODEL = "gemma4:e4b"
-OLLAMA_URL = "http://localhost:11434/api/chat"
+# 127.0.0.1, not "localhost" (measured Nov 23): on Windows "localhost" is tried as IPv6
+# first; Ollama listens on IPv4 only, so every call waited 2.05 s before falling back.
+OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
+# Lesson 13: after each call, ask Ollama under which settings that model ran
+# (context window, how much of it sits on the GPU) and Ollama's version. Numbers only.
+OLLAMA_PS_URL = "http://127.0.0.1:11434/api/ps"
+OLLAMA_VERSION_URL = "http://127.0.0.1:11434/api/version"
+SERVER_TIMEOUT_SECONDS = 3   # a slow answer here must never slow or stop a run
 CALL_TIMEOUT_SECONDS = 300
 
 # ---- Run limits (proposal: 10 files, 15 calls, 5 minutes) -----------------
@@ -86,6 +93,9 @@ PROPOSAL_SHAPE = {
 # S10: "zippy_model" and "zippy_seconds" are Zippy's own model and time (Pip's is "model").
 # S11: "zippy_usage" and "pip_usage" are Ollama's own counts for each buddy's call
 # (tokens read and written, load / read / write seconds). None when that buddy didn't run.
+# Lesson 13: each usage also holds "context", "gpu_share" (1.0 = all on the GPU, 0 = CPU)
+# and "ollama_version", asked from Ollama right after that call. None = Ollama didn't say.
+# No new trace field: old runs read the same, and each buddy keeps its own settings.
 # Counts only: no text, so they are safe to keep for locked screenshots too.
 TRACE_FIELDS = [
     "run_id", "time", "file", "model", "zippy_model", "seconds", "zippy_seconds", "gate",
