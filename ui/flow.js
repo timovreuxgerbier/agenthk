@@ -46,11 +46,11 @@ document.getElementById("start").onclick = function () { show("s-need"); };
 
 // ---- How it works: the longer explanations live here ----
 var WALK = [
-  { t: "Screenshots go to one folder", b: "Take them like you always do. They land in Screenshots For Sorting, the only folder Pip looks at.",
+  { t: "Screenshots go to one folder", b: "Take them like you always do. They land in Screenshots For Sorting, the only folder Rick looks at.",
     a: function () { return '<div class="folder">Screenshots<br>For Sorting</div>'; } },
-  { t: "Pip looks while you sleep", b: "Every Sunday night, on this computer, Pip guesses what each new screenshot is for. Nothing moves yet.",
+  { t: "Rick looks while you sleep", b: "Every Sunday night, on this computer, Rick guesses what each new screenshot is for. Nothing moves yet.",
     a: function () { return buddy("pip", 64, "idle"); } },
-  { t: "One colour, one meaning", b: "Yellow needs your OK. Red is Pip's suggestion. Blue is private: Pip stops reading and locks it.",
+  { t: "One colour, one meaning", b: "Yellow needs your OK. Red is Rick's suggestion. Blue is private: Zippy stops reading and locks it.",
     a: function () { return buddy("bloop", 48, "idle b1") + buddy("pip", 56, "idle b2") + buddy("zippy", 48, "idle b3"); } },
   { t: "You decide, nothing is deleted", b: "Only what you approve moves. Cleared files go to a To Be Deleted folder that you empty yourself.",
     a: function () { return '<div class="folder">Kept</div><div class="folder">To Be Deleted</div>'; } }

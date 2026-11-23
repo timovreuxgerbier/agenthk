@@ -23,7 +23,7 @@ var THEMES = [
     dots: "#2B3440", acc: null,
     scene: function (d) { return menorah(hanukkahNight(d) || 8); } },
   { id: "halloween", name: "Halloween", when: function (d) { return d.getMonth() === 9; },
-    greet: function () { return "Spooky season. Pip sorts in the dark."; }, dots: "#2A2140",
+    greet: function () { return "Spooky season. Rick sorts in the dark."; }, dots: "#2A2140",
     acc: function () { return "<g transform='translate(0,6)'><ellipse cx='50' cy='6' rx='30' ry='6' fill='" + HAT + "'/>" +
       "<path d='M36 6 L50 -34 Q54 -40 62 -36 L58 -30 L64 6 Z' fill='" + HAT + "'/><rect x='37' y='-3' width='26' height='5' rx='2' fill='#7B5CD6'/></g>"; },
     scene: function () { return "<svg width='60' height='60' viewBox='0 0 60 60' aria-hidden='true'><circle cx='30' cy='30' r='22' fill='#E9E2CF'/><circle cx='40' cy='24' r='20' fill='#030605'/></svg>"; } },
@@ -34,7 +34,7 @@ var THEMES = [
       return f; },
     scene: function () { return picado(["#C2408A", "#E8892B", "#EDE6D6", "#7B5CD6", "#C2408A", "#E8892B", "#EDE6D6"]); } },
   { id: "winter", name: "Winter holidays", when: function (d) { return md(d) >= 1220 && md(d) <= 1231; },
-    greet: function () { return "Cozy season. Pip keeps things tidy."; }, dots: "#22302C",
+    greet: function () { return "Cozy season. Rick keeps things tidy."; }, dots: "#22302C",
     acc: function () { return "<path d='M27 12 Q50 -26 73 12 Z' fill='" + CREAM + "'/><rect x='25' y='8' width='50' height='9' rx='4' fill='#B9AE96'/><circle cx='50' cy='-16' r='7' fill='" + CREAM + "'/>"; },
     scene: function () { return snow(); } },
   { id: "newyear", name: "New Year", when: function (d) { return md(d) >= 101 && md(d) <= 107; },

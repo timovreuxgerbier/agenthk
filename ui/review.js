@@ -1,13 +1,13 @@
 // review.js — Review (one item per screen, contract rule 4) and Done.
 // Reads review.json's shape (SAMPLE_REVIEW for now). Writes decisions.json's shape.
-// Pip's words come from the model, which reads text INSIDE screenshots, so all of
+// Rick's words come from the model, which reads text INSIDE screenshots, so all of
 // it goes through esc() and is never treated as code.
 
 function esc(t) { var d = document.createElement("div"); d.textContent = t == null ? "" : String(t); return d.innerHTML; }
 function niceDate(d) { var m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], p = String(d).split("-"); return p.length === 3 ? (+p[2]) + " " + m[+p[1] - 1] : esc(d); }
 function localTime() { var t = new Date(); t.setMinutes(t.getMinutes() - t.getTimezoneOffset()); return t.toISOString().slice(0, 19); }
-// group: 0 needs your OK (Bloop), 1 Pip's suggestion, 2 locked (Zippy)
-var GROUPS = [["py", "Needs your OK", "bloop", "tilt"], ["pr", "Pip's suggestion", "pip", "hop"], ["pb", "Locked", "zippy", "nod"]];
+// group: 0 needs your OK (Bloop), 1 Rick's suggestion, 2 locked (Zippy)
+var GROUPS = [["py", "Needs your OK", "bloop", "tilt"], ["pr", "Rick's suggestion", "pip", "hop"], ["pb", "Locked", "zippy", "nod"]];
 function group(it) { return it.state === "locked" ? 2 : (it.needs_ok || it.state === "copy") ? 0 : 1; }
 var queue = [], pos = 0, decisions = [], started = 0, last = null;
 
@@ -65,7 +65,7 @@ function card() {
     "<div class='rgrid'>" + preview(it) + "<div style='display:flex;flex-direction:column;gap:16px'>" + c.top + "</div></div>" +
     "<div class='abar' id='bar'>" + c.bar + "</div>";
   wire(it);
-  react(el.querySelector(".saved"), "hop");                       // approved: Pip hops
+  react(el.querySelector(".saved"), "hop");                       // approved: Rick hops
   react(el.querySelector(".who"), GROUPS[group(it)][3]);           // arriving: locked nods, unsure tilts
   var m = el.querySelector(".abar .sugg") || el.querySelector(".abar .opt"); if (m) m.focus();
 }

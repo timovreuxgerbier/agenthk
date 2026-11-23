@@ -1,4 +1,4 @@
-// buddies.js — Bloop (yellow, needs your OK), Pip (red, suggestions), Zippy (blue, locked).
+// buddies.js — Bloop (yellow, needs your OK), Rick (red, suggestions), Zippy (blue, locked).
 // Art follows the brand file (WebsiteTriangles): soft triangles, big eyes, small mouths.
 // Themes (themes.js) may add an accessory on top. They NEVER change a buddy's colour,
 // because each colour carries one meaning in the app.

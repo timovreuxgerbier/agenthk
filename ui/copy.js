@@ -1,4 +1,4 @@
-// copy.js — every sentence a person reads that is NOT Pip's own words.
+// copy.js — every sentence a person reads that is NOT Rick's own words.
 // Locked-kind copy is written by people (contract section 3, Raaghavi's lane).
 // These are DRAFTS. Model size (17 GB, two models) confirmed by Sphinx, Nov 17.
 
@@ -24,7 +24,7 @@ var ACTION_WORDS = { keep_image: "Keep as image", keep_text: "Turn into text", t
 var NEEDS = [
   ["A Mac", ""],
   ["The Ollama app", "free"],
-  ["Pip's two models", "17 GB download"],
+  ["Rick's two models", "17 GB download"],
   ["Free disk space", "at least 17 GB"],
   ["Time", "5 minutes, plus the download"]
 ];
@@ -36,7 +36,7 @@ var WORK_CHIPS = ["To remember things", "Recipes and ideas", "Receipts and proof
 // Friendly versions of what run.py prints in the terminal. One headline, one line.
 var STATES = {
   ollama: { t: "Open the Ollama app", b: "I need it to look at your screenshots. Open it, then try again.", main: "Try again" },
-  model:  { t: "One download, once", b: "Pip's two models are 17 GB. Use Wi-Fi. It can take a while.", main: "Start download" },
+  model:  { t: "One download, once", b: "Rick's two models are 17 GB. Use Wi-Fi. It can take a while.", main: "Start download" },
   empty:  { t: "All caught up", b: "Nothing new. I'll look again Sunday night.", main: "Close" },
   cap:    { t: "10 ready, the rest wait", b: "I look at 10 at a time so it never takes long.", main: "Review these 10" }
 };
