@@ -11,6 +11,8 @@
 # It also counts, for information only (not part of the rule), files whose confidence
 # numbers or full answer text changed.
 # SAFE ON THE MAC SET: prints row numbers and field names, never file names or names.
+# Lesson 13 (Nov 22): warns first when the two runs' server settings differ or were not
+# recorded (D28), so a difference caused by the server is not blamed on the change.
 
 import json
 import sys
@@ -19,6 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from harness import trace  # noqa: E402
+from eval import server  # noqa: E402
 
 RULE_FIELDS = ("kind", "action", "name")
 
@@ -78,6 +81,12 @@ def main():
     rule, info, only_old, only_new = compare(old, new)
     shared = len(set(old) & set(new))
     print("COMPARE  old " + old_id + "  ->  new " + new_id)
+    unlike = server.differences(trace.run(old_id)[1], trace.run(new_id)[1])
+    if unlike:
+        print("WARNING: the server settings are not shown to be the same (D28). A difference")
+        print("below may come from the server, not from what you changed:")
+        for problem in unlike:
+            print("  " + problem)
     print("Screenshots in both runs: " + str(shared)
           + "   only in old: " + str(only_old) + "   only in new: " + str(only_new))
     if only_old or only_new:
