@@ -1,0 +1,35 @@
+SHYFT TEST - READ ME FIRST (Windows)
+====================================
+
+Thank you for testing Shyft. It takes 30 to 90 minutes, mostly waiting.
+It uses only made-up screenshots. Nothing of yours is read, and nothing leaves your PC.
+
+You need: Windows 10 (version 22H2) or Windows 11, at least 8 GB of memory (16 GB is
+better), about 17 GB of free disk space, an internet connection, and the charger.
+
+0. EXTRACT THE DOWNLOAD FIRST
+   Right-click Shyft-Tester-Windows.zip > Extract All > Extract.
+   The files don't work from inside the zip.
+
+1. Double-click "1 Install Shyft"
+   A window opens and walks you through it. It installs Python, git and Ollama
+   (all free) if you don't have them, then downloads Rick's and Zippy's models.
+   This is the long part.
+
+   If Windows says "Windows protected your PC": click "More info", then "Run anyway".
+   That's because we're a student team, not a registered publisher.
+   If Windows asks whether an app may make changes (for Python or git): click "Yes".
+
+2. Double-click "2 Run the Shyft test"
+   Two runs on the made-up screenshots. Leave the window open; it can look frozen
+   while it works. Your PC stays awake by itself until it's done.
+
+3. Send the results
+   A folder called "Shyft test results" appears on your Desktop. Open my_pc.txt,
+   type roughly when you bought the PC, save, and send the whole folder to Sphinx.
+
+   If something breaks (it stops, or your PC struggles): that's a result, not a failure.
+   Send the folder anyway.
+
+4. When you're done
+   Double-click "3 Remove Shyft" to get the 17 GB back. It keeps your results folder.

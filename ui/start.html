@@ -9,8 +9,8 @@
 </head>
 <!-- start.html: the first page a tester sees, before any download.
      TEXT: drafts. Raaghavi will send the final short text: replace anything marked data-copy.
-     NUMBERS in yellow brackets come from today's Mac test (Sphinx).
-     DOWNLOAD_URL at the bottom: the package Sphinx is preparing. -->
+     NUMBERS: 17 GB measured on Timo's Mac (Nov 24); macOS 14+ and 8 GB memory are Ollama's own minimums.
+     DOWNLOAD: the tester kit (installer/ in the repo), published as a GitHub release. -->
 <body class="start">
 <div class="wrap">
   <header class="top">
@@ -24,8 +24,9 @@
       <h1 data-copy="headline">Your screenshots, sorted while you sleep.</h1>
       <p class="sub" data-copy="intro">Shyft looks at your new screenshots on your Mac and suggests what to keep, turn into text, or clear out. You decide. Nothing is deleted.</p>
       <div class="cta">
-        <a class="main" id="download" href="#">Download for Mac</a>
-        <span class="small" id="dl-note">Free · open source · beta</span>
+        <a class="main" id="download" href="#">Download the tester kit for Mac</a>
+        <span class="small" id="dl-note">Shyft-Tester.dmg · free · uses made-up screenshots only</span>
+        <button class="quiet" id="other-os" type="button">On Windows? Get the Windows kit</button>
       </div>
     </div>
 
@@ -41,11 +42,29 @@
     <section class="block" aria-labelledby="need">
       <h2 id="need">What you need</h2>
       <ul class="req">
-        <li><span>A Mac</span><span class="tbd">[which Macs: from Mac test]</span></li>
+        <li><span>A Mac or a PC</span><span>macOS 14 (Sonoma) or newer · Windows 10 (22H2) or 11</span></li>
+        <li><span>Memory</span><span>at least 8 GB · 16 GB is better</span></li>
         <li><span>Free space</span><span>about 17 GB</span></li>
-        <li><span>The Ollama app</span><span>free · Shyft helps you get it</span></li>
-        <li><span>Time</span><span><span class="tbd">[download time: from Mac test]</span> + about 5 min setup</span></li>
+        <li><span>The Ollama app</span><span>free · the installer gets it for you</span></li>
+        <li><span>Time</span><span>30 to 90 minutes, mostly waiting</span></li>
       </ul>
+    </section>
+
+    <section class="block" aria-labelledby="install">
+      <h2 id="install">Installing, step by step</h2>
+      <div class="seg" role="group" aria-label="Show steps for"><button type="button" data-os="mac">Mac</button><button type="button" data-os="win">Windows</button></div>
+      <div class="steps3 os-mac">
+        <div><b>Open the download</b><span class="muted">Double-click Shyft-Tester.dmg. A window opens with three numbered files and a READ ME.</span></div>
+        <div><b>Double-click "1 Install Shyft"</b><span class="muted">Your Mac will say it "could not verify" it, because we're a student team, not a registered Apple developer. Click <b>Done</b>, open <b>System Settings › Privacy &amp; Security</b>, click <b>Open Anyway</b>. Once per file.</span></div>
+        <div><b>Double-click "2 Run the Shyft test"</b><span class="muted">Two runs on made-up screenshots. Leave the window open; your Mac stays awake by itself.</span></div>
+        <div><b>Send your results</b><span class="muted">A "Shyft test results" folder appears on your Desktop. Send it to Sphinx. Then "3 Remove Shyft" gives the 17 GB back.</span></div>
+      </div>
+      <div class="steps3 os-win">
+        <div><b>Extract the download</b><span class="muted">Right-click Shyft-Tester-Windows.zip › <b>Extract All</b>. The files don't work from inside the zip.</span></div>
+        <div><b>Double-click "1 Install Shyft"</b><span class="muted">If Windows says "Windows protected your PC", click <b>More info</b> › <b>Run anyway</b>. We're a student team, not a registered publisher. If it asks to install Python or git, click <b>Yes</b>.</span></div>
+        <div><b>Double-click "2 Run the Shyft test"</b><span class="muted">Two runs on made-up screenshots. Leave the window open; your PC stays awake by itself.</span></div>
+        <div><b>Send your results</b><span class="muted">A "Shyft test results" folder appears on your Desktop. Send it to Sphinx. Then "3 Remove Shyft" gives the 17 GB back.</span></div>
+      </div>
     </section>
 
     <section class="block" aria-labelledby="how">
@@ -63,13 +82,27 @@
 
 <script src="buddies.js"></script>
 <script>
-  var DOWNLOAD_URL = "";   // TODO (Sphinx): link to the Mac package. Empty = not ready yet.
+  // Always the newest GitHub release with the kits attached (see installer/README.md).
+  var KITS = {
+    mac: { url: "https://github.com/timovreuxgerbier/agenthk/releases/latest/download/Shyft-Tester.dmg",
+           label: "Download the tester kit for Mac", file: "Shyft-Tester.dmg", other: "On Windows? Get the Windows kit" },
+    win: { url: "https://github.com/timovreuxgerbier/agenthk/releases/latest/download/Shyft-Tester-Windows.zip",
+           label: "Download the tester kit for Windows", file: "Shyft-Tester-Windows.zip", other: "On a Mac? Get the Mac kit" }
+  };
   document.getElementById("logo").innerHTML = buddy("pip", 26);
   document.getElementById("hero-buddies").innerHTML = trio(58);
-  var dl = document.getElementById("download");
-  if (DOWNLOAD_URL) dl.href = DOWNLOAD_URL;
-  else dl.onclick = function (e) { e.preventDefault();
-    document.getElementById("dl-note").textContent = "The download isn't ready yet. It's coming soon."; };
+  var os = /Win/i.test(navigator.platform || navigator.userAgent) ? "win" : "mac";   // best guess; people can switch
+  function setOS(o) {
+    os = o; var k = KITS[o], dl = document.getElementById("download");
+    dl.href = k.url; dl.textContent = k.label;
+    document.getElementById("dl-note").textContent = k.file + " · free · uses made-up screenshots only";
+    document.getElementById("other-os").textContent = k.other;
+    document.body.classList.toggle("win", o === "win");
+    [].forEach.call(document.querySelectorAll(".seg button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-os") === o); });
+  }
+  document.getElementById("other-os").onclick = function () { setOS(os === "win" ? "mac" : "win"); };
+  [].forEach.call(document.querySelectorAll(".seg button"), function (b) { b.onclick = function () { setOS(b.getAttribute("data-os")); }; });
+  setOS(os);
 </script>
 </body>
 </html>

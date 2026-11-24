@@ -21,9 +21,15 @@ section.block h2{font-size:24px;font-weight:800;margin:0 0 18px}
 .req li{display:flex;justify-content:space-between;gap:16px;padding:13px 2px;border-bottom:1px solid var(--line);font-size:16px}
 .req li span:last-child{color:var(--muted);text-align:right}
 .steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;counter-reset:s}
-.steps3 div{padding:4px 0 0}.steps3 b{display:block;margin-bottom:4px}
+.steps3 div{padding:4px 0 0}.steps3 div > b{display:block;margin-bottom:4px}
 .steps3 div::before{counter-increment:s;content:counter(s);display:inline-flex;width:30px;height:30px;border-radius:50%;
   align-items:center;justify-content:center;border:1px solid var(--line2);color:var(--trace);font-weight:700;margin-bottom:10px}
 .foot2{padding:36px 0 48px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
 .tbd{color:var(--y);font-style:italic}
 @media (max-width:640px){.hero h1{font-size:36px}.hero{padding:32px 0 44px}}
+/* Mac / Windows: the page shows one set of steps at a time */
+body:not(.win) .os-win, body.win .os-mac{display:none}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:12px;padding:3px;margin:0 0 20px;gap:3px}
+.seg button{min-height:40px;border:none;border-radius:9px;padding:0 18px;font-size:15px}
+.seg button[aria-pressed=true]{background:var(--text);color:#06100B;font-weight:700}
+#other-os{min-height:36px;font-size:14px}
