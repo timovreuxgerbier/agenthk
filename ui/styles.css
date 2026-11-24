@@ -1,0 +1,107 @@
+/* styles.css — calm Shyft look. One colour, one meaning. One main button per screen. */
+:root{--ground:#030605;--card:#06100B;--line:#14261C;--line2:#1E3A2B;--text:#D8FFE9;--muted:#8FB3A0;
+--trace:#2FD38A;--btn:#D1262C;--y:#F7C531;--ybg:#3A2F10;--r:#FF4B55;--rbg:#2A0B0E;--b:#8FB5F2;--bbg:#18243D}
+*{box-sizing:border-box}
+body{margin:0;background:#1a1d1c;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);padding:28px 16px;line-height:1.5}
+.page{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.window{width:100%;min-height:720px;background:var(--ground);border-radius:12px;border:1px solid #2a2f2d;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.chrome{height:40px;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid var(--line);flex-shrink:0}
+.chrome span{width:12px;height:12px;border-radius:50%;background:#2a2f2d}
+.chrome p{margin:0 auto;font-size:13px;color:var(--muted)}
+.trace{position:absolute;left:0;right:0;bottom:0;height:140px;pointer-events:none;opacity:.35}
+.screen{flex:1;position:relative;padding:56px 64px 0;display:flex;flex-direction:column}
+.screen[hidden]{display:none}
+.body{flex:1;display:flex;flex-direction:column;gap:18px;max-width:600px;width:100%;margin:0 auto}
+.center .body{align-items:center;justify-content:center;text-align:center}
+.eyebrow{font-size:14px;color:var(--trace);margin:0;font-weight:600}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.sub{margin:0;font-size:18px;color:var(--muted)}
+.small{margin:0;font-size:14px;color:var(--muted)}
+/* footer: Back always left, main button always right, same place on every screen */
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:22px 0 28px;border-top:1px solid var(--line);margin-top:28px;max-width:600px;width:100%;margin-left:auto;margin-right:auto}
+.foot .spacer{flex:1}
+button{font:inherit;font-size:16px;min-height:48px;padding:0 22px;border-radius:12px;cursor:pointer;border:1px solid var(--line2);background:none;color:var(--text)}
+button:hover{border-color:#2f5a44}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--trace);outline-offset:2px}
+.main{background:var(--text);color:#06100B;border:none;font-weight:700;padding:0 28px}
+.main:hover{background:#fff}
+.quiet{border-color:transparent;color:var(--muted)}
+.quiet:hover{color:var(--text);border-color:var(--line2)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:8px;font-size:14px;font-weight:700}
+.py{background:var(--ybg);color:var(--y)}.pr{background:var(--rbg);color:var(--r)}.pb{background:var(--bbg);color:var(--b)}.pg{background:#16241D;color:var(--muted)}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;width:100%}
+.list li{display:flex;justify-content:space-between;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);font-size:16px}
+.list li span{color:var(--muted)}
+.tbd{color:var(--y)!important;font-style:italic}
+.kbd{background:#16241D;border:1px solid var(--line2);border-radius:6px;padding:1px 7px;font-size:14px;color:var(--text)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-height:42px;font-size:15px;padding:0 14px}
+.chips button[aria-pressed=true]{border-color:var(--trace);background:#0A1A12}
+textarea{font:inherit;font-size:16px;background:var(--card);color:var(--text);border:1px solid var(--line2);border-radius:12px;padding:12px;min-height:84px;resize:vertical;width:100%}
+.track{height:8px;border-radius:4px;background:#10221A;overflow:hidden;width:100%}
+.fill{height:100%;width:0;background:var(--trace);transition:width .5s}
+/* setup step 1: status of each thing Shyft needs */
+.needs li{align-items:center}
+.needs .ok{color:var(--trace);font-weight:700}.needs .miss{color:var(--muted)}.needs .wait{color:var(--text)}
+.needs .dl{display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums;color:var(--text)}
+.needs .dl .track{width:140px;display:block}.needs .dl .fill{display:block}
+#need-help .quiet{min-height:36px;font-size:14px;padding:0 10px}
+/* walkthrough window */
+.overlay{position:absolute;inset:40px 0 0 0;background:rgba(3,6,5,.82);display:none;align-items:center;justify-content:center;z-index:5;padding:24px}
+.overlay.open{display:flex}
+.modal{width:100%;max-width:520px;background:var(--card);border:1px solid var(--line2);border-radius:18px;padding:26px;display:flex;flex-direction:column;gap:16px}
+.art{height:130px;border-radius:14px;background:var(--ground);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:14px;padding:14px}
+.dots{display:flex;gap:8px}.dots i{width:9px;height:9px;border-radius:50%;background:var(--line2)}.dots i.on{background:var(--trace)}
+.folder{font-size:12px;border:1px solid #2a4a38;border-radius:10px;padding:8px 10px;text-align:center}
+/* review */
+#s-review{padding-bottom:0}
+.abar{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:18px 0 24px;margin-top:24px;border-top:1px solid var(--line);background:var(--ground)}
+.abar .spacer{flex:1}
+.opt{display:inline-flex;align-items:center;gap:8px;min-height:58px;padding:0 18px;font-weight:600}
+.opt .tag{font-size:12px;font-weight:800;padding:2px 7px;border-radius:6px;margin-left:2px}
+.opt.sugg{border-width:2px}
+.opt.c-y{background:var(--ybg);border-color:var(--y);color:var(--y)}.opt.c-y .tag{background:var(--y);color:#1A1405}
+.opt.c-r{background:var(--rbg);border-color:var(--r);color:#FF8A91}.opt.c-r .tag{background:var(--r);color:#1A0507}
+.opt.c-b{background:var(--bbg);border-color:var(--b);color:var(--b)}.opt.c-b .tag{background:var(--b);color:#08142A}
+.reason{margin:0;font-size:16px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.preview img{width:100%;max-height:440px;object-fit:contain;border-radius:8px;background:#0F1D16;min-height:120px}
+.locked img{max-height:340px}
+.rhead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.rgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:32px;flex:1}
+.preview{background:#0C1712;border:1px solid var(--line);border-radius:14px;min-height:280px;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:22px}
+.bubble{background:#16241D;border-radius:10px;padding:12px;font-size:15px}
+.locked{align-items:center;text-align:center;color:var(--muted)}
+.guess{border:2px dashed #5E7D6C;border-radius:12px;padding:10px 12px;font-size:16px}
+.field{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted)}
+.field input{font:inherit;font-size:16px;background:var(--ground);color:var(--text);border:1px solid var(--line2);border-radius:10px;min-height:44px;padding:0 12px}
+.choice{display:flex;gap:10px;align-items:center;padding:10px 14px;border:1px solid var(--line2);border-radius:12px;cursor:pointer}
+.choice:has(input:checked){border-color:var(--trace);background:#0A1A12}
+.choice input{accent-color:var(--trace);width:18px;height:18px}
+.sample{font-size:13px;font-weight:700;padding:3px 10px;border-radius:8px;border:1px dashed var(--y);color:var(--y)}
+/* buddies: blink, bob, and short reactions */
+.buddy{display:inline-block;transform-origin:50% 100%}
+.buddy .eye{transform-box:fill-box;transform-origin:center;animation:blink 5s infinite}
+.buddy.b2 .eye{animation-delay:1.7s}.buddy.b3 .eye{animation-delay:3.1s}
+.idle{animation:bob 3.6s ease-in-out infinite}.idle.b2{animation-delay:.6s}.idle.b3{animation-delay:1.2s}
+.hop{animation:hop .6s ease-out}
+.nod{animation:nod .7s ease-in-out}
+.tilt{animation:tilt .7s ease-in-out}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-14px) scaleX(.94)}70%{transform:translateY(0) scaleY(.9)}100%{transform:none}}
+@keyframes nod{0%,100%{transform:none}30%{transform:translateY(3px) scaleY(.92)}60%{transform:translateY(-2px)}}
+@keyframes tilt{0%,100%{transform:none}30%{transform:rotate(-8deg)}65%{transform:rotate(6deg)}}
+/* themes: small, calm, never on setup or review */
+#scene{min-height:0;display:flex;justify-content:center}
+.flame{transform-box:fill-box;transform-origin:50% 100%;animation:flick 1.8s ease-in-out infinite}
+@keyframes flick{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.86) scaleX(1.06)}}
+.fall{animation:fall 6s linear infinite}@keyframes fall{0%{transform:translateY(-4px)}100%{transform:translateY(4px)}}
+.proto select,.proto input{font:inherit;font-size:13px;background:#111;color:#cdd;border:1px solid #3a3f3d;border-radius:8px;min-height:34px;padding:0 8px}
+/* prototype-only menu: hidden while presenting. Press P to show. */
+.proto{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:#9aa}
+.proto[hidden]{display:none}
+.proto button{min-height:34px;font-size:13px;padding:0 12px;border-color:#3a3f3d;color:#cdd}
+.protoonly{display:none}body.proto-on .protoonly{display:inline-flex}
+@media (prefers-reduced-motion:reduce){.flame,.fall,.buddy,.buddy .eye,.idle,.hop,.nod,.tilt{animation:none!important}.fill{transition:none}}
+@media (max-width:860px){.rgrid{grid-template-columns:1fr}.screen{padding:28px 24px 0}}

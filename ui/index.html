@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shyft — prototype</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+<div class="window" role="region" aria-label="Shyft app window">
+  <div class="chrome" aria-hidden="true"><span></span><span></span><span></span><p>Shyft</p></div>
+  <svg class="trace" id="trace" viewBox="0 0 1280 140" preserveAspectRatio="none" aria-hidden="true"><path d="M0 100 C 200 50, 340 130, 560 90 S 900 40, 1080 90 S 1240 110, 1280 70" fill="none" stroke="#2FD38A" stroke-width="2.5"/></svg>
+
+  <!-- WELCOME -->
+  <section class="screen center" id="s-welcome">
+    <div class="body">
+      <span id="scene" aria-hidden="false"></span>
+      <span id="welcome-buddies"></span>
+      <p class="eyebrow" id="greeting"></p>
+      <h1>Your screenshots, sorted</h1>
+      <p class="sub">Rick suggests. You decide. Nothing is deleted, and it all stays on this computer.</p>
+      <button class="main" id="start">Get started</button>
+      <button class="quiet" id="how">How it works</button>
+    </div>
+  </section>
+
+  <!-- SETUP 1: get Shyft ready (setup.js) -->
+  <section class="screen" id="s-need" hidden>
+    <div class="body">
+      <p class="eyebrow">Step 1 of 3</p>
+      <h1>Get Shyft ready</h1>
+      <p class="sub">Rick and Zippy run on this computer. Here's what they need.</p>
+      <ul class="list needs" id="needs" aria-live="polite"></ul>
+      <p class="small" id="need-help"></p>
+      <p class="small" id="need-note" style="color:var(--text-dim,#5E7D6C)"></p>
+    </div>
+    <div class="foot"><button data-go="s-welcome">Back</button><span class="spacer"></span><button class="main" id="need-main">Get what's missing</button></div>
+  </section>
+
+  <!-- SETUP 2 -->
+  <section class="screen" id="s-folder" hidden>
+    <div class="body">
+      <p class="eyebrow">Step 2 of 3</p>
+      <h1>Send screenshots to one folder</h1>
+      <p class="sub">Press <span class="kbd">⌘</span> <span class="kbd">Shift</span> <span class="kbd">5</span>, then Options → Other Location → <b style="color:var(--text)">Screenshots For Sorting</b>.</p>
+      <p class="small">It's the only folder Rick looks at.</p>
+    </div>
+    <div class="foot"><button data-go="s-need">Back</button><span class="spacer"></span><button class="main" data-go="s-work">I've done this</button></div>
+  </section>
+
+  <!-- SETUP 3 -->
+  <section class="screen" id="s-work" hidden>
+    <div class="body">
+      <p class="eyebrow">Step 3 of 3 · optional</p>
+      <h1>Tell Rick how you work today</h1>
+      <p class="sub">Why do you take screenshots? Pick any.</p>
+      <div class="chips" id="chips"></div>
+      <label for="work-text" class="small">Anything else? (optional)</label>
+      <textarea id="work-text" placeholder="I screenshot recipes and then can never find them"></textarea>
+      <div class="row"><button id="voice">Record a voice note</button><span class="small" id="voice-note"></span></div>
+    </div>
+    <div class="foot"><button data-go="s-folder">Back</button><span class="small">I'll look every Sunday night.</span><span class="spacer"></span><button class="main" id="finish">Finish setup</button></div>
+  </section>
+
+  <!-- SORTING -->
+  <section class="screen center" id="s-sorting" hidden>
+    <div class="body">
+      <span id="sort-buddies"></span>
+      <h1 id="sort-title">Looking at your screenshots</h1>
+      <p class="sub" id="sort-sub">On this computer. Nothing moves yet.</p>
+      <div class="track" role="progressbar" aria-label="Progress"><div class="fill" id="sort-fill"></div></div>
+      <p class="small" id="sort-count" aria-live="polite">0 of 9</p>
+      <button class="main" id="sort-review" data-review hidden>Start review</button>
+      <button class="quiet" data-go="s-welcome" id="sort-later">Tell me when it's ready</button>
+    </div>
+  </section>
+
+  <section class="screen" id="s-review" hidden></section>
+  <section class="screen center" id="s-done" hidden></section>
+  <section class="screen center" id="s-state" hidden></section>
+
+  <!-- HOW IT WORKS (longer explanations live here) -->
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
+      <div class="row" style="justify-content:space-between"><p class="eyebrow" id="m-step"></p><button class="quiet" id="m-close" style="min-height:40px">Close</button></div>
+      <div class="art" id="m-art" aria-hidden="true"></div>
+      <h2 id="m-title" style="margin:0;font-size:22px"></h2>
+      <p id="m-body" class="sub" style="font-size:16px"></p>
+      <div class="row" style="justify-content:space-between"><div class="dots" id="m-dots" aria-hidden="true"></div>
+        <div class="row"><button id="m-back">Back</button><button class="main" id="m-next">Next</button></div></div>
+    </div>
+  </div>
+</div>
+
+<nav class="proto" id="proto" hidden aria-label="Prototype menu (not part of the app)">
+  <span>Prototype only (press P to hide):</span>
+  <button data-go="s-welcome">Welcome</button><button data-go="s-need">Step 1</button><button data-go="s-folder">Step 2</button><button data-go="s-work">Step 3</button>
+  <button id="p-sort">Sorting</button><button data-review>Review</button>
+  <button data-state="empty">All caught up</button><button data-state="cap">Paused at 10</button>
+  <button data-state="ollama">Ollama closed</button><button data-state="model">First download</button>
+  <label for="need-pick">Step 1 has:</label><select id="need-pick" onchange="setScenario(this.value)"><option value="nothing">Nothing yet</option><option value="models">Ollama only</option><option value="ready">Everything</option></select>
+  <label for="theme-pick">Theme:</label><select id="theme-pick"><option value="auto">Today's date</option><option value="none">None</option><option value="halloween">Halloween</option><option value="muertos">Día de los Muertos</option><option value="hanukkah">Hanukkah</option><option value="winter">Winter holidays</option><option value="newyear">New Year</option></select>
+  <label for="theme-night">Hanukkah night:</label><input id="theme-night" type="number" min="1" max="8" value="3" style="width:52px">
+</nav>
+</div>
+<script src="copy.js"></script>
+<script src="buddies.js"></script>
+<script src="themes.js"></script>
+<script src="sample_review.js"></script>
+<!-- A real run: dev/make_review.py writes this file (not in Git). If it is missing, the sample above is used. -->
+<script src="review_data.js"></script>
+<script src="flow.js"></script>
+<script src="setup.js"></script>
+<script src="review.js"></script>
+</body>
+</html>
