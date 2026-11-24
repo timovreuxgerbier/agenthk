@@ -9,7 +9,9 @@
 </head>
 <!-- start.html: the first page a tester sees, before any download.
      TEXT: drafts. Raaghavi will send the final short text: replace anything marked data-copy.
-     NUMBERS: 17 GB measured on Timo's Mac (Nov 24); macOS 14+ and 8 GB memory are Ollama's own minimums.
+     NUMBERS: Mac 17 GB measured on Timo's Mac (Nov 24); macOS 14+ and 8 GB are Ollama's own minimums.
+     Windows (kit 2): models 6.6 + 4.6 = 11.2 GB, plus about 4 GB for Ollama if missing. Stops only under 5 GB memory.
+     Times are honest guesses, not measured: minutes with a graphics card, possibly hours without.
      DOWNLOAD: the tester kit (installer/ in the repo), published as a GitHub release. -->
 <body class="start">
 <div class="wrap">
@@ -22,11 +24,19 @@
     <div class="hero">
       <span id="hero-buddies"></span>
       <h1 data-copy="headline">Your screenshots, sorted while you sleep.</h1>
-      <p class="sub" data-copy="intro">Shyft looks at your new screenshots on your Mac and suggests what to keep, turn into text, or clear out. You decide. Nothing is deleted.</p>
+      <p class="sub" data-copy="intro">Shyft looks at your new screenshots on your computer and suggests what to keep, turn into text, or clear out. You decide. Nothing is deleted.</p>
       <div class="cta">
-        <a class="main" id="download" href="#">Download the tester kit for Mac</a>
-        <span class="small" id="dl-note">Shyft-Tester.dmg · free · uses made-up screenshots only</span>
-        <button class="quiet" id="other-os" type="button">On Windows? Get the Windows kit</button>
+        <div class="dl-pair">
+          <a class="main dl" data-os="mac" href="https://github.com/timovreuxgerbier/agenthk/releases/latest/download/Shyft-Tester.dmg">
+            <span class="dl-top">Download for Mac<span class="mine">your computer</span></span>
+            <span class="dl-file">Shyft-Tester.dmg · macOS 14 or newer</span>
+          </a>
+          <a class="main dl" data-os="win" href="https://github.com/timovreuxgerbier/agenthk/releases/latest/download/Shyft-Tester-Windows.zip">
+            <span class="dl-top">Download for Windows<span class="mine">your computer</span></span>
+            <span class="dl-file">Shyft-Tester-Windows.zip · Windows 10 or 11</span>
+          </a>
+        </div>
+        <span class="small">Free · uses made-up screenshots only · nothing is sent anywhere</span>
       </div>
     </div>
 
@@ -35,7 +45,7 @@
       <div class="cards">
         <div class="c"><h3 data-copy="why1-title">Find things again</h3><p data-copy="why1">That flight time, that recipe, that reading list. Shyft names them and turns the useful ones into text.</p></div>
         <div class="c"><h3 data-copy="why2-title">Clear the clutter, safely</h3><p data-copy="why2">Copies and blank captures go to a To Be Deleted folder. You empty it yourself, whenever you like.</p></div>
-        <div class="c"><h3 data-copy="why3-title">Private by design</h3><p data-copy="why3">Everything stays on your Mac. Screenshots that look private get locked, and Shyft stops reading them.</p></div>
+        <div class="c"><h3 data-copy="why3-title">Private by design</h3><p data-copy="why3">Everything stays on your computer. Screenshots that look private get locked, and Shyft stops reading them.</p></div>
       </div>
     </section>
 
@@ -43,10 +53,10 @@
       <h2 id="need">What you need</h2>
       <ul class="req">
         <li><span>A Mac or a PC</span><span>macOS 14 (Sonoma) or newer · Windows 10 (22H2) or 11</span></li>
-        <li><span>Memory</span><span>at least 8 GB · 16 GB is better</span></li>
-        <li><span>Free space</span><span>about 17 GB</span></li>
+        <li><span>Memory</span><span><span class="os-mac">at least 8 GB · 16 GB is better</span><span class="os-win">at least 5 GB · 8 GB or more runs better</span></span></li>
+        <li><span>Free space</span><span><span class="os-mac">about 17 GB</span><span class="os-win">about 11 GB · 17 GB without Ollama</span></span></li>
         <li><span>The Ollama app</span><span>free · the installer gets it for you</span></li>
-        <li><span>Time</span><span>30 to 90 minutes, mostly waiting</span></li>
+        <li><span>Time</span><span><span class="os-mac">30 to 90 minutes, mostly waiting</span><span class="os-win">minutes to hours · a quick check estimates it</span></span></li>
       </ul>
     </section>
 
@@ -61,9 +71,9 @@
       </div>
       <div class="steps3 os-win">
         <div><b>Extract the download</b><span class="muted">Right-click Shyft-Tester-Windows.zip › <b>Extract All</b>. The files don't work from inside the zip.</span></div>
-        <div><b>Double-click "1 Install Shyft"</b><span class="muted">If Windows says "Windows protected your PC", click <b>More info</b> › <b>Run anyway</b>. We're a student team, not a registered publisher. If it asks to install Python or git, click <b>Yes</b>.</span></div>
-        <div><b>Double-click "2 Run the Shyft test"</b><span class="muted">Two runs on made-up screenshots. Leave the window open; your PC stays awake by itself.</span></div>
-        <div><b>Send your results</b><span class="muted">A "Shyft test results" folder appears on your Desktop. Send it to Sphinx. Then "3 Remove Shyft" gives the 17 GB back.</span></div>
+        <div><b>Double-click "1 Install Shyft"</b><span class="muted">If Windows says "Windows protected your PC", click <b>More info</b> › <b>Run anyway</b>. We're a student team, not a registered publisher. If it asks to install Python, click <b>Yes</b>.</span></div>
+        <div><b>Double-click "2 Run the Shyft test"</b><span class="muted">A quick check first, with a time estimate. Then you choose whether to do the two full runs. Keep the lid open; it restarts Ollama.</span></div>
+        <div><b>Send your results</b><span class="muted">A "Shyft test results" folder appears on your Desktop. Send it to Sphinx. Then "3 Remove Shyft" removes only what the kit brought.</span></div>
       </div>
     </section>
 
@@ -71,7 +81,7 @@
       <h2 id="how">How it works</h2>
       <div class="steps3">
         <div><b>Screenshots go to one folder</b><span class="muted">Take them like always. Shyft only looks in that folder.</span></div>
-        <div><b>Rick looks while you sleep</b><span class="muted">Once a week, on your Mac, he suggests what to do with each one.</span></div>
+        <div><b>Rick looks while you sleep</b><span class="muted">Once a week, on your computer, he suggests what to do with each one.</span></div>
         <div><b>You decide</b><span class="muted">Approve or change each suggestion. Only then does anything move.</span></div>
       </div>
     </section>
@@ -83,24 +93,21 @@
 <script src="buddies.js"></script>
 <script>
   // Always the newest GitHub release with the kits attached (see installer/README.md).
-  var KITS = {
-    mac: { url: "https://github.com/timovreuxgerbier/agenthk/releases/latest/download/Shyft-Tester.dmg",
-           label: "Download the tester kit for Mac", file: "Shyft-Tester.dmg", other: "On Windows? Get the Windows kit" },
-    win: { url: "https://github.com/timovreuxgerbier/agenthk/releases/latest/download/Shyft-Tester-Windows.zip",
-           label: "Download the tester kit for Windows", file: "Shyft-Tester-Windows.zip", other: "On a Mac? Get the Mac kit" }
-  };
   document.getElementById("logo").innerHTML = buddy("pip", 26);
   document.getElementById("hero-buddies").innerHTML = trio(58, true);
-  var os = /Win/i.test(navigator.platform || navigator.userAgent) ? "win" : "mac";   // best guess; people can switch
-  function setOS(o) {
-    os = o; var k = KITS[o], dl = document.getElementById("download");
-    dl.href = k.url; dl.textContent = k.label;
-    document.getElementById("dl-note").textContent = k.file + " · free · uses made-up screenshots only";
-    document.getElementById("other-os").textContent = k.other;
+  var os = /Win/i.test((navigator.platform || "") + " " + navigator.userAgent) ? "win" : "mac";   // best guess; people can switch
+  var guess = os;
+  function setOS(o) {   // shows the install steps for that computer
+    os = o;
     document.body.classList.toggle("win", o === "win");
     [].forEach.call(document.querySelectorAll(".seg button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-os") === o); });
   }
-  document.getElementById("other-os").onclick = function () { setOS(os === "win" ? "mac" : "win"); };
+  [].forEach.call(document.querySelectorAll(".dl"), function (a) {
+    var mine = a.getAttribute("data-os") === guess;
+    a.classList.toggle("is-mine", mine);
+    if (mine) { a.setAttribute("aria-label", a.querySelector(".dl-top").firstChild.textContent + ", recommended for your computer"); }
+    a.addEventListener("click", function () { setOS(a.getAttribute("data-os")); });
+  });
   [].forEach.call(document.querySelectorAll(".seg button"), function (b) { b.onclick = function () { setOS(b.getAttribute("data-os")); }; });
   setOS(os);
 </script>
