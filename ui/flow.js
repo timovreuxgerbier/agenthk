@@ -106,6 +106,7 @@ document.getElementById("p-sort").onclick = startSorting;
 // "Try again" really re-checks Ollama and returns the person to where they were;
 // "Start download" goes to Step 1 with the download running.
 function showState(key) {
+  if (current !== "s-state") returnTo = current;   // record it BEFORE the Back button is built
   var s = STATES[key], back = key === "ollama" ? "<button class='quiet' data-go='" + returnTo + "'>Back</button>" : "";
   document.getElementById("s-state").innerHTML = "<div class='body'>" + buddy(key === "empty" ? "pip" : "bloop", 60, "idle") +
     "<h1>" + s.t + "</h1><p class='sub'>" + s.b + "</p><button class='main' id='st-main'" + (key === "cap" ? " data-review" : "") + ">" + s.main + "</button>" +
