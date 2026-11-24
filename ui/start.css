@@ -55,3 +55,13 @@ body:not(.win) .os-win, body.win .os-mac{display:none}
 :root[data-theme=light] body.start .main:hover{background:#1C3A2A}
 :root[data-theme=light] body.start .dl .mine{background:rgba(246,251,248,.18)}
 :root[data-theme=light] body.start button:hover{border-color:#9FBFAD}
+
+/* Playful buddies on the landing page (start_buddies.js). Speech bubble: neutral colours, so no colour meaning changes. */
+#hero-buddies .pal{position:relative;cursor:pointer;border-radius:14px;padding:4px 6px;outline-offset:4px}
+#hero-buddies .pal:focus-visible{outline:3px solid var(--trace)}
+#hero-buddies .bubble{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translate(-50%,6px);white-space:nowrap;
+  background:var(--text);color:var(--ground);font-size:14px;font-weight:600;padding:8px 12px;border-radius:12px;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:2}
+#hero-buddies .bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-7px;border:7px solid transparent;border-top-color:var(--text)}
+#hero-buddies .pal.talking .bubble{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){#hero-buddies .bubble{transition:none}}
