@@ -43,3 +43,15 @@ body:not(.win) .os-win, body.win .os-mac{display:none}
 .dl .mine{display:none;white-space:nowrap;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:rgba(6,16,11,.14)}
 .dl.is-mine .mine{display:inline-block}
 @media (max-width:560px){.cta .main.dl{width:100%}}
+
+/* Light mode (landing page only; the app keeps its own look). Same meanings, darker shades so text stays readable. */
+.top-right{display:flex;align-items:center;gap:14px}
+.theme{min-height:36px;font-size:14px;padding:0 12px}
+:root[data-theme=light] body.start{--ground:#F6FBF8;--card:#FFFFFF;--line:#DCE9E1;--line2:#C3D8CB;--text:#0B1F15;--muted:#4A6557;
+  --trace:#14804F;--y:#8A6400;color-scheme:light;
+  background-image:radial-gradient(circle,#D3E4DA 1.2px,transparent 1.7px),radial-gradient(circle,#D3E4DA 1.2px,transparent 1.7px)}
+:root[data-theme=light] body.start .main,
+:root[data-theme=light] body.start .seg button[aria-pressed=true]{background:#0B1F15;color:#F6FBF8}
+:root[data-theme=light] body.start .main:hover{background:#1C3A2A}
+:root[data-theme=light] body.start .dl .mine{background:rgba(246,251,248,.18)}
+:root[data-theme=light] body.start button:hover{border-color:#9FBFAD}

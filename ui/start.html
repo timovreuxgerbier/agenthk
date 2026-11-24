@@ -6,6 +6,10 @@
 <title>Shyft: your screenshots, sorted</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="start.css">
+<script>/* light or dark: the visitor's own choice if they made one, otherwise their computer's setting */
+(function () { var t = null; try { t = localStorage.getItem("shyft-theme"); } catch (e) {}
+  if (t !== "light" && t !== "dark") { t = window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; }
+  document.documentElement.setAttribute("data-theme", t); })();</script>
 </head>
 <!-- start.html: the first page a tester sees, before any download.
      TEXT: drafts. Raaghavi will send the final short text: replace anything marked data-copy.
@@ -17,7 +21,10 @@
 <div class="wrap">
   <header class="top">
     <span class="brand"><span id="logo"></span>Shyft</span>
-    <a href="https://github.com/timovreuxgerbier/agenthk">Open source on GitHub</a>
+    <span class="top-right">
+      <button class="quiet theme" id="theme" type="button"></button>
+      <a href="https://github.com/timovreuxgerbier/agenthk">Open source on GitHub</a>
+    </span>
   </header>
 
   <main>
@@ -110,6 +117,19 @@
   });
   [].forEach.call(document.querySelectorAll(".seg button"), function (b) { b.onclick = function () { setOS(b.getAttribute("data-os")); }; });
   setOS(os);
+  var themeBtn = document.getElementById("theme");
+  function showTheme() {
+    var t = document.documentElement.getAttribute("data-theme");
+    themeBtn.textContent = t === "light" ? "Dark mode" : "Light mode";
+    themeBtn.setAttribute("aria-label", "Switch to " + (t === "light" ? "dark" : "light") + " mode");
+  }
+  themeBtn.onclick = function () {
+    var t = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
+    try { localStorage.setItem("shyft-theme", t); } catch (e) {}
+    showTheme();
+  };
+  showTheme();
 </script>
 </body>
 </html>
