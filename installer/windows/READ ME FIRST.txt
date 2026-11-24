@@ -1,35 +1,52 @@
-SHYFT TEST - READ ME FIRST (Windows)
-====================================
+SHYFT TEST - READ ME FIRST (Windows, kit 2)
+===========================================
 
-Thank you for testing Shyft. It takes 30 to 90 minutes, mostly waiting.
-It uses only made-up screenshots. Nothing of yours is read, and nothing leaves your PC.
+Thank you for testing Shyft. It uses only made-up screenshots. Nothing of yours is
+read, and nothing is sent anywhere: you send the results folder yourself at the end.
+Anything already on your PC stays as it is. If your PC struggles or stops, that is a
+result we need, not a failure.
 
-You need: Windows 10 (version 22H2) or Windows 11, at least 8 GB of memory (16 GB is
-better), about 17 GB of free disk space, an internet connection, and the charger.
+YOU NEED
+  - Windows 10 (version 22H2) or Windows 11
+  - Free disk space: up to about 17 GB. Rick's and Zippy's models are about 11.2 GB
+    (6.6 + 4.6), Ollama needs about 4 GB if you don't have it, plus a little extra.
+    The installer checks this first and tells you exactly what it needs.
+  - Internet, the charger, and the lid open.
+  - Time: a quick check at the start tells you roughly how long. On a PC with a
+    graphics card it takes minutes; without one it can take hours.
 
 0. EXTRACT THE DOWNLOAD FIRST
    Right-click Shyft-Tester-Windows.zip > Extract All > Extract.
    The files don't work from inside the zip.
 
 1. Double-click "1 Install Shyft"
-   A window opens and walks you through it. It installs Python, git and Ollama
-   (all free) if you don't have them, then downloads Rick's and Zippy's models.
-   This is the long part.
-
-   If Windows says "Windows protected your PC": click "More info", then "Run anyway".
-   That's because we're a student team, not a registered publisher.
-   If Windows asks whether an app may make changes (for Python or git): click "Yes".
+   It installs Python and Ollama (both free) only if you don't have them, then
+   downloads the models. If Windows says "Windows protected your PC": click
+   "More info", then "Run anyway" (we're a student team, not a registered publisher).
+   If Windows asks whether an app may make changes (for Python): click "Yes".
 
 2. Double-click "2 Run the Shyft test"
-   Two runs on the made-up screenshots. Leave the window open; it can look frozen
-   while it works. Your PC stays awake by itself until it's done.
+   It closes and restarts Ollama: if you use Ollama for anything else, save first.
+   A quick check on 3 screenshots comes first, with a time estimate. Then you choose
+   whether to run the full test. Leave the window open; it can look frozen while it
+   works. Please stop it with Ctrl+C, not the X: Ctrl+C lets it tidy up.
+   Note: Shyft's own messages may call Rick "Pip". That's his old name.
 
 3. Send the results
-   A folder called "Shyft test results" appears on your Desktop. Open my_pc.txt,
-   type roughly when you bought the PC, save, and send the whole folder to Sphinx.
-
-   If something breaks (it stops, or your PC struggles): that's a result, not a failure.
-   Send the folder anyway.
+   "Shyft test results" on your Desktop holds:
+     my_pc.txt           your PC, kit version, code version, quick-check time and estimate
+     what_happened.txt   only if something stopped: where and why
+     quick_check.txt     the quick check (and quick_check_one_model.txt if needed)
+     run_A.txt, run_B.txt                     each full run, if it ran
+     score_synthetic_..., cost_synthetic_...  the reports for each run
+     ps_timo.txt         memory, every 30 seconds
+     install_check.txt   Shyft's own checks
+     ollama_info.txt, ollama_serve.log        Ollama's version, models and log, with
+                                              your user name and home folder hidden
+   Open my_pc.txt, type roughly when you bought the PC, save, and send the whole folder
+   to Sphinx (right-click > Send to > Compressed (zipped) folder makes it one file).
 
 4. When you're done
-   Double-click "3 Remove Shyft" to get the 17 GB back. It keeps your results folder.
+   Double-click "3 Remove Shyft". It removes only what the kit brought: the models it
+   downloaded and the Shyft folder it made. It tells you which programs it installed
+   (Python, Ollama) and how to remove them, but doesn't uninstall them by itself.

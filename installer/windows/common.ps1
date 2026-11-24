@@ -1,37 +1,55 @@
-# common.ps1 - shared settings and helpers for the Windows tester kit.
+# common.ps1 - shared settings and helpers for the Windows tester kit (kit 2).
 # Must work in Windows PowerShell 5.1 (what Windows ships). Keep this file plain ASCII:
 # 5.1 misreads other characters in files without a BOM.
 
-$ShyftHome = Join-Path $HOME "Shyft"
-$RepoUrl   = "https://github.com/timovreuxgerbier/agenthk.git"
-$Models    = @("gemma4:e4b", "gemma4:e2b")          # Zippy, then Rick
-$NeedGB    = 17                                     # measured on a fresh download: 9.5 + 7.5 GB
-$Tests     = "tests.test_execute tests.test_golden tests.test_naming tests.test_caps tests.test_gate tests.test_two_models tests.test_cost tests.test_batch tests.test_server tests.test_zoom" -split " "
-$OllamaDir = Join-Path $env:LOCALAPPDATA "Programs\Ollama"
-$env:PYTHONUNBUFFERED = "1"                         # show Shyft's progress as it happens
+$KitVersion = "kit 2"
+$CodeCommit = "1cce1b8e5dacb8a69b65578b2384f54213c47350"   # the ONE version of Shyft this kit tests
+$CodeZipPattern = "agenthk-$($CodeCommit.Substring(0, 7))*.zip"   # GitHub "Download ZIP" of that commit, kept in files/
+$Models     = [ordered]@{ "gemma4:e4b" = 6.6; "gemma4:e2b" = 4.6 }   # GB on Windows. Zippy's, then Rick's
+$OllamaGB   = 4                                         # Ollama's docs: at least 4 GB for its own install
+$MarginGB   = 2
+$Tests      = "tests.test_execute tests.test_golden tests.test_naming tests.test_caps tests.test_gate tests.test_two_models tests.test_cost tests.test_batch tests.test_server tests.test_zoom" -split " "
 
-function Say($t)  { Write-Host ""; Write-Host "==> $t" -ForegroundColor Green }
+$ShyftHome  = Join-Path $HOME "Shyft"
+$KitDir     = Join-Path $env:LOCALAPPDATA "ShyftTesterKit"       # outside the Shyft folder, survives a failed install
+$Record     = Join-Path $KitDir "record.txt"                     # what THIS kit brought, so Remove takes only that
+$OllamaDir  = Join-Path $env:LOCALAPPDATA "Programs\Ollama"
+$env:PYTHONUNBUFFERED = "1"                                       # show Shyft's progress as it happens
+$ProgressPreference = "SilentlyContinue"                         # 5.1's progress bar makes downloads very slow
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12   # GitHub needs TLS 1.2
+New-Item -ItemType Directory -Force -Path $KitDir | Out-Null
+
+$Step = "starting"                                                # each script updates this; stops are logged with it
+function Say($t)  { $script:Step = $t; Write-Host ""; Write-Host "==> $t" -ForegroundColor Green }
 function Ok($t)   { Write-Host "    [ok] $t" -ForegroundColor Green }
 function Warn($t) { Write-Host "    [!]  $t" -ForegroundColor Yellow }
-function Stop-Shyft($t) { Write-Host ""; Write-Host "STOPPED: $t" -ForegroundColor Red; Read-Host "Press Enter to close this window" | Out-Null; exit 1 }
 function Wait-Enter($t) { Read-Host $t | Out-Null }
+function Ask-YesNo($t) { while ($true) { $a = (Read-Host "$t (Y/N)").Trim().ToUpper(); if ($a -eq "Y") { return $true }; if ($a -eq "N") { return $false } } }
+
+# What the kit brought: one "key=value" per line. Keys: shyft_folder, model, program.
+function Add-Record($k, $v) { if (-not (@(Get-Record $k) -contains $v)) { Add-Content -Path $Record -Value "$k=$v" } }
+function Get-Record($k) {
+  if (-not (Test-Path $Record)) { return @() }
+  @(Get-Content $Record | Where-Object { $_ -like "$k=*" } | ForEach-Object { $_.Substring($k.Length + 1) })
+}
 
 # After winget installs something, this window doesn't know the new paths yet. This reloads them.
 function Update-Path { $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User") }
 
 function Get-WinBuild { [Environment]::OSVersion.Version.Build }
-function Get-RamGB    { [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB) }
+function Get-RamGB    { [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 1) }
 function Get-FreeGB   { $d = (Get-Item $HOME).PSDrive.Name; [math]::Floor((Get-PSDrive $d).Free / 1GB) }
 function Get-Gpus     { ((Get-CimInstance Win32_VideoController) | ForEach-Object { $_.Name }) -join ", " }
 
-# "python" on a fresh Windows can be a shortcut to the Microsoft Store, not real Python: skip that one.
+# Any real Python 3.11 or newer, wherever it comes from (python.org, Microsoft Store...).
+# Tested by RUNNING it, not by its folder. Returns the full path of python.exe, or $null.
 function Find-Python {
-  foreach ($c in @("py", "python")) {
-    $cmd = Get-Command $c -ErrorAction SilentlyContinue
-    if ($cmd -and $cmd.Source -notlike "*WindowsApps*") {
-      $v = & $c --version 2>&1
-      if ("$v" -match "Python 3") { return $c }
-    }
+  foreach ($c in @(@("py", "-3"), @("python"), @("python3"))) {
+    try {
+      $pre = @(); if ($c.Count -gt 1) { $pre = $c[1..($c.Count - 1)] }
+      $out = @(& $c[0] @pre -c "import sys; print(sys.version_info[0] * 100 + sys.version_info[1]); print(sys.executable)" 2>$null)
+      if ($LASTEXITCODE -eq 0 -and $out.Count -ge 2 -and [int]$out[0] -ge 311) { return $out[1].Trim() }
+    } catch { }
   }
   return $null
 }

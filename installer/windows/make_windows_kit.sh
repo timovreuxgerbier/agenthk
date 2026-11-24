@@ -1,13 +1,18 @@
 #!/bin/bash
 # make_windows_kit.sh - builds Shyft-Tester-Windows.zip. Works on a Mac or Linux (needs zip).
-# Before running: put shyft_synthetic_set.zip (from Sphinx) in installer/ (Git ignores it).
+# Before running: put shyft_synthetic_set.zip (from Sphinx) and the code zip agenthk-1cce1b8...zip
+# (GitHub "Download ZIP" of the pinned commit) in installer/. Neither goes into Git.
 # Run it with:   bash installer/windows/make_windows_kit.sh
 set -e
 cd "$(dirname "$0")"
 [ -f ../shyft_synthetic_set.zip ] || { echo "Put shyft_synthetic_set.zip in the installer folder first."; exit 1; }
+SHA=$(grep -o 'CodeCommit = "[0-9a-f]*"' common.ps1 | grep -o '[0-9a-f]\{40\}')
+CODE=$(ls ../agenthk-${SHA:0:7}*.zip 2>/dev/null | head -1)
+[ -n "$CODE" ] || { echo "Put the code zip (GitHub 'Download ZIP' of commit ${SHA:0:7}) in the installer folder first."; exit 1; }
+unzip -l "$CODE" | grep -q "agenthk-$SHA/" || { echo "$CODE is not commit ${SHA:0:7}. Download the ZIP from that commit, not from main."; exit 1; }
 STAGE="$(mktemp -d)"; K="$STAGE/Shyft-Tester-Windows"; mkdir -p "$K/files"
 cp *.bat "READ ME FIRST.txt" "$K/"
-cp common.ps1 install.ps1 run_test.ps1 remove.ps1 ../shyft_synthetic_set.zip "$K/files/"
+cp common.ps1 results.ps1 install.ps1 run_test.ps1 remove.ps1 ../shyft_synthetic_set.zip "$CODE" "$K/files/"
 rm -f Shyft-Tester-Windows.zip
 (cd "$STAGE" && zip -qr - Shyft-Tester-Windows) > Shyft-Tester-Windows.zip
 echo "Built: $(pwd)/Shyft-Tester-Windows.zip"
