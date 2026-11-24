@@ -12,7 +12,7 @@ CODE=$(ls ../agenthk-${SHA:0:7}*.zip 2>/dev/null | head -1)
 unzip -l "$CODE" | grep -q "agenthk-$SHA/" || { echo "$CODE is not commit ${SHA:0:7}. Download the ZIP from that commit, not from main."; exit 1; }
 STAGE="$(mktemp -d)"; K="$STAGE/Shyft-Tester-Windows"; mkdir -p "$K/files"
 cp *.bat "READ ME FIRST.txt" "$K/"
-cp common.ps1 results.ps1 install.ps1 run_test.ps1 remove.ps1 ../shyft_synthetic_set.zip "$CODE" "$K/files/"
+cp common.ps1 results.ps1 install.ps1 run_test.ps1 remove.ps1 shyft.ico ../shyft_synthetic_set.zip "$CODE" "$K/files/"
 rm -f Shyft-Tester-Windows.zip
 (cd "$STAGE" && zip -qr - Shyft-Tester-Windows) > Shyft-Tester-Windows.zip
 echo "Built: $(pwd)/Shyft-Tester-Windows.zip"

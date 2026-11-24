@@ -25,6 +25,24 @@ function Ensure-Results {
   Set-PcLine "Year you bought it (roughly)" "____ please type it here"
   Set-PcLine "Windows" "$($os.Caption) $($os.Version)"
   Set-PcLine "Free disk" ("{0} GB" -f (Get-FreeGB))
+  Set-FolderIcon
+}
+# Gives the results folder the Shyft buddies icon. Windows needs: a hidden desktop.ini that names the icon,
+# the icon inside the folder (so it still works after the kit is deleted), and the folder marked read-only
+# (for folders that only means "has a custom look"; files inside can still be written).
+# Only a nice touch: if anything here fails, the test carries on as normal.
+function Set-FolderIcon {
+  try {
+    $ini = Join-Path $Out "desktop.ini"; $ico = Join-Path $Out "shyft.ico"
+    if (Test-Path $ini) { return }                               # already done (safe to run twice)
+    $src = Join-Path $PSScriptRoot "shyft.ico"
+    if (-not (Test-Path $src)) { return }
+    Copy-Item -Path $src -Destination $ico -Force
+    Set-Content -Path $ini -Encoding ASCII -Value @("[.ShellClassInfo]", "IconResource=shyft.ico,0")
+    & attrib.exe +h +s "$ico"
+    & attrib.exe +h +s "$ini"
+    & attrib.exe +r "$Out"
+  } catch { }
 }
 # Every stop, in any script: which script, which step, why.
 function Note($reason) {

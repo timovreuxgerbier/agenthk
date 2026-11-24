@@ -43,6 +43,8 @@ YOU NEED
      install_check.txt   Shyft's own checks
      ollama_info.txt, ollama_serve.log        Ollama's version, models and log, with
                                               your user name and home folder hidden
+   (It also has two hidden files, desktop.ini and shyft.ico, that only give the folder
+    its Shyft icon.)
    Open my_pc.txt, type roughly when you bought the PC, save, and send the whole folder
    to Sphinx (right-click > Send to > Compressed (zipped) folder makes it one file).
 
