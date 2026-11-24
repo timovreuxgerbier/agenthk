@@ -13,6 +13,11 @@ unzip -l "$CODE" | grep -q "agenthk-$SHA/" || { echo "$CODE is not commit ${SHA:
 STAGE="$(mktemp -d)"; K="$STAGE/Shyft-Tester-Windows"; mkdir -p "$K/files"
 cp *.bat "READ ME FIRST.txt" "$K/"
 cp common.ps1 results.ps1 install.ps1 run_test.ps1 remove.ps1 shyft.ico ../shyft_synthetic_set.zip "$CODE" "$K/files/"
+# Shyft's screens, from the repo's ui/ folder (shown after the test). Not the landing page, never run data.
+UI=../../ui
+[ -f "$UI/index.html" ] && [ -f "$UI/results.js" ] || { echo "ui/index.html or ui/results.js is missing: run this from the repo."; exit 1; }
+mkdir -p "$K/files/ui"
+for f in index.html open_results.html styles.css buddies.js copy.js flow.js review.js results.js themes.js setup.js sample_review.js; do cp "$UI/$f" "$K/files/ui/"; done
 rm -f Shyft-Tester-Windows.zip
 (cd "$STAGE" && zip -qr - Shyft-Tester-Windows) > Shyft-Tester-Windows.zip
 echo "Built: $(pwd)/Shyft-Tester-Windows.zip"

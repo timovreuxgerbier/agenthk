@@ -129,6 +129,12 @@ else {
   if ($code -ne 0) { Stop-Shyft "Couldn't switch Shyft to the test screenshots." }
   Ok "91 made-up test screenshots ready"
 }
+$uiSrc = Join-Path $PSScriptRoot "ui"; $uiDst = Join-Path $ShyftHome "ui"   # Shyft's screens, shown after the test
+if (Test-Path (Join-Path $uiSrc "index.html")) {
+  New-Item -ItemType Directory -Force -Path $uiDst | Out-Null
+  Copy-Item -Path (Join-Path $uiSrc "*") -Destination $uiDst -Force
+  Ok "Shyft's screens ready"
+} else { Warn "Shyft's screens (files\ui) are missing. The test still works, but won't open the results page."; Note "files\ui missing" }
 
 Write-Host "    Running Shyft's own checks (about a minute)..."
 Push-Location $ShyftHome

@@ -45,6 +45,14 @@ function Run-Full($name, [string[]]$runArgs, $logName) {
   Run-Step "Cost of $name" @("run.py", "cost") $null | Out-Null
   Copy-Reports $since                                 # saved now, before anything else can stop
 }
+# Turns the run that just ended into Shyft's own results page (ui/review_data.js), with the team's dev/make_review.py.
+$ReviewReady = $false
+function Make-Review {
+  if (-not (Test-Path (Join-Path (Join-Path $ShyftHome "ui") "index.html"))) { return }
+  Say "Preparing your results page"
+  & $py dev/make_review.py 2>&1 | ForEach-Object { Line-Text $_ } | Set-Content -Path (Join-Path $Out "results_page.txt")
+  if ($LASTEXITCODE -eq 0) { $script:ReviewReady = $true; Ok "ready" } else { Warn "Couldn't prepare the results page (see results_page.txt)."; Note "make_review.py failed" }
+}
 function Show-Estimate($seconds) {
   $mins = [math]::Ceiling($seconds / 3 * 91 * 2 / 60)  # per screenshot, x 91 screenshots, x 2 runs
   $text = if ($mins -le 1) { "about 1 minute" } elseif ($mins -lt 90) { "about $mins minutes" } else { "about {0} hours" -f [math]::Round($mins / 60, 1) }
@@ -86,6 +94,7 @@ try {
     Show-Estimate $secs
     if (Ask-YesNo "Run the full test now (Run A, then Run B)?") {
       Run-Full "Run A: Rick (gemma4:e2b) with Zippy (gemma4:e4b)" @("run.py", "gemma4:e2b", "all", "--zippy", "gemma4:e4b") "run_A.txt"
+      Make-Review                                     # straight after Run A: the page shows Zippy and Rick together
       Run-Full "Run B: Rick only (gemma4:e2b)" @("run.py", "gemma4:e2b", "all") "run_B.txt"
     } else { Note "Tester chose to stop after the quick check" }
   } else {
@@ -95,6 +104,7 @@ try {
     Set-PcLine "Quick check (3 screenshots, one model)" ("{0} s, {1}" -f [math]::Round(((Get-Date) - $t).TotalSeconds), $(if ($oneOk) { "finished" } else { "stopped" }))
     if ($oneOk -and (Ask-YesNo "Two models were too much for this PC, but one works. Run Run B (Rick only) now?")) {
       Run-Full "Run B: Rick only (gemma4:e2b)" @("run.py", "gemma4:e2b", "all") "run_B.txt"
+      Make-Review
     } elseif (-not $oneOk) { Note "Both quick checks stopped: Shyft could not run on this PC" }
     else { Note "Tester chose not to run Run B" }
   }
@@ -118,4 +128,10 @@ Write-Host "  ps_timo.txt (memory every 30 s), install_check.txt, ollama_info.tx
 Write-Host "  (your Windows user name and home folder are replaced with <user> and <home>)."
 Write-Host "Please type roughly when you bought the PC in my_pc.txt, then send the whole folder to Sphinx."
 Start-Process explorer.exe $Out
+if ($ReviewReady) {
+  Write-Host ""
+  Write-Host "Shyft's results page is opening in your browser: see what Rick and Zippy suggested." -ForegroundColor Green
+  Write-Host "Try the review if you like. Nothing on your PC is moved or deleted."
+  Start-Process (Join-Path (Join-Path $ShyftHome "ui") "open_results.html")
+}
 Wait-Enter "Press Enter to close"
