@@ -10,7 +10,7 @@ function esc(t) {   // safe inside text AND inside quoted attributes (file names
 function niceDate(d) { var m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], p = String(d).split("-"); return p.length === 3 ? (+p[2]) + " " + m[+p[1] - 1] : esc(d); }
 function localTime() { var t = new Date(); t.setMinutes(t.getMinutes() - t.getTimezoneOffset()); return t.toISOString().slice(0, 19); }
 // group: 0 needs your OK (Bloop), 1 Rick's suggestion, 2 locked (Zippy)
-var GROUPS = [["py", "Needs your OK", "bloop", "tilt"], ["pr", "Rick's suggestion", "pip", "hop"], ["pb", "Locked", "zippy", "nod"]];
+var GROUPS = [["py", "Bloop · Needs your OK", "bloop", "tilt"], ["pr", "Rick · Suggestion", "pip", "hop"], ["pb", "Zippy · Locked", "zippy", "nod"]];   // name, then meaning, for every buddy
 function group(it) { return it.state === "locked" ? 2 : (it.needs_ok || it.state === "copy") ? 0 : 1; }
 var queue = [], pos = 0, decisions = [], started = 0, last = null;
 
