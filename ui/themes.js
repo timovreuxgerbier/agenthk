@@ -78,6 +78,6 @@ function applyTheme(id, d) {
   win.style.backgroundSize = "52px 45px"; win.style.backgroundPosition = "0 0, 26px 22.5px";
   document.getElementById("scene").innerHTML = t ? t.scene(d) : "";
   document.getElementById("greeting").textContent = t ? t.greet(d) : "";
-  document.getElementById("welcome-buddies").innerHTML = trio(52);
+  document.getElementById("welcome-buddies").innerHTML = trio(52, true);   // first meeting: show names
   document.getElementById("sort-buddies").innerHTML = trio(52);
 }

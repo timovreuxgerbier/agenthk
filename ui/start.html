@@ -90,7 +90,7 @@
            label: "Download the tester kit for Windows", file: "Shyft-Tester-Windows.zip", other: "On a Mac? Get the Mac kit" }
   };
   document.getElementById("logo").innerHTML = buddy("pip", 26);
-  document.getElementById("hero-buddies").innerHTML = trio(58);
+  document.getElementById("hero-buddies").innerHTML = trio(58, true);
   var os = /Win/i.test(navigator.platform || navigator.userAgent) ? "win" : "mac";   // best guess; people can switch
   function setOS(o) {
     os = o; var k = KITS[o], dl = document.getElementById("download");

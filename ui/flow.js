@@ -50,8 +50,8 @@ var WALK = [
     a: function () { return '<div class="folder">Screenshots<br>For Sorting</div>'; } },
   { t: "Rick looks while you sleep", b: "Every Sunday night, on this computer, Rick guesses what each new screenshot is for. Nothing moves yet.",
     a: function () { return buddy("pip", 64, "idle"); } },
-  { t: "One colour, one meaning", b: "Yellow needs your OK. Red is Rick's suggestion. Blue is private: Zippy stops reading and locks it.",
-    a: function () { return buddy("bloop", 48, "idle b1") + buddy("pip", 56, "idle b2") + buddy("zippy", 48, "idle b3"); } },
+  { t: "Meet Bloop, Rick and Zippy", b: "Rick suggests what to do with each screenshot. Bloop (yellow) asks for your OK when Rick isn't sure. Zippy (blue) locks private ones and stops reading.",
+    a: function () { return trio(46, true); } },
   { t: "You decide, nothing is deleted", b: "Only what you approve moves. Cleared files go to a To Be Deleted folder that you empty yourself.",
     a: function () { return '<div class="folder">Kept</div><div class="folder">To Be Deleted</div>'; } }
 ];
