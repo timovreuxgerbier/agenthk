@@ -1,7 +1,10 @@
 // flow.js — moving between screens: welcome, How it works, setup, sorting, states.
 // Review and Done live in review.js.
 
+var current = "s-welcome", returnTo = "s-welcome";   // where to go back to after an error screen
 function show(id) {
+  if (id === "s-state" && current !== "s-state") returnTo = current;
+  current = id;
   document.querySelectorAll(".screen").forEach(function (s) { s.hidden = s.id !== id; });
   document.getElementById("overlay").classList.remove("open");
   document.getElementById("trace").style.display = id === "s-welcome" ? "" : "none"; // decoration on welcome only
@@ -99,12 +102,28 @@ function startSorting() {
 document.getElementById("finish").onclick = startSorting;
 document.getElementById("p-sort").onclick = startSorting;
 
-// ---- Error and empty states: one headline, one line, one button ----
+// ---- Error and empty states: one headline, one line, one button. No dead ends:
+// "Try again" really re-checks Ollama and returns the person to where they were;
+// "Start download" goes to Step 1 with the download running.
 function showState(key) {
-  var s = STATES[key];
+  var s = STATES[key], back = key === "ollama" ? "<button class='quiet' data-go='" + returnTo + "'>Back</button>" : "";
   document.getElementById("s-state").innerHTML = "<div class='body'>" + buddy(key === "empty" ? "pip" : "bloop", 60, "idle") +
-    "<h1>" + s.t + "</h1><p class='sub'>" + s.b + "</p><button class='main' " +
-    (key === "cap" ? "data-review" : "data-go='s-welcome'") + ">" + s.main + "</button>" +
-    (key === "empty" ? "" : "<button class='quiet' data-go='s-welcome'>Later</button>") + "</div>";
+    "<h1>" + s.t + "</h1><p class='sub'>" + s.b + "</p><button class='main' id='st-main'" + (key === "cap" ? " data-review" : "") + ">" + s.main + "</button>" +
+    "<p class='small' id='st-note' aria-live='polite'></p>" +
+    (key === "ollama" ? "<button class='quiet protoonly' id='st-pretend'>Prototype: pretend Ollama is open</button>" : "") +
+    (key === "empty" || key === "cap" ? "" : back || "<button class='quiet' data-go='s-welcome'>Later</button>") + "</div>";
+  var m = document.getElementById("st-main");
+  if (key === "empty") m.onclick = function () { show("s-welcome"); };
+  if (key === "model") m.onclick = function () { show("s-need"); setScenario("models"); getMissing(); };
+  if (key === "ollama") {
+    m.onclick = function () {
+      document.getElementById("st-note").textContent = "Checking…";
+      ollamaRunning(function (ok) {
+        if (ok) return show(returnTo);
+        document.getElementById("st-note").textContent = "Still can't reach Ollama. Is it open? Look for its icon at the top of your screen.";
+      });
+    };
+    document.getElementById("st-pretend").onclick = function () { show(returnTo); };
+  }
   show("s-state");
 }

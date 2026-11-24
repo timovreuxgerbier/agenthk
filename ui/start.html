@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shyft: your screenshots, sorted</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="start.css">
+</head>
+<!-- start.html: the first page a tester sees, before any download.
+     TEXT: drafts. Raaghavi will send the final short text: replace anything marked data-copy.
+     NUMBERS in yellow brackets come from today's Mac test (Sphinx).
+     DOWNLOAD_URL at the bottom: the package Sphinx is preparing. -->
+<body class="start">
+<div class="wrap">
+  <header class="top">
+    <span class="brand"><span id="logo"></span>Shyft</span>
+    <a href="https://github.com/timovreuxgerbier/agenthk">Open source on GitHub</a>
+  </header>
+
+  <main>
+    <div class="hero">
+      <span id="hero-buddies"></span>
+      <h1 data-copy="headline">Your screenshots, sorted while you sleep.</h1>
+      <p class="sub" data-copy="intro">Shyft looks at your new screenshots on your Mac and suggests what to keep, turn into text, or clear out. You decide. Nothing is deleted.</p>
+      <div class="cta">
+        <a class="main" id="download" href="#">Download for Mac</a>
+        <span class="small" id="dl-note">Free · open source · beta</span>
+      </div>
+    </div>
+
+    <section class="block" aria-labelledby="why">
+      <h2 id="why">Why you'd want it</h2>
+      <div class="cards">
+        <div class="c"><h3 data-copy="why1-title">Find things again</h3><p data-copy="why1">That flight time, that recipe, that reading list. Shyft names them and turns the useful ones into text.</p></div>
+        <div class="c"><h3 data-copy="why2-title">Clear the clutter, safely</h3><p data-copy="why2">Copies and blank captures go to a To Be Deleted folder. You empty it yourself, whenever you like.</p></div>
+        <div class="c"><h3 data-copy="why3-title">Private by design</h3><p data-copy="why3">Everything stays on your Mac. Screenshots that look private get locked, and Shyft stops reading them.</p></div>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="need">
+      <h2 id="need">What you need</h2>
+      <ul class="req">
+        <li><span>A Mac</span><span class="tbd">[which Macs: from Mac test]</span></li>
+        <li><span>Free space</span><span>about 11 GB</span></li>
+        <li><span>The Ollama app</span><span>free · Shyft helps you get it</span></li>
+        <li><span>Time</span><span><span class="tbd">[download time: from Mac test]</span> + about 5 min setup</span></li>
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="how">
+      <h2 id="how">How it works</h2>
+      <div class="steps3">
+        <div><b>Screenshots go to one folder</b><span class="muted">Take them like always. Shyft only looks in that folder.</span></div>
+        <div><b>Rick looks while you sleep</b><span class="muted">Once a week, on your Mac, he suggests what to do with each one.</span></div>
+        <div><b>You decide</b><span class="muted">Approve or change each suggestion. Only then does anything move.</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot2">Built by Ana, Raaghavi, Sphinx and Timo · Parsons, AI Agent &amp; Platform Design, 2026</footer>
+</div>
+
+<script src="buddies.js"></script>
+<script>
+  var DOWNLOAD_URL = "";   // TODO (Sphinx): link to the Mac package. Empty = not ready yet.
+  document.getElementById("logo").innerHTML = buddy("pip", 26);
+  document.getElementById("hero-buddies").innerHTML = trio(58);
+  var dl = document.getElementById("download");
+  if (DOWNLOAD_URL) dl.href = DOWNLOAD_URL;
+  else dl.onclick = function (e) { e.preventDefault();
+    document.getElementById("dl-note").textContent = "The download isn't ready yet. It's coming soon."; };
+</script>
+</body>
+</html>

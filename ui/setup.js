@@ -11,11 +11,21 @@ var NEED = [
   { id: "zippy",  name: "Zippy's model",  what: "gemma4:e4b · spots private screenshots" },
   { id: "rick",   name: "Rick's model",   what: "gemma4:e2b · suggests what to do" }
 ];
-var have = {}, pct = {}, busy = false;
+var have = {}, pct = {}, busy = false, timers = [];
+function later(fn, ms) { timers.push(setTimeout(fn, ms)); }   // every timer is tracked so it can be stopped
+
+// Real check: Ollama answers on this computer only while it is running. Gives up after 1.5 s.
+function ollamaRunning(cb) {
+  var done = false, finish = function (ok) { if (!done) { done = true; cb(ok); } };
+  setTimeout(function () { finish(false); }, 1500);
+  fetch("http://127.0.0.1:11434/api/tags").then(function (r) { finish(r.ok); }).catch(function () { finish(false); });
+}
 var SCENARIOS = { ready: ["ollama", "zippy", "rick"], models: ["ollama"], nothing: [] };
 
 function setScenario(name) {
+  timers.forEach(clearTimeout); timers = [];          // stop any fake download still running
   have = {}; pct = {}; busy = false;
+  var note = document.getElementById("need-note"); if (note) note.textContent = "";
   (SCENARIOS[name] || []).forEach(function (id) { have[id] = "ready"; });
   NEED.forEach(function (n) { if (!have[n.id]) have[n.id] = "missing"; });
   renderNeeds();
@@ -37,30 +47,31 @@ function renderNeeds() {
   main.textContent = allReady() ? "Continue" : busy ? "Downloading…" : "Get what's missing";
   help.innerHTML = have.ollama === "waiting"
     ? "1. Open the Ollama file in your Downloads. 2. Drag it into Applications, then open it. I'll notice and carry on. <button class='quiet' id='opened'>I've opened it</button>"
-    : allReady() ? "All set. Nothing more to download." : "Needs about 17 GB of free space. On home Wi-Fi this can take 20 to 60 minutes.";
+    : allReady() ? "All set. Nothing more to download." : "Needs about 11 GB of free space. Download time: [from today's Mac test].";
   var o = document.getElementById("opened"); if (o) o.onclick = ollamaOpened;
 }
 
 function getMissing() {
   if (allReady()) return show("s-folder");
-  if (busy) return;
+  if (busy || have.ollama === "waiting") return;       // already working on it: don't start twice
   if (have.ollama !== "ready") {
     // Real app: open the official download page, then check every few seconds whether Ollama answers.
     have.ollama = "waiting"; renderNeeds();
     document.getElementById("need-note").textContent = "Prototype: in the real app this opens ollama.com/download.";
-    setTimeout(function () { if (have.ollama === "waiting") ollamaOpened(); }, 4000);
+    later(function () { if (have.ollama === "waiting") ollamaOpened(); }, 4000);
     return;
   }
   downloadNext();
 }
-function ollamaOpened() { have.ollama = "ready"; document.getElementById("need-note").textContent = ""; renderNeeds(); downloadNext(); }
+function ollamaOpened() {
+  if (have.ollama !== "waiting") return; have.ollama = "ready"; document.getElementById("need-note").textContent = ""; renderNeeds(); downloadNext(); }
 function downloadNext() {
   var next = NEED.filter(function (n) { return have[n.id] === "missing"; })[0];
   if (!next) { busy = false; renderNeeds(); return; }
   busy = true; have[next.id] = "downloading"; pct[next.id] = 0;
   (function tick() {
     pct[next.id] = Math.min(100, pct[next.id] + 4); renderNeeds();
-    if (pct[next.id] < 100) return setTimeout(tick, 120);    // prototype speed; really 10 to 30 min each
+    if (pct[next.id] < 100) return later(tick, 120);    // prototype speed; really 10 to 30 min each
     have[next.id] = "ready"; downloadNext();
   })();
 }

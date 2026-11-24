@@ -3,7 +3,10 @@
 // Rick's words come from the model, which reads text INSIDE screenshots, so all of
 // it goes through esc() and is never treated as code.
 
-function esc(t) { var d = document.createElement("div"); d.textContent = t == null ? "" : String(t); return d.innerHTML; }
+function esc(t) {   // safe inside text AND inside quoted attributes (file names can contain ' or ")
+  var d = document.createElement("div"); d.textContent = t == null ? "" : String(t);
+  return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
 function niceDate(d) { var m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], p = String(d).split("-"); return p.length === 3 ? (+p[2]) + " " + m[+p[1] - 1] : esc(d); }
 function localTime() { var t = new Date(); t.setMinutes(t.getMinutes() - t.getTimezoneOffset()); return t.toISOString().slice(0, 19); }
 // group: 0 needs your OK (Bloop), 1 Rick's suggestion, 2 locked (Zippy)
@@ -20,10 +23,21 @@ function startReview() {
 }
 document.addEventListener("click", function (e) { if (e.target.closest("[data-review]")) startReview(); });
 
+// A preview is either a real screenshot ({img, label}, written by dev/make_review.py)
+// or, in sample data, a few words standing in for it ([app, text]).
+function shot(p, alt) {
+  return "<img src='" + esc(encodeURI(p.img)) + "' alt='" + esc(alt) + "'><span class='small'>" + esc(p.label) + "</span>";
+}
+function noBrokenImages(el) {      // if a screenshot file is missing, say so instead of a broken icon
+  el.querySelectorAll(".preview img").forEach(function (im) { im.onerror = function () {
+    var t = document.createElement("p"); t.className = "small"; t.textContent = "Image not found: " + im.getAttribute("src");
+    im.replaceWith(t); }; });
+}
 function preview(it) {
+  var p = SAMPLE_PREVIEWS[it.id] || {};
   if (it.state === "locked") return "<div class='preview locked' id='pv'>" + buddy("zippy", 64) +
     "<p style='margin:0'>Hidden on purpose.</p><button class='quiet' id='showme'>Show me</button></div>";
-  var p = SAMPLE_PREVIEWS[it.id];
+  if (p.img) return "<div class='preview'>" + shot(p, "Screenshot: " + (it.reason || it.file)) + "</div>";
   return "<div class='preview'><span class='small'>" + esc(p[0]) + "</span><div class='bubble'>" + esc(p[1]) + "</div></div>";
 }
 // Each card returns its content (top) and its buttons (bar). The bar always sits in the
@@ -42,7 +56,7 @@ function details(it) {
   var gi = group(it), g = GROUPS[gi], colour = ["y", "r", "b"][gi];
   var h = "<div class='row'>" + buddy(g[2], 40, "who") + "<span class='pill " + g[0] + "'>" + g[1] + "</span></div>";
   var later = "<button class='quiet' data-act='skip'>Not now</button><span class='spacer'></span>";
-  if (it.state === "locked") return { top: h + "<h1 style='font-size:28px'>" + esc(KIND_COPY[it.kind]) + "</h1>" +
+  if (it.state === "locked") return { top: h + "<h1 style='font-size:28px'>" + esc(KIND_COPY[it.kind] || KIND_COPY.gate_error) + "</h1>" +
     "<p class='sub'>Taken " + niceDate(it.file_date) + ". What should happen to it?</p>",
     bar: later + opt("keep_image", "Keep it", "keep_image", colour, false) + opt("to_be_deleted", ACTION_WORDS.to_be_deleted, "to_be_deleted", colour, false) };
   if (it.state === "copy") return { top: h + "<h1 style='font-size:28px'>A copy of " + esc(it.copy_of) + "</h1>" +
@@ -58,7 +72,7 @@ function details(it) {
 function card() {
   if (pos >= queue.length) return done();
   var it = queue[pos], el = document.getElementById("s-review"), c = details(it);
-  el.innerHTML = "<div class='rhead'><div class='row'><span class='sample'>Sample data</span><span class='small'>" + (pos + 1) + " of " + queue.length + "</span></div>" +
+  el.innerHTML = "<div class='rhead'><div class='row'><span class='sample'>" + esc(window.REVIEW_SOURCE || "Sample data") + "</span><span class='small'>" + (pos + 1) + " of " + queue.length + "</span></div>" +
     (last ? "<div class='row small'>" + buddy("pip", 26, "saved") + "Saved <button class='quiet' id='undo' style='min-height:36px'>Undo</button></div>" : "") +
     "<button class='quiet' id='stop'>Stop here</button></div>" +
     "<div class='track' style='margin-bottom:24px'><div class='fill' style='width:" + Math.round(pos / queue.length * 100) + "%'></div></div>" +
@@ -73,8 +87,12 @@ function wire(it) {
   var el = document.getElementById("s-review");
   document.getElementById("stop").onclick = done;
   var u = document.getElementById("undo"); if (u) u.onclick = function () { decisions.pop(); pos--; last = null; card(); };
-  var sm = document.getElementById("showme"); if (sm) sm.onclick = function () {
-    document.getElementById("pv").innerHTML = "<p class='small'>You asked to see it. (The real screenshot appears here.)</p>"; };
+  noBrokenImages(el);
+  var sm = document.getElementById("showme"); if (sm) sm.onclick = function () {   // shown only because the person asked
+    var p = SAMPLE_PREVIEWS[it.id] || {};
+    document.getElementById("pv").innerHTML = p.img ? shot(p, "Locked screenshot you asked to see") :
+      "<p class='small'>You asked to see it. (The real screenshot appears here.)</p>";
+    noBrokenImages(document.getElementById("pv")); };
   el.querySelectorAll("[data-act]").forEach(function (b) { b.onclick = function () { act(it, b.getAttribute("data-act")); }; });
 }
 function act(it, a) {
