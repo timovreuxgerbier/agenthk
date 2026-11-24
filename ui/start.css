@@ -72,5 +72,22 @@ body:not(.win) .os-win, body.win .os-mac{display:none}
 #hero-buddies .pal.talking{z-index:4}
 #hero-buddies .pal.talking .bubble{opacity:1;transform:translate(-50%,0)}
 .pause-buddies{min-height:34px;font-size:13px;padding:0 12px;margin-top:-6px}
+/* Monster moves (start_buddies.js). The body tilts from its feet. */
+#hero-buddies .body{display:inline-block;transform-origin:50% 100%}
+#hero-buddies .pal.walking{z-index:2}
+#hero-buddies .body.waddle{animation:waddle .5s ease-in-out infinite alternate}
+#hero-buddies .body.stomp{animation:stomp .42s ease-out}
+#hero-buddies .body.stomp-big{animation:stomp-big .7s ease-in-out}
+#hero-buddies .body.wobble{animation:wobble .5s ease-in-out}
+#hero-buddies .body.roar{animation:roar .9s ease-in-out}
+#hero-buddies .body.wiggle{animation:wobble .5s ease-in-out}
+#hero-buddies .spin{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes waddle{0%{transform:rotate(-7deg) translateY(0)}50%{transform:rotate(0) translateY(-5px)}100%{transform:rotate(7deg) translateY(0)}}
+@keyframes stomp{0%{transform:scale(1.1,.86)}60%{transform:scale(.97,1.04)}100%{transform:none}}
+@keyframes stomp-big{0%{transform:none}35%{transform:translateY(-20px) scale(.94,1.07)}55%{transform:translateY(0) scale(1.18,.78)}75%{transform:scale(.96,1.05)}100%{transform:none}}
+@keyframes wobble{0%,100%{transform:none}25%{transform:rotate(-5deg)}60%{transform:rotate(4deg)}}
+@keyframes roar{0%{transform:none}15%{transform:scale(1.1) translateY(-4px)}25%,45%,65%{transform:scale(1.1) translate(-3px,-4px)}35%,55%,75%{transform:scale(1.1) translate(3px,-4px)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){#hero-buddies .body{animation:none!important}}
 @media (max-width:640px){#hero-buddies.play{height:210px}#hero-buddies .bubble{max-width:190px;font-size:13px}}
 @media (prefers-reduced-motion:reduce){#hero-buddies .bubble{transition:none}}
