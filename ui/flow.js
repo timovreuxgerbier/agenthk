@@ -52,7 +52,7 @@ var WALK = [
     a: function () { return buddy("pip", 64, "idle"); } },
   { t: "Meet Bloop, Rick and Zippy", b: "Rick suggests what to do with each screenshot. Bloop (yellow) asks for your OK when Rick isn't sure. Zippy (blue) locks private ones and stops reading.",
     a: function () { return trio(46, true); } },
-  { t: "You decide, nothing is deleted", b: "Only what you approve moves. Cleared files go to a To Be Deleted folder that you empty yourself.",
+  { t: "You decide, nothing is deleted", b: "At first, only what you approve moves. Shyft earns more one step at a time, and you can undo any move. Cleared files go to a To Be Deleted folder that you empty yourself.",
     a: function () { return '<div class="folder">Kept</div><div class="folder">To Be Deleted</div>'; } }
 ];
 var w = 0;

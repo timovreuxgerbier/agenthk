@@ -91,3 +91,7 @@ body:not(.win) .os-win, body.win .os-mac{display:none}
 @media (prefers-reduced-motion:reduce){#hero-buddies .body{animation:none!important}}
 @media (max-width:640px){#hero-buddies.play{height:210px}#hero-buddies .bubble{max-width:190px;font-size:13px}}
 @media (prefers-reduced-motion:reduce){#hero-buddies .bubble{transition:none}}
+
+/* Trust ladder section (shared styles in trust.css) */
+.lp-lead{font-size:17px;margin:-6px 0 6px;max-width:640px}
+#lp-stairs{margin:22px 0 18px}

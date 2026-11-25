@@ -112,12 +112,14 @@ function done() {
     "<h1>" + (later ? "Good place to stop" : "All done") + "</h1>" +
     "<p class='sub'>" + keep + " kept · " + del + " in To Be Deleted · " + later + " for next time</p>" +
     "<button class='main' data-go='s-welcome'>Close</button>" +
+    "<button class='quiet' id='to-trust'>Your trust ladder · Step " + trustGet() + "</button>" +
     "<button class='quiet protoonly' id='dl'>Download decisions.json (prototype)</button></div>";
   document.getElementById("dl").onclick = function () {
     var out = { contract: "0.2", run_id: SAMPLE_REVIEW.run_id, decisions: decisions };
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }));
     a.download = "decisions.json"; a.click();
   };
+  document.getElementById("to-trust").onclick = function () { openTrust("s-done"); };
   show("s-done");
   react(document.querySelector("#s-done .b2"), "hop");
 }

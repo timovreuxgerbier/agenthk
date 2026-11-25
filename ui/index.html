@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shyft — prototype</title>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="trust.css">
 </head>
 <body>
 <div class="page">
@@ -28,7 +29,7 @@
   <!-- SETUP 1: get Shyft ready (setup.js) -->
   <section class="screen" id="s-need" hidden>
     <div class="body">
-      <p class="eyebrow">Step 1 of 3</p>
+      <p class="eyebrow">Setup 1 of 4</p>
       <h1>Get Shyft ready</h1>
       <p class="sub">Rick and Zippy run on this computer. Here's what they need.</p>
       <ul class="list needs" id="needs" aria-live="polite"></ul>
@@ -41,18 +42,29 @@
   <!-- SETUP 2 -->
   <section class="screen" id="s-folder" hidden>
     <div class="body">
-      <p class="eyebrow">Step 2 of 3</p>
+      <p class="eyebrow">Setup 2 of 4</p>
       <h1>Send screenshots to one folder</h1>
       <p class="sub">Press <span class="kbd">⌘</span> <span class="kbd">Shift</span> <span class="kbd">5</span>, then Options → Other Location → <b style="color:var(--text)">Screenshots For Sorting</b>.</p>
-      <p class="small">It's the only folder Rick looks at.</p>
+      <p class="small">To start, it's the only folder Rick looks at.</p>
     </div>
-    <div class="foot"><button data-go="s-need">Back</button><span class="spacer"></span><button class="main" data-go="s-work">I've done this</button></div>
+    <div class="foot"><button data-go="s-need">Back</button><span class="spacer"></span><button class="main" id="folder-next">I've done this</button></div>
+  </section>
+
+  <!-- SETUP 3: the trust ladder (trust.js, trust_app.js) -->
+  <section class="screen" id="s-trustpick" hidden>
+    <div class="body">
+      <p class="eyebrow" id="tp-eyebrow">Setup 3 of 4</p>
+      <h1>How much should Shyft do?</h1>
+      <p class="sub">It earns more of your computer, one step at a time. Start where you're comfortable.</p>
+      <div id="trust-pick"></div>
+    </div>
+    <div class="foot"><button id="tp-back">Back</button><span class="spacer"></span><button class="main" id="tp-main">Continue</button></div>
   </section>
 
   <!-- SETUP 3 -->
   <section class="screen" id="s-work" hidden>
     <div class="body">
-      <p class="eyebrow">Step 3 of 3 · optional</p>
+      <p class="eyebrow">Setup 4 of 4 · optional</p>
       <h1>Tell Rick how you work today</h1>
       <p class="sub">Why do you take screenshots? Pick any.</p>
       <div class="chips" id="chips"></div>
@@ -60,7 +72,7 @@
       <textarea id="work-text" placeholder="I screenshot recipes and then can never find them"></textarea>
       <div class="row"><button id="voice">Record a voice note</button><span class="small" id="voice-note"></span></div>
     </div>
-    <div class="foot"><button data-go="s-folder">Back</button><span class="small">I'll look every Sunday night.</span><span class="spacer"></span><button class="main" id="finish">Finish setup</button></div>
+    <div class="foot"><button id="work-back">Back</button><span class="small">I'll look every Sunday night.</span><span class="spacer"></span><button class="main" id="finish">Finish setup</button></div>
   </section>
 
   <!-- SORTING -->
@@ -74,6 +86,18 @@
       <button class="main" id="sort-review" data-review hidden>Start review</button>
       <button class="quiet" data-go="s-welcome" id="sort-later">Tell me when it's ready</button>
     </div>
+  </section>
+
+  <!-- TRUST: where you are on the ladder (trust_app.js) -->
+  <section class="screen" id="s-trust" hidden>
+    <div class="body wide">
+      <p class="eyebrow">Trust ladder</p>
+      <h1>It earns more of your computer, one step at a time.</h1>
+      <p class="trust-always" id="trust-always"></p>
+      <div id="trust-stairs"></div>
+      <p class="trust-back" id="trust-back"></p>
+    </div>
+    <div class="foot"><button id="tr-change">Change step</button><span class="spacer"></span><button class="main" id="tr-done">Done</button></div>
   </section>
 
   <section class="screen" id="s-review" hidden></section>
@@ -95,7 +119,7 @@
 
 <nav class="proto" id="proto" hidden aria-label="Prototype menu (not part of the app)">
   <span>Prototype only (press P to hide):</span>
-  <button data-go="s-welcome">Welcome</button><button data-go="s-need">Step 1</button><button data-go="s-folder">Step 2</button><button data-go="s-work">Step 3</button>
+  <button data-go="s-welcome">Welcome</button><button data-go="s-need">Setup 1</button><button data-go="s-folder">Setup 2</button><button id="p-trustpick">Setup 3</button><button data-go="s-work">Setup 4</button><button id="p-trust">Trust</button>
   <button id="p-sort">Sorting</button><button data-review>Review</button>
   <button data-state="empty">All caught up</button><button data-state="cap">Paused at 10</button>
   <button data-state="ollama">Ollama closed</button><button data-state="model">First download</button>
@@ -110,9 +134,11 @@
 <script src="sample_review.js"></script>
 <!-- A real run: dev/make_review.py writes this file (not in Git). If it is missing, the sample above is used. -->
 <script src="review_data.js"></script>
+<script src="trust.js"></script>
 <script src="flow.js"></script>
 <script src="setup.js"></script>
 <script src="review.js"></script>
+<script src="trust_app.js"></script>
 <script src="results.js"></script>
 </body>
 </html>

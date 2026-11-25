@@ -6,6 +6,7 @@
 <title>Shyft: your screenshots, sorted</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="start.css">
+<link rel="stylesheet" href="trust.css">
 <script>/* light or dark: the visitor's own choice if they made one, otherwise their computer's setting */
 (function () { var t = null; try { t = localStorage.getItem("shyft-theme"); } catch (e) {}
   if (t !== "light" && t !== "dark") { t = window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; }
@@ -87,10 +88,18 @@
     <section class="block" aria-labelledby="how">
       <h2 id="how">How it works</h2>
       <div class="steps3">
-        <div><b>Screenshots go to one folder</b><span class="muted">Take them like always. Shyft only looks in that folder.</span></div>
+        <div><b>Screenshots go to one folder</b><span class="muted">Take them like always. To start, Shyft only looks in that folder.</span></div>
         <div><b>Rick looks while you sleep</b><span class="muted">Once a week, on your computer, he suggests what to do with each one.</span></div>
-        <div><b>You decide</b><span class="muted">Approve or change each suggestion. Only then does anything move.</span></div>
+        <div><b>You decide</b><span class="muted">Approve or change each suggestion. At first, nothing moves without your OK.</span></div>
       </div>
+    </section>
+
+    <section class="block" aria-labelledby="trust">
+      <h2 id="trust">The trust ladder</h2>
+      <p class="muted lp-lead">Shyft earns more of your computer, one step at a time. You choose where to start.</p>
+      <p class="trust-always" id="lp-always"></p>
+      <div id="lp-stairs"></div>
+      <p class="trust-back" id="lp-back"></p>
     </section>
   </main>
 
@@ -132,5 +141,11 @@
   showTheme();
 </script>
 <script src="start_buddies.js"></script>
+<script src="trust.js"></script>
+<script>   /* the same six steps as in the app (trust.js) */
+  trustStairs(document.getElementById("lp-stairs"), 0);
+  document.getElementById("lp-always").textContent = TRUST_ALWAYS;
+  document.getElementById("lp-back").textContent = TRUST_BACK;
+</script>
 </body>
 </html>
