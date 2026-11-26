@@ -13,7 +13,7 @@ import json
 import time
 import urllib.error
 
-from harness import check, context, gate, naming, router, trace
+from harness import check, cloud_lock, context, gate, naming, router, trace
 
 STOP = "stop"   # a run cap was reached; the loop ends cleanly
 
@@ -25,6 +25,8 @@ class Stopped(Exception):
 def _call(model, ask, *args):
     try:
         return ask(*args)
+    except cloud_lock.Refused as problem:      # S18: the whole run ends, in plain words
+        raise Stopped("CLOUD LOCK: " + str(problem))
     except urllib.error.HTTPError as error:
         if error.code == 404:
             raise Stopped("The model isn't downloaded. In a terminal run: ollama pull " + model)

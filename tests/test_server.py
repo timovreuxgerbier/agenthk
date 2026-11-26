@@ -45,6 +45,10 @@ def fake_ollama(ps=PS, version="0.30.1"):
             return Reply(ps)
         if url == schema.OLLAMA_VERSION_URL:
             return Reply({"version": version})
+        if url == schema.OLLAMA_STATUS_URL:      # S18: the cloud lock asks first
+            return Reply({"cloud": {"disabled": True, "source": "config"}})
+        if url == schema.OLLAMA_TAGS_URL:
+            return Reply({"models": []})
         return Reply(CHAT)
     return urlopen
 
@@ -57,6 +61,7 @@ def run_with(zippy, pip):
 class TestServerFrom(unittest.TestCase):
     def setUp(self):
         router._ollama_version = None
+        router.cloud_lock.forget()
 
     def test_settings_of_the_model_that_answered(self):
         with mock.patch.object(router.urllib.request, "urlopen", fake_ollama()):
