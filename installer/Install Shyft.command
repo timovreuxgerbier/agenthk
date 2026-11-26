@@ -10,7 +10,7 @@ cat <<'EOF'
   This sets up Shyft for testing. It will:
     1. check your Mac
     2. install Ollama (free, from ollama.com) if you don't have it
-    3. download Rick's and Zippy's models (about 17 GB)
+    3. download Rick's and Zippy's models (about 11.2 GB)
     4. put the Shyft code and the made-up test screenshots in a folder called Shyft
   It only uses made-up screenshots. Nothing of yours is read or sent anywhere.
 EOF
@@ -52,6 +52,11 @@ for m in $MODELS; do
   "$OL" pull "$m" || stop "The download of $m stopped. Run Install Shyft again: it picks up where it left off."
   ok "$m downloaded"
 done
+for m in $MODELS; do   # D27: exactly the measured builds, or stop and say so plainly
+  id=$(model_id "$OL" "$m")
+  [ "$id" = "$(expected_id "$m")" ] || stop "$m here is not the build Shyft was measured with (id ${id:-none}, expected $(expected_id "$m")). Please tell the Shyft team."
+done
+ok "Both models are the exact builds Shyft was measured with"
 
 say "5/5  Shyft code and test screenshots"
 if [ -d "$SHYFT_HOME/.git" ]; then

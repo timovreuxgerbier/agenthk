@@ -5,7 +5,12 @@
 $KitVersion = "kit 2"
 $CodeCommit = "1cce1b8e5dacb8a69b65578b2384f54213c47350"   # the ONE version of Shyft this kit tests
 $CodeZipPattern = "agenthk-$($CodeCommit.Substring(0, 7))*.zip"   # GitHub "Download ZIP" of that commit, kept in files/
-$Models     = [ordered]@{ "gemma4:e4b" = 6.6; "gemma4:e2b" = 4.6 }   # GB on Windows. Zippy's, then Rick's
+# Decision D27 (Nov 25): exactly these two model builds on every platform, checked by id after install.
+# (The short names download different builds on a Mac.)
+$Zippy      = "gemma4:e4b-it-q4_K_M"
+$Rick       = "gemma4:e2b-it-q4_K_M"
+$Models     = [ordered]@{ $Zippy = 6.6; $Rick = 4.6 }      # GB. Zippy's, then Rick's: 11.2 GB together
+$ModelIds   = @{ $Zippy = "dc35e8d9c606"; $Rick = "b37049369adf" }   # the ID column of "ollama list"
 $OllamaGB   = 4                                         # Ollama's docs: at least 4 GB for its own install
 $MarginGB   = 2
 $Tests      = "tests.test_execute tests.test_golden tests.test_naming tests.test_caps tests.test_gate tests.test_two_models tests.test_cost tests.test_batch tests.test_server tests.test_zoom" -split " "
@@ -67,6 +72,13 @@ function Wait-Ollama { for ($i = 0; $i -lt 60; $i++) { if (Test-OllamaUp) { retu
 function Start-OllamaApp {
   $app = Join-Path $OllamaDir "ollama app.exe"
   if (Test-Path $app) { Start-Process $app } else { $o = Find-Ollama; if ($o) { Start-Process $o -ArgumentList "serve" -WindowStyle Hidden } }
+}
+function Get-ModelId($ol, $m) {   # the model's id from "ollama list", or $null
+  foreach ($line in (& $ol list 2>$null | Select-Object -Skip 1)) {
+    $parts = ("$line").Trim() -split "\s+"
+    if ($parts[0] -eq $m) { return $parts[1] }
+  }
+  return $null
 }
 function Test-Model($ol, $m) {
   foreach ($line in (& $ol list 2>$null | Select-Object -Skip 1)) { if ((("$line").Trim() -split "\s+")[0] -eq $m) { return $true } }

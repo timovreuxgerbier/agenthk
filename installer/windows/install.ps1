@@ -98,6 +98,15 @@ foreach ($m in $Models.Keys) {
   if ($LASTEXITCODE -ne 0) { Stop-Shyft "The download of $m stopped. Run Install Shyft again: it picks up where it left off." }
   Ok "$m downloaded"
 }
+foreach ($m in $Models.Keys) {                # D27: exactly the measured builds, or stop and say so plainly
+  $id = Get-ModelId $ol $m
+  if ($id -ne $ModelIds[$m]) {
+    $why = if (@(Get-Record "model") -contains $m) { "The kit downloaded it, but Ollama gave a different build." } else { "It was already on this PC, so the kit won't replace it." }
+    Stop-Shyft ("{0} here is not the build Shyft was measured with (id {1}, expected {2}). {3} Please tell the Shyft team and send your results folder." -f $m, $id, $ModelIds[$m], $why)
+  }
+}
+Ok "Both models are the exact builds Shyft was measured with"
+Set-PcLine "Models" (($Models.Keys | ForEach-Object { "$_ ($($ModelIds[$_]))" }) -join ", ")
 Save-OllamaInfo $ol
 
 Say "6/6  Shyft code and test screenshots"
@@ -129,12 +138,11 @@ else {
   if ($code -ne 0) { Stop-Shyft "Couldn't switch Shyft to the test screenshots." }
   Ok "91 made-up test screenshots ready"
 }
-$uiSrc = Join-Path $PSScriptRoot "ui"; $uiDst = Join-Path $ShyftHome "ui"   # Shyft's screens, shown after the test
-if (Test-Path (Join-Path $uiSrc "index.html")) {
-  New-Item -ItemType Directory -Force -Path $uiDst | Out-Null
-  Copy-Item -Path (Join-Path $uiSrc "*") -Destination $uiDst -Force
-  Ok "Shyft's screens ready"
-} else { Warn "Shyft's screens (files\ui) are missing. The test still works, but won't open the results page."; Note "files\ui missing" }
+$uiZip = Join-Path $PSScriptRoot "shyft_ui.zip"; $uiDst = Join-Path $ShyftHome "ui"   # Shyft's screens, shown after the test
+if (Test-Path $uiZip) {
+  try { Expand-Archive -Path $uiZip -DestinationPath $uiDst -Force -ErrorAction Stop; Ok "Shyft's screens ready" }
+  catch { Warn "Couldn't unpack Shyft's screens. The test still works, but won't open the results page."; Note "shyft_ui.zip didn't unpack" }
+} else { Warn "Shyft's screens (shyft_ui.zip) are missing. The test still works, but won't open the results page."; Note "shyft_ui.zip missing" }
 
 Write-Host "    Running Shyft's own checks (about a minute)..."
 Push-Location $ShyftHome

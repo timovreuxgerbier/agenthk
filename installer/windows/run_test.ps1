@@ -87,23 +87,23 @@ try {
   Push-Location $ShyftHome
 
   $t = Get-Date
-  $quickOk = Run-Step "Quick check: 3 screenshots, Rick and Zippy" @("run.py", "gemma4:e2b", "3", "--zippy", "gemma4:e4b") "quick_check.txt"
+  $quickOk = Run-Step "Quick check: 3 screenshots, Rick and Zippy" @("run.py", $Rick, "3", "--zippy", $Zippy) "quick_check.txt"
   $secs = ((Get-Date) - $t).TotalSeconds
   Set-PcLine "Quick check (3 screenshots, two models)" ("{0} s, {1}" -f [math]::Round($secs), $(if ($quickOk) { "finished" } else { "stopped" }))
   if ($quickOk) {
     Show-Estimate $secs
     if (Ask-YesNo "Run the full test now (Run A, then Run B)?") {
-      Run-Full "Run A: Rick (gemma4:e2b) with Zippy (gemma4:e4b)" @("run.py", "gemma4:e2b", "all", "--zippy", "gemma4:e4b") "run_A.txt"
+      Run-Full "Run A: Rick ($Rick) with Zippy ($Zippy)" @("run.py", $Rick, "all", "--zippy", $Zippy) "run_A.txt"
       Make-Review                                     # straight after Run A: the page shows Zippy and Rick together
-      Run-Full "Run B: Rick only (gemma4:e2b)" @("run.py", "gemma4:e2b", "all") "run_B.txt"
+      Run-Full "Run B: Rick only ($Rick)" @("run.py", $Rick, "all") "run_B.txt"
     } else { Note "Tester chose to stop after the quick check" }
   } else {
     Warn "The quick check with two models stopped. Trying Rick alone..."
     $t = Get-Date
-    $oneOk = Run-Step "Quick check: 3 screenshots, Rick only" @("run.py", "gemma4:e2b", "3") "quick_check_one_model.txt"
+    $oneOk = Run-Step "Quick check: 3 screenshots, Rick only" @("run.py", $Rick, "3") "quick_check_one_model.txt"
     Set-PcLine "Quick check (3 screenshots, one model)" ("{0} s, {1}" -f [math]::Round(((Get-Date) - $t).TotalSeconds), $(if ($oneOk) { "finished" } else { "stopped" }))
     if ($oneOk -and (Ask-YesNo "Two models were too much for this PC, but one works. Run Run B (Rick only) now?")) {
-      Run-Full "Run B: Rick only (gemma4:e2b)" @("run.py", "gemma4:e2b", "all") "run_B.txt"
+      Run-Full "Run B: Rick only ($Rick)" @("run.py", $Rick, "all") "run_B.txt"
       Make-Review
     } elseif (-not $oneOk) { Note "Both quick checks stopped: Shyft could not run on this PC" }
     else { Note "Tester chose not to run Run B" }

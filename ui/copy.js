@@ -1,7 +1,8 @@
 // copy.js — every sentence a person reads that is NOT Rick's own words.
 // Locked-kind copy is written by people (contract section 3, Raaghavi's lane).
 // These are DRAFTS. Download: 11.2 GB (gemma4:e4b 6.6 + gemma4:e2b 4.6, as measured for the Windows kit).
-// Timo's Mac measured 17 GB on Nov 24 (9.5 + 7.5): the team should confirm which is right before showing it.
+// Decision D27 (Nov 25): the same two builds everywhere (gemma4:e4b-it-q4_K_M, gemma4:e2b-it-q4_K_M). Timo's 17 GB
+// on Nov 24 was the Mac's short-name builds, which Shyft no longer uses.
 // Free disk needed: 18 GB (the download plus room to work). Download time still to come.
 
 var KIND_COPY = {

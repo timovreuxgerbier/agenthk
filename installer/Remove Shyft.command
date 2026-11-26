@@ -1,5 +1,5 @@
 #!/bin/bash
-# Remove Shyft — gives back the space: deletes the Shyft folder and the two models (about 17 GB).
+# Remove Shyft — gives back the space: deletes the Shyft folder and the two models (about 11.2 GB).
 # Keeps the Ollama app (other apps may use it) and your "Shyft test results" folder.
 DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$DIR/shyft_common.sh"
@@ -9,7 +9,7 @@ cat <<'EOF'
   ------------
   This deletes:
     - the Shyft folder in your home folder (code and made-up test screenshots)
-    - Rick's and Zippy's models (about 17 GB)
+    - Rick's and Zippy's models (about 11.2 GB)
   It keeps the Ollama app and the "Shyft test results" folder on your Desktop.
 EOF
 pause "Press Return to remove Shyft (or close this window to cancel)."

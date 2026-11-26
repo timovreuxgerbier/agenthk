@@ -8,7 +8,7 @@ result we need, not a failure.
 
 YOU NEED
   - Windows 10 (version 22H2) or Windows 11
-  - Free disk space: up to about 17 GB. Rick's and Zippy's models are about 11.2 GB
+  - Free disk space: up to about 18 GB. Rick's and Zippy's models are about 11.2 GB
     (6.6 + 4.6), Ollama needs about 4 GB if you don't have it, plus a little extra.
     The installer checks this first and tells you exactly what it needs.
   - Internet, the charger, and the lid open.
@@ -34,6 +34,9 @@ YOU NEED
    At the end, Shyft opens in your browser and shows what Rick and Zippy suggested
    for the made-up screenshots. You can go through them if you like: nothing on your
    PC is moved or deleted.
+   To open that page again later: in your user folder, open Shyft > ui >
+   open_results.html. Shyft only ever looks at the made-up test screenshots,
+   never at your own files.
 
 3. Send the results
    "Shyft test results" on your Desktop holds:

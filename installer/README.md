@@ -5,9 +5,9 @@ and the made-up test screenshots. The scripts automate Sphinx's test steps (inst
 
 | File | What it does |
 |---|---|
-| `Install Shyft.command` | Checks the Mac, installs Ollama (official script from ollama.com), downloads gemma4:e4b + gemma4:e2b, clones this repo into `~/Shyft`, unpacks the test set, runs the unit tests. Safe to run again. |
+| `Install Shyft.command` | Checks the Mac, installs Ollama (official script from ollama.com), downloads gemma4:e4b-it-q4_K_M + gemma4:e2b-it-q4_K_M (decision D27, checked by id), clones this repo into `~/Shyft`, unpacks the test set, runs the unit tests. Safe to run again. |
 | `Run the Shyft test.command` | Starts Ollama with `OLLAMA_CONTEXT_LENGTH=16384`, logs memory every 30 s, runs A (e2b + Zippy e4b) and B (e2b), score + cost after each, then collects results in `~/Desktop/Shyft test results`. |
-| `Remove Shyft.command` | Deletes `~/Shyft` and the two models (about 17 GB). Keeps Ollama and the results. |
+| `Remove Shyft.command` | Deletes `~/Shyft` and the two models (about 11.2 GB). Keeps Ollama and the results. |
 | `shyft_common.sh` | Shared settings (models, repo, space needed) and helpers. |
 | `make_dmg.sh` | Builds the DMG. **Mac only.** |
 

@@ -52,10 +52,10 @@ step() {   # runs one step; if it fails, notes it and carries on
   if bash -c "set -o pipefail; $*"; then ok "done"
   else warn "This step stopped. That's a result too."; echo "Stopped: $* ($(date))" >> "$OUT/what_happened.txt"; fi
 }
-step "Run A: Rick (gemma4:e2b) with Zippy (gemma4:e4b)" "python3 run.py gemma4:e2b all --zippy gemma4:e4b 2>&1 | tee run_A.txt"
+step "Run A: Rick ($RICK) with Zippy ($ZIPPY)" "python3 run.py $RICK all --zippy $ZIPPY 2>&1 | tee run_A.txt"
 step "Scoring run A" "python3 run.py score"
 step "Cost of run A" "python3 run.py cost"
-step "Run B: Rick only (gemma4:e2b)" "python3 run.py gemma4:e2b all 2>&1 | tee run_B.txt"
+step "Run B: Rick only ($RICK)" "python3 run.py $RICK all 2>&1 | tee run_B.txt"
 step "Scoring run B" "python3 run.py score"
 step "Cost of run B" "python3 run.py cost"
 

@@ -9,7 +9,7 @@ function openLocked(from) {
     "<div class='body'>" +
       "<span class='design-only'>Design only · not built yet</span>" +
       "<div class='row' style='gap:14px'>" + buddy("zippy", 54, "idle") + "<h1>Locked folder</h1></div>" +
-      "<p class='sub'>Zippy locked these because they looked private, and Shyft stopped reading them. They stay on this computer.</p>" +
+      "<p class='sub'>Zippy locked these because they looked private. Shyft stopped reading them and doesn't send them anywhere. If this folder is backed up by OneDrive or iCloud, those apps may still copy them.</p>" +
       (items.length ? "<ul class='locklist'>" + items.map(function (it) {
         return "<li><span class='thumb' aria-hidden='true'>&#128274;</span><span class='what'><b>" + esc(KIND_COPY[it.kind] || KIND_COPY.gate_error) +
           "</b><span>" + esc(it.file) + (it.file_date ? " · " + esc(it.file_date) : "") + "</span></span>" +
