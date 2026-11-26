@@ -30,6 +30,10 @@ OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
 # (context window, how much of it sits on the GPU) and Ollama's version. Numbers only.
 OLLAMA_PS_URL = "http://127.0.0.1:11434/api/ps"
 OLLAMA_VERSION_URL = "http://127.0.0.1:11434/api/version"
+# S18, the cloud lock (harness/cloud_lock.py): is Ollama's cloud off, and which models run
+# on another computer. Asked before a model's first call in a run.
+OLLAMA_STATUS_URL = "http://127.0.0.1:11434/api/status"
+OLLAMA_TAGS_URL = "http://127.0.0.1:11434/api/tags"
 SERVER_TIMEOUT_SECONDS = 3   # a slow answer here must never slow or stop a run
 CALL_TIMEOUT_SECONDS = 300
 
