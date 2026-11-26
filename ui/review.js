@@ -111,6 +111,7 @@ function done() {
   document.getElementById("s-done").innerHTML = "<div class='body'>" + trio(48) +
     "<h1>" + (later ? "Good place to stop" : "All done") + "</h1>" +
     "<p class='sub'>" + keep + " kept · " + del + " in To Be Deleted · " + later + " for next time</p>" +
+    "<p class='small'>Cost of this run: $0. It all ran on this computer.</p>" +
     "<button class='main' data-go='s-welcome'>Close</button>" +
     "<button class='quiet' id='to-trust'>Your trust ladder · Step " + trustGet() + "</button>" +
     "<button class='quiet protoonly' id='dl'>Download decisions.json (prototype)</button></div>";

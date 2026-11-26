@@ -1,0 +1,38 @@
+/* screens.css: the spec screen, the locked folder (design only), the facts row, and projector mode. */
+
+/* Facts up front: runs locally, privacy-preserving, $0 (welcome screen and landing page) */
+.facts{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0;padding:0;list-style:none}
+.facts li{font-size:14px;font-weight:700;padding:5px 12px;border-radius:999px;border:1.5px solid var(--line2);color:var(--text)}
+.facts li::before{content:"\2713\00a0";color:var(--trace)}
+
+/* Spec screen: minimum vs ideal, like a game's system requirements */
+.spec{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%}
+.spec-col{border:1.5px solid var(--line2);border-radius:16px;overflow:hidden;background:var(--card)}
+.spec-col header{padding:14px 18px;border-bottom:1.5px solid var(--line2);display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.spec-col h2{margin:0;font-size:20px;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+.spec-col header span{font-size:14px;color:var(--muted)}
+.spec-col.ideal{border:2.5px solid var(--trace)}
+.spec-col.ideal header{border-bottom:2.5px solid var(--trace)}
+.spec-col ul{list-style:none;margin:0;padding:6px 18px 12px}
+.spec-col li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:16px}
+.spec-col li:last-child{border-bottom:0}
+.spec-col li span{color:var(--muted);text-align:right}
+.spec-col li b,.pace li b{font-weight:700;white-space:nowrap}
+.pace{list-style:none;margin:0;padding:0;width:100%;display:flex;flex-direction:column;gap:8px}
+.pace li{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:12px 16px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:16px}
+.pace li span{color:var(--muted);text-align:right}
+.pace-title{font-size:18px;margin:6px 0 -6px}
+@media (max-width:760px){.spec{grid-template-columns:1fr}}
+
+/* Locked folder: design only */
+.design-only{align-self:flex-start;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:8px;border:1.5px dashed var(--line2);color:var(--muted)}
+.locklist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;width:100%}
+.locklist li{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid var(--line2);border-radius:12px;background:var(--card)}
+.locklist .thumb{width:56px;height:42px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bbg);color:var(--b);font-size:20px}
+.locklist .what{flex:1;display:flex;flex-direction:column;gap:2px}
+.locklist .what span{font-size:14px;color:var(--muted)}
+.locklist button{min-height:40px;font-size:14px;padding:0 14px}
+
+/* Projector mode: everything bigger (press B, or the prototype menu). The window still fits the screen. */
+body.big .page{zoom:1.25;max-width:calc(1180px / 1.25)}
+body.big .window{min-height:calc(100vh / 1.25 - 40px)}

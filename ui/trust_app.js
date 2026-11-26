@@ -1,6 +1,7 @@
 // trust_app.js: the trust ladder inside the app. Two screens:
 //   s-trustpick  "How much should Shyft do?" (setup 3 of 4, and "Change step" later)
 //   s-trust      the Trust screen: the staircase, where you are, what unlocks the next step
+// Plus the ladder walkthrough (one card per step, then the safety net), shown in flow.js's walkthrough window.
 // The steps themselves live in trust.js.
 
 var trustReturn = "s-welcome", trustMode = "setup", trustChoice = 1;
@@ -37,3 +38,22 @@ document.getElementById("trust-back").textContent = TRUST_BACK;
 // Prototype menu
 document.getElementById("p-trustpick").onclick = function () { openPicker("setup"); };
 document.getElementById("p-trust").onclick = function () { openTrust(current === "s-trust" ? null : current); };
+
+// ---- The ladder walkthrough ----
+function ladderArt(k) {   // six small bars rising; the one being explained is filled; coming ones are dashed
+  return "<div class='mini' aria-hidden='true'>" + TRUST_STEPS.map(function (s, i) {
+    return "<i class='" + (i === k ? "on" : "") + (s.real ? "" : " soon-bar") + "' style='height:" + (16 + i * 15) + "px'></i>";
+  }).join("") + "</div>";
+}
+function trustDeck(from) {
+  var items = TRUST_STEPS.map(function (s, i) {
+    return { t: "Step " + (i + 1) + " · " + s.t + (s.real ? "" : " (coming)"),
+      b: (s.real ? "Real today. " : TRUST_COMING + " ") + s.walk + (s.up ? " To reach the next step: " + s.up.charAt(0).toLowerCase() + s.up.slice(1) + "." : ""),
+      a: function () { return ladderArt(i); } };
+  });
+  items.push({ t: "The safety net", b: TRUST_ALWAYS + " " + TRUST_BACK + " Climbing the ladder by itself is coming too.",
+    a: function () { return buddy("zippy", 60, "idle"); } });
+  openDeck({ name: "Trust ladder", items: items, from: from });
+}
+document.getElementById("tr-walk").onclick = function () { trustDeck("tr-walk"); };
+document.getElementById("tp-walk").onclick = function () { trustDeck("tp-walk"); };

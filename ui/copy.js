@@ -1,6 +1,8 @@
 // copy.js — every sentence a person reads that is NOT Rick's own words.
 // Locked-kind copy is written by people (contract section 3, Raaghavi's lane).
-// These are DRAFTS. Space needed: about 17 GB (fresh download on Timo's Mac, Nov 24: 9.5 + 7.5 GB). Download time still to come.
+// These are DRAFTS. Download: 11.2 GB (gemma4:e4b 6.6 + gemma4:e2b 4.6, as measured for the Windows kit).
+// Timo's Mac measured 17 GB on Nov 24 (9.5 + 7.5): the team should confirm which is right before showing it.
+// Free disk needed: 18 GB (the download plus room to work). Download time still to come.
 
 var KIND_COPY = {
   nudity_or_children: "Might show a body or a child. I stopped looking.",
@@ -27,7 +29,7 @@ var WORK_CHIPS = ["To remember things", "Recipes and ideas", "Receipts and proof
 // Friendly versions of what run.py prints in the terminal. One headline, one line.
 var STATES = {
   ollama: { t: "Open the Ollama app", b: "I need it to look at your screenshots. Open it, then try again.", main: "Try again" },
-  model:  { t: "One download, once", b: "Rick and Zippy's models are about 17 GB. Use Wi-Fi.", main: "Start download" },
+  model:  { t: "One download, once", b: "Rick and Zippy's models are an 11.2 GB download. Use Wi-Fi.", main: "Start download" },
   empty:  { t: "All caught up", b: "Nothing new. I'll look again Sunday night.", main: "Close" },
   cap:    { t: "10 ready, the rest wait", b: "I look at 10 at a time so it never takes long.", main: "Review these 10" }
 };

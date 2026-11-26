@@ -17,7 +17,7 @@ cp common.ps1 results.ps1 install.ps1 run_test.ps1 remove.ps1 shyft.ico ../shyft
 UI=../../ui
 [ -f "$UI/index.html" ] && [ -f "$UI/results.js" ] || { echo "ui/index.html or ui/results.js is missing: run this from the repo."; exit 1; }
 # Packed as a zip so testers can't open a results-less copy by mistake: only Install unpacks it.
-(cd "$UI" && zip -q "$K/files/shyft_ui.zip" index.html open_results.html styles.css trust.css buddies.js copy.js trust.js flow.js review.js trust_app.js results.js themes.js setup.js sample_review.js)
+(cd "$UI" && zip -q "$K/files/shyft_ui.zip" index.html open_results.html styles.css trust.css screens.css light.css mode.js buddies.js copy.js trust.js flow.js review.js trust_app.js locked.js results.js themes.js setup.js sample_review.js)
 rm -f Shyft-Tester-Windows.zip
 (cd "$STAGE" && zip -qr - Shyft-Tester-Windows) > Shyft-Tester-Windows.zip
 echo "Built: $(pwd)/Shyft-Tester-Windows.zip"

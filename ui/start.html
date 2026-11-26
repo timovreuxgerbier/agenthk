@@ -7,10 +7,9 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="start.css">
 <link rel="stylesheet" href="trust.css">
-<script>/* light or dark: the visitor's own choice if they made one, otherwise their computer's setting */
-(function () { var t = null; try { t = localStorage.getItem("shyft-theme"); } catch (e) {}
-  if (t !== "light" && t !== "dark") { t = window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"; }
-  document.documentElement.setAttribute("data-theme", t); })();</script>
+<link rel="stylesheet" href="screens.css">
+<link rel="stylesheet" href="light.css">
+<script src="mode.js"></script>   <!-- light or dark: follows the computer, with a manual switch -->
 </head>
 <!-- start.html: the first page a tester sees, before any download.
      TEXT: drafts. Raaghavi will send the final short text: replace anything marked data-copy.
@@ -31,6 +30,7 @@
   <main>
     <div class="hero">
       <div id="hero-buddies" aria-label="Bloop, Rick and Zippy. Touch one to meet it."></div>
+      <ul class="facts" aria-label="About Shyft"><li>Runs locally</li><li>Privacy-preserving</li><li>$0 to run</li></ul>
       <h1 data-copy="headline">Your screenshots, sorted while you sleep.</h1>
       <p class="sub" data-copy="intro">Shyft looks at your new screenshots on your computer and suggests what to keep, turn into text, or clear out. You decide. Nothing is deleted.</p>
       <div class="cta">
@@ -126,19 +126,7 @@
   });
   [].forEach.call(document.querySelectorAll(".seg button"), function (b) { b.onclick = function () { setOS(b.getAttribute("data-os")); }; });
   setOS(os);
-  var themeBtn = document.getElementById("theme");
-  function showTheme() {
-    var t = document.documentElement.getAttribute("data-theme");
-    themeBtn.textContent = t === "light" ? "Dark mode" : "Light mode";
-    themeBtn.setAttribute("aria-label", "Switch to " + (t === "light" ? "dark" : "light") + " mode");
-  }
-  themeBtn.onclick = function () {
-    var t = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", t);
-    try { localStorage.setItem("shyft-theme", t); } catch (e) {}
-    showTheme();
-  };
-  showTheme();
+  modeButton(document.getElementById("theme"));
 </script>
 <script src="start_buddies.js"></script>
 <script src="trust.js"></script>

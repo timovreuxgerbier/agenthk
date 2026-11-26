@@ -95,3 +95,5 @@ body:not(.win) .os-win, body.win .os-mac{display:none}
 /* Trust ladder section (shared styles in trust.css) */
 .lp-lead{font-size:17px;margin:-6px 0 6px;max-width:640px}
 #lp-stairs{margin:22px 0 18px}
+
+.hero .facts{justify-content:center;margin:2px 0 -4px}

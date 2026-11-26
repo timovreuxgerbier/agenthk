@@ -6,11 +6,14 @@
 <title>Shyft — prototype</title>
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="trust.css">
+<link rel="stylesheet" href="screens.css">
+<link rel="stylesheet" href="light.css">
+<script src="mode.js"></script>
 </head>
 <body>
 <div class="page">
 <div class="window" role="region" aria-label="Shyft app window">
-  <div class="chrome" aria-hidden="true"><span></span><span></span><span></span><p>Shyft</p></div>
+  <div class="chrome"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><p aria-hidden="true">Shyft</p><button class="quiet mode" id="mode"></button></div>
   <svg class="trace" id="trace" viewBox="0 0 1280 140" preserveAspectRatio="none" aria-hidden="true"><path d="M0 100 C 200 50, 340 130, 560 90 S 900 40, 1080 90 S 1240 110, 1280 70" fill="none" stroke="#2FD38A" stroke-width="2.5"/></svg>
 
   <!-- WELCOME -->
@@ -19,11 +22,37 @@
       <span id="scene" aria-hidden="false"></span>
       <span id="welcome-buddies"></span>
       <p class="eyebrow" id="greeting"></p>
+      <ul class="facts" aria-label="About Shyft"><li>Runs locally</li><li>Privacy-preserving</li><li>$0 to run</li></ul>
       <h1>Your screenshots, sorted</h1>
       <p class="sub">Rick suggests. You decide. Nothing is deleted, and it all stays on this computer.</p>
       <button class="main" id="start">Get started</button>
       <button class="quiet" id="how">How it works</button>
     </div>
+  </section>
+
+  <!-- BEFORE SETUP: can this computer run Shyft? Minimum vs ideal, like a game -->
+  <section class="screen" id="s-spec" hidden>
+    <div class="body wide">
+      <p class="eyebrow">Before you start</p>
+      <h1>Can your computer run Shyft?</h1>
+      <p class="sub">Like a game: the minimum to run it, and what makes it fast.</p>
+      <div class="spec">
+        <section class="spec-col" aria-labelledby="spec-min">
+          <header><h2 id="spec-min">Minimum</h2><span>It runs</span></header>
+          <ul><li><b>Memory</b><span>16 GB</span></li><li><b>Free disk</b><span>18 GB (11.2 GB download)</span></li><li><b>Graphics card</b><span>Not needed</span></li></ul>
+        </section>
+        <section class="spec-col ideal" aria-labelledby="spec-ideal">
+          <header><h2 id="spec-ideal">Ideal</h2><span>It runs fast</span></header>
+          <ul><li><b>Memory</b><span>16 GB</span></li><li><b>Free disk</b><span>18 GB</span></li><li><b>Chip</b><span>A graphics card, or an Apple chip (M1 or newer)</span></li></ul>
+        </section>
+      </div>
+      <h2 class="pace-title">How long it takes</h2>
+      <ul class="pace">
+        <li><b>Your daily screenshots</b><span>Minutes</span></li>
+        <li><b>A backlog of thousands</b><span>An evening with a graphics card · several nights without</span></li>
+      </ul>
+    </div>
+    <div class="foot"><button data-go="s-welcome">Back</button><span class="spacer"></span><button class="main" data-go="s-need">Continue</button></div>
   </section>
 
   <!-- SETUP 1: get Shyft ready (setup.js) -->
@@ -36,7 +65,7 @@
       <p class="small" id="need-help"></p>
       <p class="small" id="need-note" style="color:var(--text-dim,#5E7D6C)"></p>
     </div>
-    <div class="foot"><button data-go="s-welcome">Back</button><span class="spacer"></span><button class="main" id="need-main">Get what's missing</button></div>
+    <div class="foot"><button data-go="s-spec">Back</button><span class="spacer"></span><button class="main" id="need-main">Get what's missing</button></div>
   </section>
 
   <!-- SETUP 2 -->
@@ -56,6 +85,7 @@
       <p class="eyebrow" id="tp-eyebrow">Setup 3 of 4</p>
       <h1>How much should Shyft do?</h1>
       <p class="sub">It earns more of your computer, one step at a time. Start where you're comfortable.</p>
+      <button class="quiet" id="tp-walk" style="align-self:flex-start;margin:-8px 0 -4px -12px">How does the ladder work?</button>
       <div id="trust-pick"></div>
     </div>
     <div class="foot"><button id="tp-back">Back</button><span class="spacer"></span><button class="main" id="tp-main">Continue</button></div>
@@ -97,10 +127,11 @@
       <div id="trust-stairs"></div>
       <p class="trust-back" id="trust-back"></p>
     </div>
-    <div class="foot"><button id="tr-change">Change step</button><span class="spacer"></span><button class="main" id="tr-done">Done</button></div>
+    <div class="foot"><button id="tr-change">Change step</button><button class="quiet" id="tr-walk">Walk me through it</button><span class="spacer"></span><button class="main" id="tr-done">Done</button></div>
   </section>
 
   <section class="screen" id="s-review" hidden></section>
+  <section class="screen" id="s-locked" hidden></section>
   <section class="screen center" id="s-done" hidden></section>
   <section class="screen center" id="s-state" hidden></section>
 
@@ -119,7 +150,7 @@
 
 <nav class="proto" id="proto" hidden aria-label="Prototype menu (not part of the app)">
   <span>Prototype only (press P to hide):</span>
-  <button data-go="s-welcome">Welcome</button><button data-go="s-need">Setup 1</button><button data-go="s-folder">Setup 2</button><button id="p-trustpick">Setup 3</button><button data-go="s-work">Setup 4</button><button id="p-trust">Trust</button>
+  <button data-go="s-welcome">Welcome</button><button data-go="s-need">Setup 1</button><button data-go="s-folder">Setup 2</button><button id="p-trustpick">Setup 3</button><button data-go="s-work">Setup 4</button><button id="p-trust">Trust</button><button data-go="s-spec">Specs</button><button id="p-locked">Locked folder (design)</button><button id="p-big">Big text (B)</button>
   <button id="p-sort">Sorting</button><button data-review>Review</button>
   <button data-state="empty">All caught up</button><button data-state="cap">Paused at 10</button>
   <button data-state="ollama">Ollama closed</button><button data-state="model">First download</button>
@@ -139,6 +170,7 @@
 <script src="setup.js"></script>
 <script src="review.js"></script>
 <script src="trust_app.js"></script>
+<script src="locked.js"></script>
 <script src="results.js"></script>
 </body>
 </html>
