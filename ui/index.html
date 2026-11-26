@@ -39,20 +39,22 @@
       <div class="spec">
         <section class="spec-col" aria-labelledby="spec-min">
           <header><h2 id="spec-min">Minimum</h2><span>It runs</span></header>
-          <ul><li><b>Memory</b><span>16 GB</span></li><li><b>Free disk</b><span>18 GB (11.2 GB download)</span></li><li><b>Graphics card</b><span>Not needed</span></li></ul>
+          <ul><li><b>Memory</b><span data-req="memory">16 GB</span></li><li><b>Free disk</b><span data-req="disk">18 GB (11.2 GB download)</span></li><li><b>Graphics card</b><span>Not needed</span></li></ul>
         </section>
         <section class="spec-col ideal" aria-labelledby="spec-ideal">
           <header><h2 id="spec-ideal">Ideal</h2><span>It runs fast</span></header>
-          <ul><li><b>Memory</b><span>16 GB</span></li><li><b>Free disk</b><span>18 GB</span></li><li><b>Chip</b><span>A graphics card, or an Apple chip (M1 or newer)</span></li></ul>
+          <ul><li><b>Memory</b><span data-req="memory">16 GB</span></li><li><b>Free disk</b><span data-req="disk-short">18 GB</span></li><li><b>Chip</b><span>A graphics card, or an Apple chip (M1 or newer)</span></li></ul>
         </section>
       </div>
+      <ul class="pace yours" id="spec-yours" hidden aria-live="polite"></ul>
+      <p class="small" id="spec-below"></p>
       <h2 class="pace-title">How long it takes</h2>
       <ul class="pace">
         <li><b>Your daily screenshots</b><span>Minutes</span></li>
         <li><b>A backlog of thousands</b><span>An evening with a graphics card · several nights without</span></li>
       </ul>
     </div>
-    <div class="foot"><button data-go="s-welcome">Back</button><span class="spacer"></span><button class="main" data-go="s-need">Continue</button></div>
+    <div class="foot"><button data-go="s-welcome">Back</button><span class="spacer"></span><button class="main" id="spec-next">Continue</button></div>
   </section>
 
   <!-- SETUP 1: get Shyft ready (setup.js) -->
@@ -165,6 +167,7 @@
 <script src="sample_review.js"></script>
 <!-- A real run: dev/make_review.py writes this file (not in Git). If it is missing, the sample above is used. -->
 <script src="review_data.js"></script>
+<script src="live.js"></script>
 <script src="trust.js"></script>
 <script src="flow.js"></script>
 <script src="setup.js"></script>

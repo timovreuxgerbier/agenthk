@@ -1,28 +1,21 @@
-// setup.js — Step 1 "Get Shyft ready": check Ollama and the two models, and get what's missing.
-// PROTOTYPE: everything here is simulated. In the real app:
-//  - "is Ollama open?"      = ask http://127.0.0.1:11434/api/tags (answers only if Ollama is running)
-//  - "is a model there?"    = the same answer lists the downloaded models
-//  - "download a model"     = POST http://127.0.0.1:11434/api/pull, which reports progress
-// Installing Ollama itself is the one step the person must do: open the file, drag it to Applications.
-// Team decision: does the page talk to Ollama for this, or does our Python harness?
+// setup.js — Setup 1 "Get Shyft ready": check Ollama and the two models, and get what's missing.
+// Two modes:
+//  - window.LIVE (opened by app/shyft_app.py): real answers from this computer (live.js). Stage 1 only checks;
+//    getting what's missing comes in stage 2, and the screen says so.
+//  - PROTOTYPE (opened as a file): simulated, for design demos. Pick a scenario in the prototype menu.
 
 var NEED = [
   { id: "ollama", name: "The Ollama app", what: "Runs Rick and Zippy on this computer. Free." },
-  { id: "zippy",  name: "Zippy's model",  what: "gemma4:e4b · spots private screenshots" },
-  { id: "rick",   name: "Rick's model",   what: "gemma4:e2b · suggests what to do" }
+  { id: "zippy",  name: "Zippy's model",  what: "gemma4:e4b-it-q4_K_M · spots private screenshots" },
+  { id: "rick",   name: "Rick's model",   what: "gemma4:e2b-it-q4_K_M · suggests what to do" }
 ];
-var have = {}, pct = {}, busy = false, timers = [];
+var have = {}, pct = {}, busy = false, timers = [], liveNote = "";
 function later(fn, ms) { timers.push(setTimeout(fn, ms)); }   // every timer is tracked so it can be stopped
 
-// Real check: Ollama answers on this computer only while it is running. Gives up after 1.5 s.
-function ollamaRunning(cb) {
-  var done = false, finish = function (ok) { if (!done) { done = true; cb(ok); } };
-  setTimeout(function () { finish(false); }, 1500);
-  fetch("http://127.0.0.1:11434/api/tags").then(function (r) { finish(r.ok); }).catch(function () { finish(false); });
-}
+// ---- PROTOTYPE ----
 var SCENARIOS = { ready: ["ollama", "zippy", "rick"], models: ["ollama"], nothing: [] };
-
 function setScenario(name) {
+  if (window.LIVE) return liveCheck();                       // real answers instead of a made-up scenario
   timers.forEach(clearTimeout); timers = [];          // stop any fake download still running
   have = {}; pct = {}; busy = false;
   var note = document.getElementById("need-note"); if (note) note.textContent = "";
@@ -30,11 +23,45 @@ function setScenario(name) {
   NEED.forEach(function (n) { if (!have[n.id]) have[n.id] = "missing"; });
   renderNeeds();
 }
-function allReady() { return NEED.every(function (n) { return have[n.id] === "ready"; }); }
 
+// ---- window.LIVE: what is true on this computer ----
+var LIVE_WORDS = {   // every state has words, never colour alone
+  notrunning: "<span class='miss'>Not running</span>",
+  old: "<span class='miss'>Too old for Shyft</span>",
+  missing: "<span class='miss'>Not downloaded yet</span>",
+  wrong: "<span class='miss'>Different build</span>",
+  checking: "<span class='wait'>Checking…</span>"
+};
+function liveCheck() {
+  NEED.forEach(function (n) { have[n.id] = "checking"; }); renderNeeds();
+  liveGet("/api/status", function (s, why) {
+    if (!s) { liveNote = "Couldn't reach Shyft's helper (" + why + "). Is its window still open?"; NEED.forEach(function (n) { have[n.id] = "missing"; }); return renderNeeds(); }
+    var o = s.ollama, notes = [];
+    have.ollama = !o.running ? "notrunning" : o.cloud === "too_old" ? "old" : "ready";
+    s.models.forEach(function (m) {
+      var id = m.role === "gate" ? "zippy" : "rick";
+      NEED.filter(function (n) { return n.id === id; })[0].what = m.pull + " · " + (id === "zippy" ? "spots private screenshots" : "suggests what to do");
+      have[id] = !m.found ? "missing" : m.matches ? "ready" : "wrong";
+    });
+    if (have.ollama === "notrunning") notes.push("Open Ollama (the llama icon), then check again.");
+    if (have.ollama === "old") notes.push("This Ollama can't say whether its cloud is off, and Shyft checks that before every run. Update it from ollama.com/download.");
+    if (o.cloud === "on") notes.push("Ollama's cloud is on. Shyft will run it with the cloud off.");
+    if (have.zippy === "wrong" || have.rick === "wrong") notes.push("A model here isn't the build Shyft was measured with. Please tell the Shyft team.");
+    var c = s.computer, r = s.requirements;
+    notes.push("This computer: " + (c.memory_gb == null ? "memory couldn't be checked" : c.memory_gb + " GB memory") + ", " +
+      (c.free_disk_gb == null ? "free space couldn't be checked" : c.free_disk_gb + " GB free") + ". " +
+      (allReady() ? "" : "Still needed: about " + r.need_now_gb + " GB free." + (s.meets.disk === false ? " Not enough yet." : "")));
+    liveNote = notes.join(" ");
+    renderNeeds();
+  });
+}
+
+// ---- Shared ----
+function allReady() { return NEED.every(function (n) { return have[n.id] === "ready"; }); }
 function statusHtml(id) {
   var s = have[id];
   if (s === "ready") return "<span class='ok'>✓ Ready</span>";
+  if (LIVE_WORDS[s]) return LIVE_WORDS[s];
   if (s === "waiting") return "<span class='wait'>Waiting for Ollama to open…</span>";
   if (s === "downloading") return "<span class='dl'><span class='track'><span class='fill' style='width:" + pct[id] + "%'></span></span>" + pct[id] + "%</span>";
   return "<span class='miss'>Not found</span>";
@@ -44,6 +71,12 @@ function renderNeeds() {
     return "<li><span><b>" + n.name + "</b><br><span class='small'>" + n.what + "</span></span>" + statusHtml(n.id) + "</li>";
   }).join("");
   var main = document.getElementById("need-main"), help = document.getElementById("need-help");
+  if (window.LIVE) {
+    main.textContent = allReady() ? "Continue" : "Check again";
+    help.textContent = liveNote;
+    document.getElementById("need-note").textContent = allReady() ? "" : "Stage 1 only checks. Getting what's missing comes in the next stage.";
+    return;
+  }
   main.textContent = allReady() ? "Continue" : busy ? "Downloading…" : "Get what's missing";
   help.innerHTML = have.ollama === "waiting"
     ? "1. Open the Ollama file in your Downloads. 2. Drag it into Applications, then open it. I'll notice and carry on. <button class='quiet' id='opened'>I've opened it</button>"
@@ -53,9 +86,9 @@ function renderNeeds() {
 
 function getMissing() {
   if (allReady()) return show("s-folder");
+  if (window.LIVE) return liveCheck();                        // stage 1: check again
   if (busy || have.ollama === "waiting") return;       // already working on it: don't start twice
   if (have.ollama !== "ready") {
-    // Real app: open the official download page, then check every few seconds whether Ollama answers.
     have.ollama = "waiting"; renderNeeds();
     document.getElementById("need-note").textContent = "Prototype: in the real app this opens ollama.com/download.";
     later(function () { if (have.ollama === "waiting") ollamaOpened(); }, 4000);
