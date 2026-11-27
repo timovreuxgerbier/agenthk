@@ -5,7 +5,10 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 . "$DIR/shyft_common.sh"
 clear
-cd "$SHYFT_HOME" 2>/dev/null || stop "Shyft isn't installed yet. Double-click \"Install Shyft\" first."
+[ -f "$SHYFT_HOME/.shyft_kit_commit" ] && cd "$SHYFT_HOME" 2>/dev/null || stop "Shyft isn't installed yet. Double-click \"Install Shyft\" first."
+# Nook (main, Nov 27): a test run never writes into a person's Nook. This note doesn't exist, so Shyft
+# sees "no home" and keeps the test's trace in ~/Shyft, where the results collect it (as Sphinx's tests do).
+export SHYFT_HOME_NOTE="$SHYFT_HOME/kit_no_home.json"
 OL=$(ollama_bin); [ -n "$OL" ] || stop "Ollama isn't installed yet. Double-click \"Install Shyft\" first."
 cat <<'EOF'
   Shyft test
@@ -21,6 +24,8 @@ OUT="$HOME/Desktop/Shyft test results"; mkdir -p "$OUT"
 START=$(mktemp)                                   # marks the start time, to find today's result files
 rm -f ps_timo.txt "$OUT/what_happened.txt"
 { echo "Date: $(date)"
+  echo "Kit: $KIT_VERSION"
+  echo "Shyft code commit: $(cat .shyft_kit_commit)"
   echo "Chip: $(sysctl -n machdep.cpu.brand_string)"
   echo "Memory: $(ram_gb) GB"
   echo "Mac model: $(sysctl -n hw.model)"
@@ -33,13 +38,15 @@ say "Starting Ollama with a longer memory window"
 osascript -e 'quit app "Ollama"' >/dev/null 2>&1
 i=0; while ollama_up && [ "$i" -lt 15 ]; do sleep 1; i=$((i + 1)); done
 if ollama_up; then   # something kept Ollama running: say so, so the results aren't misread
-  warn "Ollama didn't quit, so this test runs WITHOUT the longer memory window."
-  echo "Note: ran without OLLAMA_CONTEXT_LENGTH=16384 (Ollama didn't quit)" >> "$OUT/what_happened.txt"
+  warn "Ollama didn't quit, so this test runs WITHOUT the longer memory window, and may stop at Shyft's cloud lock."
+  echo "Note: ran without OLLAMA_CONTEXT_LENGTH=16384 and OLLAMA_NO_CLOUD=1 (Ollama didn't quit)" >> "$OUT/what_happened.txt"
 fi
-OLLAMA_CONTEXT_LENGTH=16384 "$OL" serve > "$SHYFT_HOME/ollama_serve.log" 2>&1 &
+# OLLAMA_NO_CLOUD=1: Shyft's cloud lock refuses to run while Ollama's cloud is on.
+OLLAMA_CONTEXT_LENGTH=16384 OLLAMA_NO_CLOUD=1 "$OL" serve > "$SHYFT_HOME/ollama_serve.log" 2>&1 &
 SERVE=$!
 wait_ollama || stop "Ollama didn't start. Restart your Mac, then double-click \"Run the Shyft test\" again."
 ok "Ollama is running"
+cloud_report || { kill "$SERVE" 2>/dev/null; open -a Ollama >/dev/null 2>&1; stop "$TOO_OLD"; }   # put Ollama back first
 
 caffeinate -dimsu & AWAKE=$!                      # keeps the Mac awake while this window runs
 ( while true; do curl -s http://127.0.0.1:11434/api/ps; echo; memory_pressure 2>/dev/null | tail -1; sleep 30; done ) >> ps_timo.txt 2>/dev/null &

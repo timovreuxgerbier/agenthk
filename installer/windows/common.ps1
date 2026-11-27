@@ -2,8 +2,8 @@
 # Must work in Windows PowerShell 5.1 (what Windows ships). Keep this file plain ASCII:
 # 5.1 misreads other characters in files without a BOM.
 
-$KitVersion = "kit 2"
-$CodeCommit = "1cce1b8e5dacb8a69b65578b2384f54213c47350"   # the ONE version of Shyft this kit tests
+$KitVersion = "kit 3"
+$CodeCommit = "524117b648f9cbf0db445e4c43855dc028b19763"   # the ONE version of Shyft this kit tests (main, Nov 27: cloud lock, where-checks, Nook, records)
 $CodeZipPattern = "agenthk-$($CodeCommit.Substring(0, 7))*.zip"   # GitHub "Download ZIP" of that commit, kept in files/
 # Decision D27 (Nov 25): exactly these two model builds on every platform, checked by id after install.
 # (The short names download different builds on a Mac.)
@@ -13,7 +13,7 @@ $Models     = [ordered]@{ $Zippy = 6.6; $Rick = 4.6 }      # GB. Zippy's, then R
 $ModelIds   = @{ $Zippy = "dc35e8d9c606"; $Rick = "b37049369adf" }   # the ID column of "ollama list"
 $OllamaGB   = 4                                         # Ollama's docs: at least 4 GB for its own install
 $MarginGB   = 2
-$Tests      = "tests.test_execute tests.test_golden tests.test_naming tests.test_caps tests.test_gate tests.test_two_models tests.test_cost tests.test_batch tests.test_server tests.test_zoom" -split " "
+$Tests      = "tests.test_execute tests.test_golden tests.test_naming tests.test_caps tests.test_gate tests.test_two_models tests.test_cost tests.test_batch tests.test_server tests.test_zoom tests.test_requirements tests.test_check_misses tests.test_cloud_lock tests.test_sync_check tests.test_disk_check tests.test_where_check tests.test_home tests.test_records" -split " "   # 169 tests (main 524117b)
 
 $ShyftHome  = Join-Path $HOME "Shyft"
 $KitDir     = Join-Path $env:LOCALAPPDATA "ShyftTesterKit"       # outside the Shyft folder, survives a failed install
@@ -73,6 +73,15 @@ function Start-OllamaApp {
   $app = Join-Path $OllamaDir "ollama app.exe"
   if (Test-Path $app) { Start-Process $app } else { $o = Find-Ollama; if ($o) { Start-Process $o -ArgumentList "serve" -WindowStyle Hidden } }
 }
+# Shyft's cloud lock asks Ollama (/api/status) whether its cloud is off, before every run. Ollama older than
+# 0.40.17 can't answer, so every run would stop. The kit never updates Ollama: it checks and says so instead.
+function Test-CloudReport {
+  try {
+    $s = (New-Object System.Net.WebClient).DownloadString("http://127.0.0.1:11434/api/status") | ConvertFrom-Json
+    return ($s.cloud -ne $null) -and ($s.cloud.PSObject.Properties.Name -contains "disabled")
+  } catch { return $false }
+}
+$TooOld = "Your Ollama is too old for this version of Shyft: it can't say whether its cloud is off, and Shyft checks that before every run. The kit never changes your Ollama, so please update it yourself from ollama.com/download, then run this again."
 function Get-ModelId($ol, $m) {   # the model's id from "ollama list", or $null
   foreach ($line in (& $ol list 2>$null | Select-Object -Skip 1)) {
     $parts = ("$line").Trim() -split "\s+"

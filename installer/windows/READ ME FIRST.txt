@@ -1,4 +1,4 @@
-SHYFT TEST - READ ME FIRST (Windows, kit 2)
+SHYFT TEST - READ ME FIRST (Windows, kit 3)
 ===========================================
 
 Thank you for testing Shyft. It uses only made-up screenshots. Nothing of yours is
@@ -52,6 +52,11 @@ YOU NEED
                                               your user name and home folder hidden
    (It also has two hidden files, desktop.ini and shyft.ico, that only give the folder
     its Shyft icon.)
+   Every run starts with a short notice called "WHERE YOUR FILES ARE", so run_A.txt and
+   run_B.txt (and the quick checks) also say whether the screenshots folder and Shyft's
+   folder are inside OneDrive, and whether Windows says this PC's disk is encrypted.
+   Only yes / no / couldn't check: no folder paths and no names. Shyft only looks; it
+   changes nothing.
    Open my_pc.txt, type roughly when you bought the PC, save, and send the whole folder
    to Sphinx (right-click > Send to > Compressed (zipped) folder makes it one file).
 

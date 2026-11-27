@@ -8,6 +8,9 @@ Clear-Host
 Ensure-Results
 if (-not (Test-Path (Join-Path $ShyftHome ".shyft_kit_commit"))) { Stop-Shyft "Shyft isn't installed yet. Double-click '1 Install Shyft' first." }
 $ol = Find-Ollama; $py = Find-Python
+# Nook (main, Nov 27): a test run never writes into a person's Nook. This note doesn't exist, so Shyft
+# sees "no home" and keeps the test's trace in the Shyft folder, where the results collect it (as Sphinx's tests do).
+$env:SHYFT_HOME_NOTE = Join-Path $ShyftHome "kit_no_home.json"
 if (-not $ol -or -not $py) { Stop-Shyft "Python or Ollama is missing. Double-click '1 Install Shyft' first." }
 Write-Host @"
   Shyft test
@@ -66,11 +69,13 @@ try {
   Say "Restarting Ollama with a longer memory window"
   Get-Process -Name "ollama app", "ollama" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
   for ($i = 0; ($i -lt 15) -and (Test-OllamaUp); $i++) { Start-Sleep 1 }
-  if (Test-OllamaUp) { Warn "Ollama didn't close, so this test runs WITHOUT the longer memory window."; Note "Ran without OLLAMA_CONTEXT_LENGTH=16384 (Ollama didn't close)" }
+  if (Test-OllamaUp) { Warn "Ollama didn't close, so this test runs WITHOUT the longer memory window, and may stop at Shyft's cloud lock."; Note "Ran without OLLAMA_CONTEXT_LENGTH=16384 and OLLAMA_NO_CLOUD=1 (Ollama didn't close)" }
   $env:OLLAMA_CONTEXT_LENGTH = "16384"
+  $env:OLLAMA_NO_CLOUD = "1"                         # Shyft's cloud lock refuses to run while Ollama's cloud is on
   $serve = Start-Process -FilePath $ol -ArgumentList "serve" -WindowStyle Hidden -PassThru -RedirectStandardError $serveLog
   if (-not (Wait-Ollama)) { Stop-Shyft "Ollama didn't start. Restart your PC, then run the test again." }
   Ok "Ollama is running"
+  if (-not (Test-CloudReport)) { Stop-Shyft $TooOld }
   Save-OllamaInfo $ol
   Set-Awake $true
   $job = Start-Job -ArgumentList (Join-Path $Out "ps_timo.txt") -ScriptBlock {   # memory sample every 30 s

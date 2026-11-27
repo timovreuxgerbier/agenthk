@@ -84,6 +84,8 @@ if (-not $ol) {
 if (-not (Test-OllamaUp)) { Start-OllamaApp }
 if (-not (Wait-Ollama)) { Stop-Shyft "Ollama didn't start. Open it from the Start menu (llama icon by the clock), then run this again." }
 Ok "Ollama is running"
+if (-not (Test-CloudReport)) { Stop-Shyft $TooOld }   # before the long downloads
+Ok "Ollama can report its cloud setting"
 
 Say "5/6  Rick's and Zippy's models"
 foreach ($m in $Models.Keys) {

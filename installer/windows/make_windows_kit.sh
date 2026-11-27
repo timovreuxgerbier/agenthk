@@ -1,6 +1,6 @@
 #!/bin/bash
 # make_windows_kit.sh - builds Shyft-Tester-Windows.zip. Works on a Mac or Linux (needs zip).
-# Before running: put shyft_synthetic_set.zip (from Sphinx) and the code zip agenthk-1cce1b8...zip
+# Before running: put shyft_synthetic_set.zip (from Sphinx) and the code zip agenthk-524117b...zip
 # (GitHub "Download ZIP" of the pinned commit) in installer/. Neither goes into Git.
 # Run it with:   bash installer/windows/make_windows_kit.sh
 set -e
