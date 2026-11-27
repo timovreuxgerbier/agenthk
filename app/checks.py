@@ -41,7 +41,7 @@ def requirements():
     for role, buddy in (("gate", "Zippy"), ("namer", "Rick")):
         m = shape[role]
         models.append({"role": role, "buddy": buddy, "job": m["job"].replace("Pip", "Rick"),
-                       "pull": m["pull"], "id": m["id"], "gb": m["download_gb"]})
+                       "pull": m["pull"], "short": m.get("short_name"), "id": m["id"], "gb": m["download_gb"]})
     return {"memory_gb": req["floor"]["memory_gb"], "free_disk_gb": req["floor"]["free_disk_gb"],
             "disk_parts": req["floor"]["free_disk_parts_gb"], "download_gb": shape["download_gb_total"],
             "models": models, "pace": req["pace"]["plain_words"], "below_floor": req["floor"]["below_the_floor"]}
@@ -125,11 +125,25 @@ def ollama():
     models = {}
     try:
         for item in _get("/api/tags").get("models") or []:
-            name = (item.get("name") or item.get("model") or "").lower()
+            name = item.get("name") or item.get("model") or ""   # as Ollama has it: run.py gets this exact name
             models[name] = (item.get("digest") or "")[:12]   # "ollama list" shows these 12 characters as ID
     except Exception:   # noqa: BLE001
         pass
     return {"running": True, "version": version, "cloud": report, "models": models}
+
+
+def match(m, here):
+    """D27 / files_rule: names can be re-pointed, ids can't. So a model is FOUND by its id, under any
+    name (a laptop may hold the measured build as gemma4:e4b). A DIFFERENT BUILD is only a tag with the
+    model's long or short name whose id differs. Neither: not downloaded.
+      matches: the measured build is here.  found: something is here (the right build, or a different one).
+      name: the name to run it by (the long name if it has it, else any name it's under)."""
+    own = {m["pull"].lower(), (m.get("short") or "").lower()} - {""}      # names compared without case
+    under = sorted((n for n, i in here.items() if i == m["id"]), key=lambda n: n.lower() != m["pull"].lower())
+    if under:
+        return {"found": True, "matches": True, "found_id": m["id"], "name": under[0]}
+    named = [i for n, i in here.items() if n.lower() in own]
+    return {"found": bool(named), "matches": False, "found_id": named[0] if named else None, "name": m["pull"]}
 
 
 def status():
@@ -137,10 +151,7 @@ def status():
     every judgement (ready, enough space) is made here, once, so the two screens can't disagree."""
     req = requirements()
     oll = ollama()
-    models = []
-    for m in req["models"]:
-        found_id = oll["models"].get(m["pull"].lower())
-        models.append(dict(m, found=found_id is not None, found_id=found_id, matches=found_id == m["id"]))
+    models = [dict(m, **match(m, oll["models"])) for m in req["models"]]
     memory, disk = memory_gb(), free_disk_gb()
     # Free space needed NOW: what is still to download (a different build too: the right one must come),
     # plus Ollama if it isn't there, plus spare. The parts come from shyft_requirements.json.

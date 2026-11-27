@@ -45,7 +45,7 @@ function liveCheck() {
     have.ollama = !o.running ? "notrunning" : o.cloud === "too_old" ? "old" : o.cloud === "on" ? "cloudon" : "ready";
     s.models.forEach(function (m) {
       var id = m.role === "gate" ? "zippy" : "rick";
-      NEED.filter(function (n) { return n.id === id; })[0].what = m.pull + " · " + (id === "zippy" ? "spots private screenshots" : "suggests what to do");
+      NEED.filter(function (n) { return n.id === id; })[0].what = (m.matches ? m.name : m.pull) + " · " + (id === "zippy" ? "spots private screenshots" : "suggests what to do");
       have[id] = !m.found ? "missing" : m.matches ? "ready" : "wrong";
     });
     if (have.ollama === "notrunning") notes.push("Open Ollama (the llama icon), then check again.");

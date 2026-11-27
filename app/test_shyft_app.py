@@ -152,6 +152,27 @@ class Status(Base):
         self.assertTrue(rick["found"])                # found despite other upper/lower case...
         self.assertFalse(rick["matches"])             # ...but a different build
 
+    def test_found_by_id_under_the_short_names(self):   # Sphinx's must-fix: the Legion pulled the short names
+        self.ollama.tags = [model("gemma4:e4b", ZIPPY_ID), model("gemma4:e2b", RICK_ID)]
+        s = self.status()
+        for m in s["models"]:
+            self.assertTrue(m["found"] and m["matches"], m)
+        self.assertEqual([m["name"] for m in s["models"]], ["gemma4:e4b", "gemma4:e2b"])   # run by the name it's under
+        req = json.loads(checks.REQUIREMENTS.read_text(encoding="utf-8"))
+        self.assertEqual(s["requirements"]["need_now_gb"], req["floor"]["free_disk_parts_gb"]["spare"])   # no 11 GB download
+
+    def test_found_by_id_under_any_name_long_name_first(self):
+        self.ollama.tags = [model("my-zippy:latest", ZIPPY_ID), model("gemma4:e4b-it-q4_k_m", ZIPPY_ID)]
+        zippy, rick = self.status()["models"]
+        self.assertEqual(zippy["name"], "gemma4:e4b-it-q4_k_m")   # exactly as Ollama has it, case kept
+        self.assertFalse(rick["found"])                # nothing for Rick: not downloaded
+
+    def test_different_build_only_under_its_own_names(self):
+        self.ollama.tags = [model("gemma4:e2b", "000000000000"), model("someone-elses:7b", "111111111111")]
+        zippy, rick = self.status()["models"]
+        self.assertFalse(zippy["found"])               # an unrelated model is not "a different build of Zippy"
+        self.assertTrue(rick["found"] and not rick["matches"])   # short name, wrong id: a different build
+
     def test_rick_not_pip_on_screen(self):
         names = [m["buddy"] for m in self.status()["requirements"]["models"]]
         self.assertEqual(names, ["Zippy", "Rick"])
