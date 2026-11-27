@@ -9,7 +9,9 @@
 # It is a .js file (not .json) so the page works when opened by double-click.
 # SAFETY: refuses unless the synthetic set is loaded. Real screenshots never go on a page.
 # S13: the run's screenshots are COPIED into demo/ and the page points at the copies.
-# demo/review.json is written too: apply.py acts on demo/ only, never on a test set.
+# review.json is written too: apply.py acts on demo/ only, never on a test set.
+# S21 (0.3): the trace is read from every place it is kept, and review.json goes into the
+# home (Nook), via harness/records.py. The copies stay in demo/ (D41).
 import json
 import shutil
 import sys
@@ -18,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from harness import ids, naming, schema  # noqa: E402
+from harness import ids, naming, records, schema, trace  # noqa: E402
 
 ACTIVE = ROOT / "golden" / "active_set.txt"
 OUT = ROOT / "ui" / "review_data.js"
@@ -35,13 +37,13 @@ def loaded_set():
 
 
 def run_rows(run_id):
-    rows = [json.loads(line) for line in schema.TRACE.read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = trace.read_all()
     if not rows:
-        stop("trace.jsonl is empty.")
+        stop("there is no trace yet.")
     run_id = run_id or rows[-1].get("run_id")
     picked = [r for r in rows if r.get("run_id") == run_id]
     if not picked:
-        stop("no run called " + run_id + " in trace.jsonl.")
+        stop("no run called " + run_id + " in the trace.")
     return run_id, picked
 
 
@@ -114,7 +116,7 @@ def main():
     # The page shows the image only for open items, and for locked ones only after "Show me".
     previews = {i["id"]: {"img": "../demo/" + i["file"], "label": i["file"]} for i in items}
     models = review["models"]["zippy"] + " / " + review["models"]["pip"]
-    (DEMO / "review.json").write_text(json.dumps(review, indent=1, ensure_ascii=False), encoding="utf-8")
+    records.review_file().write_text(json.dumps(review, indent=1, ensure_ascii=False), encoding="utf-8")
     OUT.write_text(
         "// review_data.js — WRITTEN BY dev/make_review.py. Do not edit by hand.\n"
         "// Real answers from run " + run_id + " (Zippy / Pip: " + models + "), synthetic screenshots.\n"
@@ -124,7 +126,7 @@ def main():
         encoding="utf-8")
     print("Wrote ui/review_data.js from run", run_id + ":", len(items), "items,",
           states.count("open"), "open,", states.count("locked"), "locked,", states.count("copy"), "copies.")
-    print("Copies in demo/, and demo/review.json for apply.py.")
+    print("Copies in demo/. review.json for apply.py is in " + records.where_words("demo/") + ".")
     print("Open ui/index.html in your browser (double-click it).")
 
 

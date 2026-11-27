@@ -1,14 +1,22 @@
 # harness/receipt.py — Lane: Sphinx. Bloop's receipt (idea: Sabrina, 'Spire).
 # Three jobs: RECORD what changed, let the person UNDO the last run, and PROVE
-# where it ran. Two files per run, in the folder's "Shyft receipts" subfolder:
+# where it ran. Two files per run:
 #   receipt_<time>.json  every step, for undo (our code reads it)
 #   receipt_<time>.txt   the same in plain words, for the person
 # Locked files are SEALED in the .txt: kind and month only, never a name.
+# S21 (stage 0.3): new receipts go into the home ("Shyft's records/receipts", via
+# harness/records.py), one folder for every screenshot folder, so each receipt says which
+# folder it is about and undo only uses that folder's receipts. Receipts from before 0.3
+# stay in the folder's "Shyft receipts" subfolder and are still read, so those runs can
+# still be undone. With no home, receipts go to that subfolder, as before.
 
 import json
 from datetime import datetime
+from pathlib import Path
 
-FOLDER_NAME = "Shyft receipts"
+from harness import records
+
+FOLDER_NAME = records.OLD_RECEIPTS
 WORDS = {"renamed": "Renamed", "moved": "Moved to To Be Deleted", "kept": "Kept as they were",
          "skipped": "Not now", "not_done": "Not done"}
 ONE = {"moved": "moved to To Be Deleted", "kept": "kept as it was", "skipped": "not now",
@@ -16,31 +24,52 @@ ONE = {"moved": "moved to To Be Deleted", "kept": "kept as it was", "skipped": "
 
 
 def folder_for(target):
-    return target / FOLDER_NAME
+    """Where a new receipt about `target` goes (the home, or the old subfolder)."""
+    return records.receipts_folder(target)
 
 
 def now():
     return datetime.now().isoformat(timespec="seconds")
 
 
+def _free_stem(where, stamp):
+    """receipt_<stamp>, or receipt_<stamp>_2... if that name is taken: never overwrites."""
+    stem, n = "receipt_" + stamp, 2
+    while (where / (stem + ".json")).exists() or (where / (stem + ".txt")).exists():
+        stem, n = "receipt_" + stamp + "_" + str(n), n + 1
+    return stem
+
+
 def save(target, record):
     """Write both files. Returns the .txt path."""
     where = folder_for(target)
     where.mkdir(exist_ok=True)
-    stamp = record["made"].replace(":", "").replace("-", "")
-    (where / ("receipt_" + stamp + ".json")).write_text(json.dumps(record, indent=1), encoding="utf-8")
-    text = where / ("receipt_" + stamp + ".txt")
-    text.write_text(plain(record), encoding="utf-8")
+    record = dict(record, folder=str(record.get("folder") or target))   # which folder it is about
+    stem = _free_stem(where, record["made"].replace(":", "").replace("-", ""))
+    with open(where / (stem + ".json"), "x", encoding="utf-8") as out:
+        out.write(json.dumps(record, indent=1))
+    text = where / (stem + ".txt")
+    with open(text, "x", encoding="utf-8") as out:
+        out.write(plain(record))
     return text
 
 
+def _belongs(place, record, target):
+    """Old subfolder: every receipt in it is about that folder. The home: only if it says so."""
+    if place.name == records.OLD_RECEIPTS and place.parent == Path(target):
+        return True
+    return records.same_folder(record.get("folder"), target)
+
+
 def all_records(target):
-    """(path, record) for every receipt, oldest first."""
-    where = folder_for(target)
-    if not where.exists():
-        return []
-    paths = sorted(where.glob("receipt_*.json"))
-    return [(p, json.loads(p.read_text(encoding="utf-8"))) for p in paths]
+    """(path, record) for every receipt about `target`, old place and home, oldest first."""
+    found = []
+    for place in records.receipt_places(target):
+        for path in sorted(place.glob("receipt_*.json")):
+            record = json.loads(path.read_text(encoding="utf-8"))
+            if _belongs(place, record, target):
+                found.append((path, record))
+    return sorted(found, key=lambda pair: str(pair[1].get("made") or ""))
 
 
 def latest_open(target):

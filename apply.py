@@ -7,17 +7,17 @@
 # It works ONLY on the demo folder (demo/), which dev/make_review.py fills with copies
 # of a synthetic run's screenshots. The test sets are never touched.
 # Renames and moves only. Nothing is ever deleted or overwritten. Every change is
-# checked and written to a receipt in demo/Shyft receipts/.
+# checked and written to a receipt. S21 (0.3): review.json and the receipts are kept in the
+# home (Nook), via harness/records.py; with no home, where they were (demo/).
 
 import json
 import sys
 from pathlib import Path
 
-from harness import execute, schema, undo
+from harness import execute, records, schema, undo
 
 sys.stdout.reconfigure(encoding="utf-8")
 DEMO = schema.ROOT / "demo"
-REVIEW = DEMO / "review.json"
 
 
 def newest_download():
@@ -34,15 +34,16 @@ def load(path, what):
 
 
 def run_apply(args):
-    if not REVIEW.exists():
-        sys.exit("Stopped, nothing changed: no demo/review.json. Run dev/make_review.py first.")
+    review = records.review_to_read()
+    if review is None:
+        sys.exit("Stopped, nothing changed: no review.json. Run dev/make_review.py first.")
     source = Path(args[0]) if args else newest_download()
     if source is None:
         sys.exit("Stopped, nothing changed: no decisions*.json in your Downloads folder.\n"
                  "On the review page's last screen, click 'Download decisions.json'.")
     print("Decisions: " + str(source))
     try:
-        text, steps = execute.apply(DEMO, schema.ROOT, load(REVIEW, "review"),
+        text, steps = execute.apply(DEMO, schema.ROOT, load(review, "review"),
                                     load(source, "decisions file"))
     except execute.Refused as problem:
         sys.exit("Stopped, nothing changed: " + str(problem))
