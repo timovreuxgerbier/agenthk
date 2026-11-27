@@ -88,7 +88,9 @@ def score(page, copy):
     plain = [line for line in page["lines"] if line not in details]
     missing = [line for line in plain if not line_there(line, copy)]
     wrong = {d: nearest_line(d, copy) for d, r in details.items() if r[0] == "wrong"}
-    misread = {d: r[1] for d, r in details.items() if r[0] == "wrong"}   # for the agreement table
+    # For the agreement table: what was read, found inside the model's own line only, so two
+    # identical misreads are always seen as the same (S22: found by eye after the first run).
+    misread = {d: _closest(squeeze(d), squeeze(line))[1] for d, line in wrong.items()}
     absent = [d for d, r in details.items() if r[0] == "missing"]
     planted = page.get("planted") or ""
     return {"file": page["file"], "details": {d: r[0] for d, r in details.items()},

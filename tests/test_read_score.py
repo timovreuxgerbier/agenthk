@@ -99,6 +99,14 @@ class Scorer(unittest.TestCase):
         self.assertEqual((table["both_right"], table["only_first"], table["neither"]), (0, 1, 1))
         self.assertEqual(len(table["shared_wrong"]), 1)
 
+    def test_the_same_misread_is_shared_even_when_other_lines_differ(self):
+        p = page(["TXT include:_spf.google.com", "CNAME google._domainkey"],
+                 ["TXT include:_spf.google.com", "CNAME google._domainkey"])
+        a = read_score.score(p, "TXT include:spf.google.com\nCNAME google_domainkey")
+        b = read_score.score(p, "TXT include:_spf.google.com\nCNAME google_domainkey")
+        shared = read_score.agreement([a], [b])["shared_wrong"]
+        self.assertEqual([d for _, d, _ in shared], ["CNAME google._domainkey"])
+
 
 class Report(unittest.TestCase):
     def test_verdicts_follow_the_bar_written_before_the_run(self):
