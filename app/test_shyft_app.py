@@ -195,6 +195,13 @@ class Status(Base):
         self.assertIn('o.cloud === "on" ? "cloudon"', js)
         self.assertNotIn("will run it with the cloud off", js)
 
+    def test_no_answer_claims_nothing_about_the_computer(self):   # Sphinx, on the Legion
+        js = (checks.ROOT / "ui" / "setup.js").read_text(encoding="utf-8")
+        line = [l for l in js.splitlines() if "Couldn't reach Shyft's helper" in l][0]
+        self.assertIn('have[n.id] = "unknown"', line)
+        self.assertNotIn('"missing"', line)
+        self.assertIn("unknown: \"<span class='wait'>Couldn't check</span>\"", js)
+
     def test_ollama_not_running(self):
         self.ollama.stop()
         s = self.status()
