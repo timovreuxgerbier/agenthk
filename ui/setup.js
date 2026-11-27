@@ -33,12 +33,13 @@ var LIVE_WORDS = {   // our own markup only; every state has words, never colour
   cloudon: "<span class='miss'>Cloud is on</span>",
   missing: "<span class='miss'>Not downloaded yet</span>",
   wrong: "<span class='miss'>Different build</span>",
-  checking: "<span class='wait'>Checking…</span>"
+  checking: "<span class='wait'>Checking…</span>",
+  unknown: "<span class='wait'>Couldn't check</span>"   // the helper didn't answer: no claim about this computer
 };
 function liveCheck() {
   NEED.forEach(function (n) { have[n.id] = "checking"; }); renderNeeds();
   liveGet("/api/status", function (s, why) {
-    if (!s) { liveNote = "Couldn't reach Shyft's helper (" + why + "). Is its window still open?"; NEED.forEach(function (n) { have[n.id] = "missing"; }); return renderNeeds(); }
+    if (!s) { liveNote = "Couldn't reach Shyft's helper (" + why + "). Is its window still open?"; NEED.forEach(function (n) { have[n.id] = "unknown"; }); return renderNeeds(); }
     var o = s.ollama, notes = [];
     // Ready only if a run would really start: running, able to report its cloud, and the cloud off
     // (Shyft's cloud lock refuses every run otherwise).
