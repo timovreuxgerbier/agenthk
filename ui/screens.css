@@ -44,3 +44,6 @@ body.big .window{min-height:calc(100vh / 1.25 - 40px)}
 
 /* Setup 1, live: one note per line, easier to read than one long paragraph */
 #need-help{white-space:pre-line}
+
+/* Stage 2: the where-notice from run.py keeps its line breaks */
+#sort-notice{white-space:pre-line;text-align:left;max-width:34em;margin:12px auto 0}

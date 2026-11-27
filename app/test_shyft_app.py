@@ -246,14 +246,14 @@ class Review(Base):
 
 class D38(unittest.TestCase):
     """app/ writes, moves, renames and deletes nothing, and builds no path to a person's files or to
-    Shyft's home. Read every app/ file (not this test) and look at what it calls."""
+    Shyft's home. Read every app/ file (not the tests) and look at what it calls."""
     CHANGES_FILES = {"write_text", "write_bytes", "mkdir", "makedirs", "rename", "renames", "unlink", "rmdir",
                      "remove", "removedirs", "rmtree", "move", "copy", "copy2", "copyfile", "copytree", "chmod",
                      "touch", "symlink_to", "hardlink_to", "truncate"}
     PERSONAL = {"home", "expanduser", "USERPROFILE", "HOMEDRIVE", "HOMEPATH", "LOCALAPPDATA", "APPDATA", "HOME"}
 
     def files(self):
-        return [p for p in APP.glob("*.py") if p.name != Path(__file__).name]
+        return [p for p in APP.glob("*.py") if not p.name.startswith("test_")]   # tests may use temp folders
 
     def test_changes_no_files(self):
         for path in self.files():

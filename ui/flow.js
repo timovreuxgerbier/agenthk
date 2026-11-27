@@ -91,8 +91,9 @@ document.addEventListener("keydown", function (e) {
   if (e.key === "ArrowLeft" && w > 0) document.getElementById("m-back").click();
 });
 
-// ---- Sorting (simulated; the real one will ask the local server for progress) ----
+// ---- Sorting (prototype: simulated. Live: the real run, in live_jobs.js) ----
 function startSorting() {
+  if (window.LIVE) return liveSort();
   show("s-sorting");
   var total = SAMPLE_REVIEW.items.length, n = 0;
   document.getElementById("sort-review").hidden = true;

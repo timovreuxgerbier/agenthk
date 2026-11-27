@@ -67,7 +67,7 @@
       <p class="small" id="need-help"></p>
       <p class="small" id="need-note" style="color:var(--text-dim,#5E7D6C)"></p>
     </div>
-    <div class="foot"><button data-go="s-spec">Back</button><span class="spacer"></span><button class="main" id="need-main">Get what's missing</button></div>
+    <div class="foot"><button data-go="s-spec">Back</button><span class="spacer"></span><button class="quiet" id="need-stop" hidden>Stop</button><button class="main" id="need-main">Get what's missing</button></div>
   </section>
 
   <!-- SETUP 2 -->
@@ -115,6 +115,8 @@
       <p class="sub" id="sort-sub">On this computer. Nothing moves yet.</p>
       <div class="track" role="progressbar" aria-label="Progress"><div class="fill" id="sort-fill"></div></div>
       <p class="small" id="sort-count" aria-live="polite">0 of 9</p>
+      <p class="small" id="sort-notice"></p>
+      <button class="quiet" id="sort-stop" hidden>Stop</button>
       <button class="main" id="sort-review" data-review hidden>Start review</button>
       <button class="quiet" data-go="s-welcome" id="sort-later">Tell me when it's ready</button>
     </div>
@@ -168,6 +170,7 @@
 <!-- A real run: dev/make_review.py writes this file (not in Git). If it is missing, the sample above is used. -->
 <script src="review_data.js"></script>
 <script src="live.js"></script>
+<script src="live_jobs.js"></script>
 <script src="trust.js"></script>
 <script src="flow.js"></script>
 <script src="setup.js"></script>

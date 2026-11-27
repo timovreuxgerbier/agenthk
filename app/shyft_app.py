@@ -1,9 +1,11 @@
-# app/shyft_app.py — Lane: Ana. Stage 1 of the Windows app plan: Shyft's screens, with real answers.
+# app/shyft_app.py — Lane: Ana. Stages 1 and 2 of the Windows app plan: Shyft's screens, with real answers.
 #
 #   python3 app/shyft_app.py
 #
 # Opens Shyft's screens (ui/) in your browser, and answers them with what is true on this computer
-# (app/checks.py). Stage 1 only LOOKS: it installs, downloads, runs, moves and deletes nothing.
+# (app/checks.py). Stage 2 adds jobs (app/jobs.py), one at a time: downloading missing model files through
+# Ollama, and starting the team's run.py on the made-up test set. Still nothing is moved or deleted:
+# run.py only proposes.
 # Close this window, or press Ctrl+C, to stop it.
 #
 # Safety rules (plan, section 6; D38):
@@ -33,7 +35,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))   # the project folder, so "app" can be found
-from app import checks   # noqa: E402 (after the path line on purpose)
+from app import checks, jobs   # noqa: E402 (after the path line on purpose)
 
 UI = checks.ROOT / "ui"
 SHOWN = {".html", ".js", ".css", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".webp", ".gif"}
@@ -99,6 +101,8 @@ def make_handler(key, host):
             path = urlsplit(self.path).path
             if path == "/api/status":
                 return self._send(200, checks.status())
+            if path == "/api/job":
+                return self._send(200, jobs.snapshot())
             if path == "/api/review":
                 review = review_answer()
                 return self._send(200, review) if review is not None else self._send(404, {"error": "No review yet."})
@@ -109,10 +113,18 @@ def make_handler(key, host):
         def do_POST(self):
             if not self._ours(post=True):
                 return self._send(403, {"error": "Not allowed."})
-            if urlsplit(self.path).path == "/api/quit":
+            path = urlsplit(self.path).path
+            if path == "/api/quit":   # stops any job first, so nothing keeps running unseen
+                jobs.stop()
                 self._send(200, {"bye": True})
                 threading.Thread(target=self.server.shutdown, daemon=True).start()
                 return None
+            if path in ("/api/get-ready", "/api/run"):
+                started, answer = (jobs.get_ready if path == "/api/get-ready" else jobs.sort)()
+                return self._send(200, answer) if started else self._send(409, {"error": answer})
+            if path == "/api/stop":
+                jobs.stop()
+                return self._send(200, jobs.snapshot())
             return self._send(404, {"error": "Unknown."})
 
         def _file(self, path):   # only Shyft's screens in ui/, only the kinds a page needs
@@ -152,6 +164,7 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
+        jobs.stop()   # closing the window stops a download or a run too
         server.server_close()
     print("Shyft stopped.")
 

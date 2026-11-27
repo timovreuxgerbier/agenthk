@@ -1,7 +1,7 @@
 // setup.js — Setup 1 "Get Shyft ready": check Ollama and the two models, and get what's missing.
 // Two modes:
-//  - LIVE (opened by app/shyft_app.py): real answers from this computer (live.js). Stage 1 only checks;
-//    getting what's missing comes in stage 2, and the screen says so. Every judgement (ready, enough
+//  - LIVE (opened by app/shyft_app.py): real answers from this computer (live.js). Stage 2 downloads
+//    missing model files through Ollama (live_jobs.js). Ollama itself the person installs. Every judgement (ready, enough
 //    space) comes from the server, so this screen and the Spec screen always agree.
 //  - PROTOTYPE (opened as a file): simulated, for design demos. Pick a scenario in the prototype menu.
 // Values from the server go onto the page as text, never as markup.
@@ -62,6 +62,8 @@ function liveCheck() {
 }
 
 // ---- Shared ----
+function canDownload() {   // live: Ollama ready, and a model simply missing (a different build is never replaced)
+  return have.ollama === "ready" && (have.zippy === "missing" || have.rick === "missing"); }
 function allReady() { return NEED.every(function (n) { return have[n.id] === "ready"; }); }
 function statusHtml(id) {   // our own markup only (no values from the server)
   var s = have[id];
@@ -84,9 +86,11 @@ function renderNeeds() {
   });
   var main = document.getElementById("need-main"), help = document.getElementById("need-help");
   if (window.LIVE) {
-    main.textContent = allReady() ? "Continue" : "Check again";
+    var downloading = have.zippy === "downloading" || have.rick === "downloading";
+    main.textContent = allReady() ? "Continue" : downloading ? "Downloading…" : canDownload() ? "Download what's missing" : "Check again";
+    main.disabled = downloading;
     help.textContent = liveNote;
-    document.getElementById("need-note").textContent = allReady() ? "" : "Stage 1 only checks. Getting what's missing comes in the next stage.";
+    document.getElementById("need-note").textContent = "";
     return;
   }
   main.textContent = allReady() ? "Continue" : busy ? "Downloading…" : "Get what's missing";
@@ -98,7 +102,7 @@ function renderNeeds() {
 
 function getMissing() {
   if (allReady()) return show("s-folder");
-  if (window.LIVE) return liveCheck();                 // stage 1: check again
+  if (window.LIVE) return canDownload() ? liveGetReady() : liveCheck();   // stage 2: download, or check again
   if (busy || have.ollama === "waiting") return;       // already working on it: don't start twice
   if (have.ollama !== "ready") {
     have.ollama = "waiting"; renderNeeds();
