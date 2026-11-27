@@ -9,12 +9,14 @@
 # - Say exactly what was checked, so "no sign" is never read as "safe".
 # - "Encrypted" only when Windows says so. Shyft encrypts nothing.
 # S20: one more line, for the home (harness/home.py); its words are in harness/home_words.py.
+# S21: and one for where this run's records go (harness/records.py), right after the home's.
 
 from harness import disk_check, home, home_words, schema, sync_check
 
 PLACES = [
     ("Screenshots folder", schema.SCREENSHOTS),
-    ("Shyft's own folder (where it keeps its notes)", schema.ROOT),
+    ("Shyft's code folder (its program, and its records from before " + home_words.NAME + ")",
+     schema.ROOT),
 ]
 SCOPE = "Only OneDrive was checked. iCloud, Dropbox and Google Drive are not checked yet."
 
@@ -46,6 +48,7 @@ def lines(sync_results, disk_result, home_state=None):
     out += ["  " + sync_line(label, result) for label, result in sync_results]
     if home_state is not None:
         out.append("  " + home_words.notice_line(*home_state))
+        out.append("  " + home_words.records_line(home_state[0]))
     results = [result for _, result in sync_results] + ([home_state[1]] if home_state else [])
     if any(r and r[0] == sync_check.NO_SIGN for r in results):
         out.append("  " + SCOPE)

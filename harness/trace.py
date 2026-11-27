@@ -2,11 +2,13 @@
 # Writes and reads the run record. One JSON line per screenshot per run.
 # S8: anything judged sensitive, by Zippy OR Pip, is redacted before it is written:
 # only the action and confidence survive. No description, no name, no why-saved.
+# S21 (stage 0.3): new lines go into the home (harness/records.py). Old lines are read
+# where they are, in the code folder's trace.jsonl. Nothing is moved or copied.
 
 import json
 from datetime import datetime
 
-from harness import schema, gate
+from harness import schema, gate, records
 
 
 def new_run_id():
@@ -41,16 +43,19 @@ def write(entry):
     """Append one trace line, redacted. Only the keys in schema.TRACE_FIELDS are kept."""
     safe = redact(entry)
     line = {key: safe.get(key) for key in schema.TRACE_FIELDS}
-    with schema.TRACE.open("a", encoding="utf-8") as log:
+    with records.trace_file().open("a", encoding="utf-8") as log:
         log.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 
 def read_all():
-    """Return every trace line as a list of dicts (empty list if no trace yet)."""
-    if not schema.TRACE.exists():
-        return []
-    lines = schema.TRACE.read_text(encoding="utf-8").splitlines()
-    return [json.loads(line) for line in lines if line.strip()]
+    """Every trace line, old place and home together, as a list of dicts, oldest run first
+    (empty list if no trace yet). Run ids are times, so sorting by them keeps runs in order;
+    the sort is stable, so each run's own lines keep their order."""
+    entries = []
+    for path in records.trace_files():
+        lines = path.read_text(encoding="utf-8").splitlines()
+        entries += [json.loads(line) for line in lines if line.strip()]
+    return sorted(entries, key=lambda e: str(e.get("run_id") or ""))
 
 
 def latest_run():

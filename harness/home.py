@@ -1,6 +1,7 @@
 # harness/home.py — Lane: Sphinx. S20, stage 0.2 of the home base (D34, D36).
-# Shyft's home for a person's files ("The Waystation", working title). Today it is created
-# with one note in it; Shyft's own records move in at 0.3, a person's files only with approval.
+# Shyft's home for a person's files ("Nook", Raaghavi's name, Nov 27; was "The Waystation").
+# It is created with one note in it. S21 (0.3): Shyft's records go in its "Shyft's records"
+# folder (harness/records.py); a person's files come in later, only with approval.
 #
 # where() is the ONE answer to "where is the home". Nothing else builds that path
 # (Ana's app included: D38).
@@ -29,7 +30,12 @@ from harness import home_words as words, schema, sync_check
 
 
 def note_path():
-    """Shyft's own note of where the home is: hidden, outside the home and the code folder."""
+    """Shyft's own note of where the home is: hidden, outside the home and the code folder.
+    S21: SHYFT_HOME_NOTE, if set, is used instead. The tests set it to a note that doesn't
+    exist, so no test ever writes into a real home; a developer can do the same to try a
+    run with no home, without touching the real one."""
+    if os.environ.get("SHYFT_HOME_NOTE"):
+        return Path(os.environ["SHYFT_HOME_NOTE"])
     base = os.environ.get("LOCALAPPDATA") if sys.platform == "win32" else None
     return (Path(base) / "Shyft" if base else Path.home() / ".shyft") / "home.json"
 
@@ -74,9 +80,15 @@ def state(note=None, check=sync_check.check):
     return ("by_request" if data.get("synced_by_request") else "made"), check(place)
 
 
-def _ours(place):
-    """An empty folder, or one with only Shyft's note in it."""
+def _only_note(place):
+    """An empty folder, or one with only Shyft's note in it (rule 7: only these can move)."""
     return all(item.name == words.ABOUT_FILE for item in place.iterdir())
+
+
+def _ours(place):
+    """Only Shyft's note and Shyft's records in it. S21: after Remove deleted Shyft's hidden
+    note (D42), a new Shyft must still recognise its own home, records and all."""
+    return all(item.name in (words.ABOUT_FILE, words.RECORDS_FOLDER) for item in place.iterdir())
 
 
 def _problem(holder, place, user, old=None):
@@ -115,7 +127,7 @@ def make(holder=None, yes_onedrive=False, yes_unchecked=False, user=None, note=N
         why = words.UNCHECKED.format(reason)
     if why:
         return False, words.refused(why)
-    if old and old != place and old.is_dir() and not _ours(old):
+    if old and old != place and old.is_dir() and not _only_note(old):
         return False, words.refused(words.HAS_FILES)
     existed = place.is_dir()
     fresh = not (place / words.ABOUT_FILE).exists()
@@ -134,6 +146,6 @@ def make(holder=None, yes_onedrive=False, yes_unchecked=False, user=None, note=N
     temp.write_text(json.dumps(data, indent=1), encoding="utf-8")
     os.replace(temp, note)
     lines = words.made(place, data["synced_by_request"])
-    if old and old != place:
+    if old and old != place and old.is_dir():   # S21: only a folder that is still there
         lines += words.moved_from(old)
     return True, lines

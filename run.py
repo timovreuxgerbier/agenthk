@@ -13,7 +13,7 @@
 #                                       Without it, "all" runs go in chunks of 50: Zippy
 #                                       looks at the chunk, then Pip (harness/batch.py).
 #   python3 run.py score                compare the latest run against golden/golden.csv
-#   python3 run.py score RUN_ID         compare an older run (its id is in trace.jsonl)
+#   python3 run.py score RUN_ID         compare an older run (its id is in the trace)
 #   python3 run.py cost                 S11: time + tokens + cloud estimate, latest run
 #   python3 run.py cost RUN_ID          the same for an older run (old runs: time only)
 #
@@ -22,7 +22,7 @@
 import sys
 import time
 
-from harness import schema, prefilter, context, trace, caps, gate, pipeline, batch, where_check
+from harness import schema, prefilter, context, trace, caps, gate, pipeline, batch, where_check, records
 
 # Windows terminals default to a code page that crashes on emoji in model output.
 sys.stdout.reconfigure(encoding="utf-8")
@@ -92,7 +92,8 @@ def propose(model, max_files, batch_mode=False, zippy_model=None, one_by_one=Fal
         print("  " + str(problem))
         return
 
-    print("Done. Total " + str(round(time.time() - run_start, 1)) + " seconds. Trace saved to trace.jsonl")
+    print("Done. Total " + str(round(time.time() - run_start, 1)) + " seconds. Trace saved in "
+          + records.where_words("Shyft's code folder") + ".")   # S21: the home, or where it was before 0.3
     print(limits.summary())
 
 

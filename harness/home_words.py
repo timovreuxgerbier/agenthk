@@ -11,13 +11,15 @@
 
 from pathlib import Path
 
-NAME = "The Waystation"          # working title (Sphinx, Nov 27). Renaming it is this one line.
+NAME = "Nook"          # Raaghavi's name (Nov 27); was "The Waystation". Renaming it is this one line.
+RECORDS_FOLDER = "Shyft's records"   # S21: inside the home, Shyft's own records (harness/records.py)
 ABOUT_FILE = "About this folder.txt"
 SENTENCE = (NAME + " is your folder. Shyft sorts your screenshots here, and everything in it "
             "stays yours and stays put if you remove Shyft.")
 ABOUT_TEXT = (SENTENCE + "\n\n"
-              "What is in it today: only this note. Later, Shyft keeps its receipts and its notes "
-              "about the screenshots it sorts here. Your own files come in only when you say so.\n\n"
+              "What is in it: this note, and the folder \"" + RECORDS_FOLDER + "\", where Shyft keeps "
+              "its records: what it proposed for your screenshots, and a receipt of every change it "
+              "made, so each change can be undone. Your own files come in only when you say so.\n\n"
               "If you remove Shyft, this folder and everything in it stay where they are. You can "
               "delete it yourself, like any other folder.\n\n"
               "If this folder is inside OneDrive, OneDrive copies it to Microsoft's cloud.\n")
@@ -56,6 +58,21 @@ def notice_line(state, result=None):
     return label + ": couldn't check (" + str(reason) + ")."
 
 
+# ---- S21: where Shyft's records go (harness/records.py) ------------------------------------
+RECORDS_OLD_PLACE = "the places Shyft used before " + NAME + " (its code folder, and next to your files)"
+
+
+def records_line(state):
+    """The records' line in the run notice, from home.state()'s state. No paths."""
+    if state in ("made", "by_request"):
+        return "Shyft's records (what it proposed, receipts for undo): kept in " + NAME + "."
+    why = {"none": NAME + " isn't made yet",
+           "missing": NAME + " isn't where Shyft made it",
+           "unreadable": "Shyft can't read its note of where " + NAME + " is"}.get(state, "no " + NAME)
+    return ("Shyft's records (what it proposed, receipts for undo): " + why + ", so this run's "
+            "records go to " + RECORDS_OLD_PLACE + ".")
+
+
 # ---- What Shyft says when a person makes or moves the home -------------------------------
 def made(place, by_request):
     out = ["Made " + NAME + " in " + shown(place.parent) + ".", SENTENCE]
@@ -77,8 +94,8 @@ def remade(place, folder_was_there):
             "as you asked.", SENTENCE]
 
 
-def moved_from(old):
-    return ["The old " + NAME + " folder in " + shown(old.parent) + " is left where it is. "
+def moved_from(old):   # S21: the old folder by its own name (it may be from before a rename)
+    return ["The old folder \"" + old.name + "\" in " + shown(old.parent) + " is left where it is. "
             "You can delete it yourself."]
 
 
