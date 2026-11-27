@@ -8,8 +8,9 @@
 # - No folder paths and no user names: testers send their run output back.
 # - Say exactly what was checked, so "no sign" is never read as "safe".
 # - "Encrypted" only when Windows says so. Shyft encrypts nothing.
+# S20: one more line, for the home (harness/home.py); its words are in harness/home_words.py.
 
-from harness import disk_check, schema, sync_check
+from harness import disk_check, home, home_words, schema, sync_check
 
 PLACES = [
     ("Screenshots folder", schema.SCREENSHOTS),
@@ -38,11 +39,15 @@ def disk_line(result):
     return "This computer's disk: couldn't tell (" + str(reason) + ")."
 
 
-def lines(sync_results, disk_result):
-    """The notice, as a list of lines. sync_results: [(label, (answer, reason)), ...]."""
+def lines(sync_results, disk_result, home_state=None):
+    """The notice, as a list of lines. sync_results: [(label, (answer, reason)), ...].
+    home_state: (state, result) from home.state() (S20), or None to leave the home out."""
     out = ["WHERE YOUR FILES ARE (checked before this run; Shyft only looked, nothing changed)"]
     out += ["  " + sync_line(label, result) for label, result in sync_results]
-    if any(result[0] == sync_check.NO_SIGN for _, result in sync_results):
+    if home_state is not None:
+        out.append("  " + home_words.notice_line(*home_state))
+    results = [result for _, result in sync_results] + ([home_state[1]] if home_state else [])
+    if any(r and r[0] == sync_check.NO_SIGN for r in results):
         out.append("  " + SCOPE)
     out.append("  " + disk_line(disk_result))
     out.append("  The run goes on either way.")
@@ -54,7 +59,7 @@ def report(places=PLACES):
     try:
         sync_results = [(label, sync_check.check(folder)) for label, folder in places]
         disk_result = disk_check.check(places[0][1])
-        text = lines(sync_results, disk_result)
+        text = lines(sync_results, disk_result, home.state())   # S20: the home's own line
     except Exception as problem:            # noqa: BLE001 (on purpose: notice, not gate)
         text = ["WHERE YOUR FILES ARE: couldn't check (" + type(problem).__name__
                 + "). The run goes on."]
