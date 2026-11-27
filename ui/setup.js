@@ -1,8 +1,10 @@
 // setup.js — Setup 1 "Get Shyft ready": check Ollama and the two models, and get what's missing.
 // Two modes:
-//  - window.LIVE (opened by app/shyft_app.py): real answers from this computer (live.js). Stage 1 only checks;
-//    getting what's missing comes in stage 2, and the screen says so.
+//  - LIVE (opened by app/shyft_app.py): real answers from this computer (live.js). Stage 1 only checks;
+//    getting what's missing comes in stage 2, and the screen says so. Every judgement (ready, enough
+//    space) comes from the server, so this screen and the Spec screen always agree.
 //  - PROTOTYPE (opened as a file): simulated, for design demos. Pick a scenario in the prototype menu.
+// Values from the server go onto the page as text, never as markup.
 
 var NEED = [
   { id: "ollama", name: "The Ollama app", what: "Runs Rick and Zippy on this computer. Free." },
@@ -15,7 +17,7 @@ function later(fn, ms) { timers.push(setTimeout(fn, ms)); }   // every timer is 
 // ---- PROTOTYPE ----
 var SCENARIOS = { ready: ["ollama", "zippy", "rick"], models: ["ollama"], nothing: [] };
 function setScenario(name) {
-  if (window.LIVE) return liveCheck();                       // real answers instead of a made-up scenario
+  if (window.LIVE) return liveCheck();                // real answers instead of a made-up scenario
   timers.forEach(clearTimeout); timers = [];          // stop any fake download still running
   have = {}; pct = {}; busy = false;
   var note = document.getElementById("need-note"); if (note) note.textContent = "";
@@ -24,10 +26,11 @@ function setScenario(name) {
   renderNeeds();
 }
 
-// ---- window.LIVE: what is true on this computer ----
-var LIVE_WORDS = {   // every state has words, never colour alone
+// ---- LIVE: what is true on this computer ----
+var LIVE_WORDS = {   // our own markup only; every state has words, never colour alone
   notrunning: "<span class='miss'>Not running</span>",
   old: "<span class='miss'>Too old for Shyft</span>",
+  cloudon: "<span class='miss'>Cloud is on</span>",
   missing: "<span class='miss'>Not downloaded yet</span>",
   wrong: "<span class='miss'>Different build</span>",
   checking: "<span class='wait'>Checking…</span>"
@@ -37,7 +40,9 @@ function liveCheck() {
   liveGet("/api/status", function (s, why) {
     if (!s) { liveNote = "Couldn't reach Shyft's helper (" + why + "). Is its window still open?"; NEED.forEach(function (n) { have[n.id] = "missing"; }); return renderNeeds(); }
     var o = s.ollama, notes = [];
-    have.ollama = !o.running ? "notrunning" : o.cloud === "too_old" ? "old" : "ready";
+    // Ready only if a run would really start: running, able to report its cloud, and the cloud off
+    // (Shyft's cloud lock refuses every run otherwise).
+    have.ollama = !o.running ? "notrunning" : o.cloud === "too_old" ? "old" : o.cloud === "on" ? "cloudon" : "ready";
     s.models.forEach(function (m) {
       var id = m.role === "gate" ? "zippy" : "rick";
       NEED.filter(function (n) { return n.id === id; })[0].what = m.pull + " · " + (id === "zippy" ? "spots private screenshots" : "suggests what to do");
@@ -45,20 +50,20 @@ function liveCheck() {
     });
     if (have.ollama === "notrunning") notes.push("Open Ollama (the llama icon), then check again.");
     if (have.ollama === "old") notes.push("This Ollama can't say whether its cloud is off, and Shyft checks that before every run. Update it from ollama.com/download.");
-    if (o.cloud === "on") notes.push("Ollama's cloud is on. Shyft will run it with the cloud off.");
+    if (have.ollama === "cloudon") notes.push("Ollama's cloud is on, so Shyft would refuse to run. " + o.cloud_fix);
     if (have.zippy === "wrong" || have.rick === "wrong") notes.push("A model here isn't the build Shyft was measured with. Please tell the Shyft team.");
     var c = s.computer, r = s.requirements;
     notes.push("This computer: " + (c.memory_gb == null ? "memory couldn't be checked" : c.memory_gb + " GB memory") + ", " +
       (c.free_disk_gb == null ? "free space couldn't be checked" : c.free_disk_gb + " GB free") + ". " +
-      (allReady() ? "" : "Still needed: about " + r.need_now_gb + " GB free." + (s.meets.disk === false ? " Not enough yet." : "")));
-    liveNote = notes.join(" ");
+      (allReady() ? "" : "Needed now: about " + r.need_now_gb + " GB free" + (s.meets.disk === false ? ", so not enough yet." : ".")));
+    liveNote = notes.join("\n");   // one note per line (screens.css: #need-help keeps the line breaks)
     renderNeeds();
   });
 }
 
 // ---- Shared ----
 function allReady() { return NEED.every(function (n) { return have[n.id] === "ready"; }); }
-function statusHtml(id) {
+function statusHtml(id) {   // our own markup only (no values from the server)
   var s = have[id];
   if (s === "ready") return "<span class='ok'>✓ Ready</span>";
   if (LIVE_WORDS[s]) return LIVE_WORDS[s];
@@ -67,9 +72,16 @@ function statusHtml(id) {
   return "<span class='miss'>Not found</span>";
 }
 function renderNeeds() {
-  document.getElementById("needs").innerHTML = NEED.map(function (n) {
-    return "<li><span><b>" + n.name + "</b><br><span class='small'>" + n.what + "</span></span>" + statusHtml(n.id) + "</li>";
-  }).join("");
+  var list = document.getElementById("needs");
+  list.textContent = "";
+  NEED.forEach(function (n) {   // names and model names as text; only the status is our own markup
+    var li = document.createElement("li"), left = document.createElement("span"), b = document.createElement("b"), small = document.createElement("span");
+    b.textContent = n.name; small.className = "small"; small.textContent = n.what;
+    left.appendChild(b); left.appendChild(document.createElement("br")); left.appendChild(small);
+    var right = document.createElement("span"); right.innerHTML = statusHtml(n.id);
+    li.appendChild(left); li.appendChild(right.firstChild || right);
+    list.appendChild(li);
+  });
   var main = document.getElementById("need-main"), help = document.getElementById("need-help");
   if (window.LIVE) {
     main.textContent = allReady() ? "Continue" : "Check again";
@@ -86,7 +98,7 @@ function renderNeeds() {
 
 function getMissing() {
   if (allReady()) return show("s-folder");
-  if (window.LIVE) return liveCheck();                        // stage 1: check again
+  if (window.LIVE) return liveCheck();                 // stage 1: check again
   if (busy || have.ollama === "waiting") return;       // already working on it: don't start twice
   if (have.ollama !== "ready") {
     have.ollama = "waiting"; renderNeeds();
@@ -109,4 +121,6 @@ function downloadNext() {
   })();
 }
 document.getElementById("need-main").onclick = getMissing;
+var picker = document.getElementById("need-pick");   // prototype menu (no inline handler: the security policy forbids them)
+if (picker) picker.onchange = function () { setScenario(this.value); };
 setScenario("nothing");

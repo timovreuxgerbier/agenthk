@@ -41,3 +41,6 @@ body.big .window{min-height:calc(100vh / 1.25 - 40px)}
 .pace.yours{margin-top:4px}
 .pace.yours .yours-title{background:transparent;border:0;padding:4px 2px}
 .pace.yours .yours-title span{font-size:14px}
+
+/* Setup 1, live: one note per line, easier to read than one long paragraph */
+#need-help{white-space:pre-line}

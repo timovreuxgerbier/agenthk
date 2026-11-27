@@ -1,17 +1,23 @@
 # app/shyft_app.py — Lane: Ana. Stage 1 of the Windows app plan: Shyft's screens, with real answers.
 #
-#   python app/shyft_app.py          (Mac: python3 app/shyft_app.py)
+#   python3 app/shyft_app.py
 #
 # Opens Shyft's screens (ui/) in your browser, and answers them with what is true on this computer
 # (app/checks.py). Stage 1 only LOOKS: it installs, downloads, runs, moves and deletes nothing.
 # Close this window, or press Ctrl+C, to stop it.
 #
-# Safety rules (plan, section 6):
+# Safety rules (plan, section 6; D38):
 # - Listens on 127.0.0.1 only, never on the network, on a port picked at random each time.
 # - A secret key, made at start, is in the address the browser opens. Every /api/ request must carry it
 #   (header X-Shyft-Key), so no other website or program can ask this server anything.
 # - The Host header must be this exact address, so a website can't reach it by renaming itself (DNS rebinding).
-# - Serves only files inside ui/, read-only. Never takes a file path from the browser.
+# - Requests from other websites are refused, files included: browsers label every request with
+#   Sec-Fetch-Site, and anything but "same-origin" (our own page) or "none" (typed into the address bar)
+#   is turned away. A POST must also carry our own Origin.
+# - Serves only Shyft's screens from ui/, read-only, never review_data.js (a review's real words come
+#   only through the keyed /api/review). Never takes a file path from the browser.
+# - A strict Content-Security-Policy: only our own script files run, nothing loads from elsewhere.
+# - Builds no path to a person's files or the home: Shyft's records are found by harness/records.py.
 # - Sends nothing anywhere: the only other address it talks to is Ollama, on this computer.
 # Python standard library only.
 
@@ -31,9 +37,30 @@ from app import checks   # noqa: E402 (after the path line on purpose)
 
 UI = checks.ROOT / "ui"
 SHOWN = {".html", ".js", ".css", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".webp", ".gif"}
+# In ui/ but not part of the app: the made-up demo review (real reviews come through /api/review),
+# the public landing page, and the tester kit's own opener. None of them is ever served.
+NOT_SERVED = {"review_data.js", "start.html", "start.css", "start_buddies.js", "open_results.html"}
+CSP = ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+       "connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'")
+# style-src allows inline styles (progress bars and buddy sizes are set in style="..."): styles can't run code.
+
+
+def review_answer():
+    """The newest review.json, as harness/records.py finds it (stage 0.3), or None. This file never
+    builds that path itself (D38)."""
+    try:
+        from harness import records
+    except ImportError:   # code from before stage 0.3: no records yet
+        return None
+    where = records.review_to_read()
+    if where is None:
+        return None
+    return json.loads(Path(where).read_text(encoding="utf-8"))
 
 
 def make_handler(key, host):
+    origin = "http://" + host
+
     class Handler(BaseHTTPRequestHandler):
         server_version = "Shyft"
         sys_version = ""
@@ -49,11 +76,18 @@ def make_handler(key, host):
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Referrer-Policy", "no-referrer")   # the key never leaves in a Referer header
+            self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Content-Security-Policy", CSP)
             self.end_headers()
             self.wfile.write(data)
 
-        def _ours(self):   # the right Host, and for /api/ the right key
+        def _ours(self, post=False):
             if self.headers.get("Host") != host:
+                return False
+            site = self.headers.get("Sec-Fetch-Site")
+            if site is not None and site not in ("same-origin", "none"):   # another website asked
+                return False
+            if post and self.headers.get("Origin") != origin:
                 return False
             if urlsplit(self.path).path.startswith("/api/"):
                 return hmac.compare_digest(self.headers.get("X-Shyft-Key", ""), key)
@@ -65,12 +99,15 @@ def make_handler(key, host):
             path = urlsplit(self.path).path
             if path == "/api/status":
                 return self._send(200, checks.status())
+            if path == "/api/review":
+                review = review_answer()
+                return self._send(200, review) if review is not None else self._send(404, {"error": "No review yet."})
             if path.startswith("/api/"):
                 return self._send(404, {"error": "Unknown."})
             return self._file(path)
 
         def do_POST(self):
-            if not self._ours():
+            if not self._ours(post=True):
                 return self._send(403, {"error": "Not allowed."})
             if urlsplit(self.path).path == "/api/quit":
                 self._send(200, {"bye": True})
@@ -78,10 +115,11 @@ def make_handler(key, host):
                 return None
             return self._send(404, {"error": "Unknown."})
 
-        def _file(self, path):   # only files inside ui/, only the kinds a page needs
+        def _file(self, path):   # only Shyft's screens in ui/, only the kinds a page needs
             name = "index.html" if path in ("", "/") else path.lstrip("/")
             target = (UI / name).resolve()
-            if UI.resolve() not in target.parents or target.suffix.lower() not in SHOWN or not target.is_file():
+            if (UI.resolve() not in target.parents or target.suffix.lower() not in SHOWN
+                    or target.name in NOT_SERVED or not target.is_file()):
                 return self._send(404, b"Not found", "text/plain; charset=utf-8")
             kind = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
             if kind.startswith("text/") or kind.endswith("javascript"):
@@ -92,7 +130,7 @@ def make_handler(key, host):
 
 
 def serve(open_browser=True, port=0):
-    """Start the server. Returns (server, address the browser should open)."""
+    """Start the server. Returns (server, address the browser should open, key)."""
     key = secrets.token_urlsafe(24)
     server = ThreadingHTTPServer(("127.0.0.1", port), None)
     host = "127.0.0.1:" + str(server.server_address[1])
