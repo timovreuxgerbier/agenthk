@@ -22,7 +22,7 @@
 import sys
 import time
 
-from harness import schema, prefilter, context, trace, caps, gate, pipeline, batch
+from harness import schema, prefilter, context, trace, caps, gate, pipeline, batch, where_check
 
 # Windows terminals default to a code page that crashes on emoji in model output.
 sys.stdout.reconfigure(encoding="utf-8")
@@ -82,6 +82,7 @@ def propose(model, max_files, batch_mode=False, zippy_model=None, one_by_one=Fal
         print("Order: one by one (Zippy, then Pip, for each screenshot).")
     print("Zippy looks first; Pip only sees what Zippy clears.")
     print("Nothing will be moved, renamed or deleted.\n")
+    where_check.report()   # S19: where the files sit (OneDrive? encrypted disk?). Never stops a run.
     run_start = time.time()
     copies = prefilter.find_copies(files)
     step = batch.run if chunked else _one_by_one

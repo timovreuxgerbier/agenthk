@@ -48,7 +48,11 @@ document.getElementById("chips").onclick = function (e) {
 document.getElementById("voice").onclick = function () {
   document.getElementById("voice-note").textContent = "Prototype only: voice notes aren't built yet.";
 };
-document.getElementById("start").onclick = function () { show("s-spec"); };   // the spec screen comes first
+document.getElementById("start").onclick = function () {   // the spec screen comes first
+  show("s-spec");
+  if (window.LIVE) liveGet("/api/status", function (s) { if (s) liveSpec(s); });   // real numbers and "This computer"
+};
+document.getElementById("spec-next").onclick = function () { show("s-need"); if (window.LIVE) liveCheck(); };
 
 // ---- How it works: the longer explanations live here ----
 var WALK = [

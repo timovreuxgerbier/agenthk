@@ -9,10 +9,12 @@
 # settings that model ran: its context window, how much of it was on the GPU, and Ollama's
 # version. The Nov 21 baseline could not be explained because nobody wrote these down.
 
+# S18: every call passes the cloud lock (cloud_lock.py) before it is sent and after it returns.
+
 import json
 import urllib.request
 
-from harness import schema
+from harness import schema, cloud_lock
 
 _last_usage = None       # the most recent call's numbers, until take_usage() collects them
 _ollama_version = None   # asked once; Ollama's version does not change during a run
@@ -79,6 +81,7 @@ def ask(model, messages, shape=None):
     """Return the model's raw text answer. Raises urllib errors or TimeoutError on failure."""
     global _last_usage
     _last_usage = None        # a failed call must never leave the previous call's numbers
+    cloud_lock.before(model)  # refuses before anything is sent
     body = {
         "model": model,
         "stream": False,
@@ -94,5 +97,6 @@ def ask(model, messages, shape=None):
     )
     with urllib.request.urlopen(request, timeout=schema.CALL_TIMEOUT_SECONDS) as response:
         reply = json.loads(response.read().decode("utf-8"))
+    cloud_lock.after(model, reply)   # the answer came from this computer
     _last_usage = dict(usage_from(reply), **server_from(model))
     return reply["message"]["content"]

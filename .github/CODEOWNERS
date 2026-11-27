@@ -40,6 +40,10 @@
 # /eval/judge.py          @ANA_USERNAME
 # /eval/rubric.md         @ANA_USERNAME
 
+# ---- Ana · the app (D38): app/ only calls the team's code. Sphinx reviews it too,
+# because it touches how Shyft meets a person's computer.
+/app/                     @laraa413-rgb @GuardianOfMysteries
+
 # ---- Shared: team decision. Everyone is asked. -------------------------
 # When Raaghavi and Ana are added above, add them to these four lines too.
 /harness/schema.py        @timovreuxgerbier @GuardianOfMysteries
