@@ -10,7 +10,7 @@ function esc(t) {   // safe inside text AND inside quoted attributes (file names
 function niceDate(d) { var m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], p = String(d).split("-"); return p.length === 3 ? (+p[2]) + " " + m[+p[1] - 1] : esc(d); }
 function localTime() { var t = new Date(); t.setMinutes(t.getMinutes() - t.getTimezoneOffset()); return t.toISOString().slice(0, 19); }
 // group: 0 needs your OK (Bloop), 1 Rick's suggestion, 2 locked (Zippy)
-var GROUPS = [["py", "Needs your OK", "bloop", "tilt"], ["pr", "Rick's suggestion", "pip", "hop"], ["pb", "Locked", "zippy", "nod"]];
+var GROUPS = [["py", "Bloop · Needs your OK", "bloop", "tilt"], ["pr", "Rick · Suggestion", "pip", "hop"], ["pb", "Zippy · Locked", "zippy", "nod"]];   // name, then meaning, for every buddy
 function group(it) { return it.state === "locked" ? 2 : (it.needs_ok || it.state === "copy") ? 0 : 1; }
 var queue = [], pos = 0, decisions = [], started = 0, last = null;
 
@@ -111,13 +111,16 @@ function done() {
   document.getElementById("s-done").innerHTML = "<div class='body'>" + trio(48) +
     "<h1>" + (later ? "Good place to stop" : "All done") + "</h1>" +
     "<p class='sub'>" + keep + " kept · " + del + " in To Be Deleted · " + later + " for next time</p>" +
+    "<p class='small'>Cost of this run: $0. It all ran on this computer.</p>" +
     "<button class='main' data-go='s-welcome'>Close</button>" +
+    "<button class='quiet' id='to-trust'>Your trust ladder · Step " + trustGet() + "</button>" +
     "<button class='quiet protoonly' id='dl'>Download decisions.json (prototype)</button></div>";
   document.getElementById("dl").onclick = function () {
     var out = { contract: "0.2", run_id: SAMPLE_REVIEW.run_id, decisions: decisions };
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }));
     a.download = "decisions.json"; a.click();
   };
+  document.getElementById("to-trust").onclick = function () { openTrust("s-done"); };
   show("s-done");
   react(document.querySelector("#s-done .b2"), "hop");
 }

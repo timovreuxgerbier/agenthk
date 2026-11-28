@@ -47,7 +47,7 @@ function renderNeeds() {
   main.textContent = allReady() ? "Continue" : busy ? "Downloading…" : "Get what's missing";
   help.innerHTML = have.ollama === "waiting"
     ? "1. Open the Ollama file in your Downloads. 2. Drag it into Applications, then open it. I'll notice and carry on. <button class='quiet' id='opened'>I've opened it</button>"
-    : allReady() ? "All set. Nothing more to download." : "Needs about 17 GB of free space. Download time: [from today's Mac test].";
+    : allReady() ? "All set. Nothing more to download." : "An 11.2 GB download. Needs 18 GB free: the download plus room to work.";
   var o = document.getElementById("opened"); if (o) o.onclick = ollamaOpened;
 }
 

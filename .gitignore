@@ -239,3 +239,9 @@ run*.txt
 ui/review_data.js
 _to_delete/
 demo/
+installer/agenthk-*.zip
+installer/shyft_synthetic_set.zip
+installer/windows/Shyft-Tester-Windows.zip
+
+# macOS folder settings (never commit)
+.DS_Store

@@ -1,0 +1,32 @@
+/* light.css: the app in light mode (mode.js sets data-theme). Same meanings, darker shades.
+   Contrast measured on white (WCAG): text needs 4.5:1, shapes 3:1.
+   Rick red 4.2 and Zippy blue 4.1 pass as shapes. Bloop yellow is only 1.6, so Bloop gets a dark-gold outline (4.4).
+   Trace green is only 1.9, so light mode uses a darker green (4.8). Text colours below are all 4.5:1 or more. */
+:root[data-theme=light]{--ground:#F6FBF8;--card:#FFFFFF;--line:#DCE9E1;--line2:#C3D8CB;--text:#0B1F15;--muted:#4A6557;
+  --trace:#14804F;--y:#8A6400;--ybg:#FFF6DA;--r:#B4141E;--rbg:#FDECEE;--b:#1D5BC4;--bbg:#EAF1FD;color-scheme:light}
+:root[data-theme=light] body:not(.start){background:#E3EAE6}   /* behind the app window only, not the landing page */
+:root[data-theme=light] .window{border-color:#CBD9D1}
+:root[data-theme=light] .chrome span{background:#CBD9D1}
+:root[data-theme=light] .main{background:#0B1F15;color:#F6FBF8}
+:root[data-theme=light] .main:hover{background:#1C3A2A}
+:root[data-theme=light] button:hover{border-color:#8FB3A0}
+:root[data-theme=light] .pg,:root[data-theme=light] .kbd,:root[data-theme=light] .bubble{background:#EEF3F0}
+:root[data-theme=light] .chips button[aria-pressed=true],:root[data-theme=light] .choice:has(input:checked){background:#E3F3EA}
+:root[data-theme=light] .track{background:#DCE9E1}
+:root[data-theme=light] .overlay{background:rgba(227,234,230,.88)}
+:root[data-theme=light] .folder{border-color:#B5CCBF}
+:root[data-theme=light] .preview{background:#FFFFFF}
+:root[data-theme=light] .preview img{background:#EEF3F0}
+:root[data-theme=light] .guess{border-color:#6E8A7C}
+:root[data-theme=light] .opt.c-r{color:var(--r)}
+:root[data-theme=light] .opt.c-y .tag,:root[data-theme=light] .opt.c-r .tag,:root[data-theme=light] .opt.c-b .tag{color:#FFFFFF}
+:root[data-theme=light] .trace{opacity:.25}
+/* Bloop on white: a thin dark-gold outline so his shape reaches 3:1. (Rick and Zippy already pass.) */
+:root[data-theme=light] svg.buddy:has(polygon[fill="#F7C531"]){
+  filter:drop-shadow(1.5px 0 0 #9A7200) drop-shadow(-1.5px 0 0 #9A7200) drop-shadow(0 1.5px 0 #9A7200) drop-shadow(0 -1.5px 0 #9A7200)}
+
+/* Colour is never the only signal: a picked chip also gets a tick */
+.chips button[aria-pressed=true]::before{content:"\2713\00a0";font-weight:800}
+/* The light/dark switch in the app's title bar */
+.chrome .mode{margin-left:auto;min-height:30px;font-size:13px;padding:0 10px}
+.chrome p{flex:1;text-align:center;margin:0}

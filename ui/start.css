@@ -21,9 +21,79 @@ section.block h2{font-size:24px;font-weight:800;margin:0 0 18px}
 .req li{display:flex;justify-content:space-between;gap:16px;padding:13px 2px;border-bottom:1px solid var(--line);font-size:16px}
 .req li span:last-child{color:var(--muted);text-align:right}
 .steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;counter-reset:s}
-.steps3 div{padding:4px 0 0}.steps3 b{display:block;margin-bottom:4px}
+.steps3 div{padding:4px 0 0}.steps3 div > b{display:block;margin-bottom:4px}
 .steps3 div::before{counter-increment:s;content:counter(s);display:inline-flex;width:30px;height:30px;border-radius:50%;
   align-items:center;justify-content:center;border:1px solid var(--line2);color:var(--trace);font-weight:700;margin-bottom:10px}
 .foot2{padding:36px 0 48px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
 .tbd{color:var(--y);font-style:italic}
 @media (max-width:640px){.hero h1{font-size:36px}.hero{padding:32px 0 44px}}
+/* Mac / Windows: the page shows one set of steps at a time */
+body:not(.win) .os-win, body.win .os-mac{display:none}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:12px;padding:3px;margin:0 0 20px;gap:3px}
+.seg button{min-height:40px;border:none;border-radius:9px;padding:0 18px;font-size:15px}
+.seg button[aria-pressed=true]{background:var(--text);color:#06100B;font-weight:700}
+
+
+/* Two download buttons, equal weight. The one matching the visitor's computer gets a small tag. */
+.dl-pair{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.cta .main.dl{flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;min-height:72px;min-width:250px;padding:12px 26px;line-height:1.2}
+.dl-top{display:flex;align-items:center;gap:10px;font-weight:700;text-align:left}
+.cta .main.dl{text-align:left}
+.dl-file{font-size:13px;font-weight:500;opacity:.75}
+.dl .mine{display:none;white-space:nowrap;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:rgba(6,16,11,.14)}
+.dl.is-mine .mine{display:inline-block}
+@media (max-width:560px){.cta .main.dl{width:100%}}
+
+/* Light mode (landing page only; the app keeps its own look). Same meanings, darker shades so text stays readable. */
+.top-right{display:flex;align-items:center;gap:14px}
+.theme{min-height:36px;font-size:14px;padding:0 12px;white-space:nowrap}
+.top a{white-space:nowrap}
+@media (max-width:480px){.top-right{gap:6px}.top-right a{font-size:13px}.theme{font-size:13px;padding:0 8px}}
+:root[data-theme=light] body.start{--ground:#F6FBF8;--card:#FFFFFF;--line:#DCE9E1;--line2:#C3D8CB;--text:#0B1F15;--muted:#4A6557;
+  --trace:#14804F;--y:#8A6400;color-scheme:light;
+  background-image:radial-gradient(circle,#D3E4DA 1.2px,transparent 1.7px),radial-gradient(circle,#D3E4DA 1.2px,transparent 1.7px)}
+:root[data-theme=light] body.start .main,
+:root[data-theme=light] body.start .seg button[aria-pressed=true]{background:#0B1F15;color:#F6FBF8}
+:root[data-theme=light] body.start .main:hover{background:#1C3A2A}
+:root[data-theme=light] body.start .dl .mine{background:rgba(246,251,248,.18)}
+:root[data-theme=light] body.start button:hover{border-color:#9FBFAD}
+
+/* The buddies' play area at the top of the landing page (start_buddies.js).
+   Speech bubble uses neutral colours, so no buddy colour changes meaning. */
+#hero-buddies.play{position:relative;width:min(920px,100%);height:290px;margin-bottom:-6px}
+#hero-buddies .pal{position:absolute;left:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;border-radius:16px;padding:4px 8px;outline-offset:4px;will-change:transform}
+#hero-buddies .pal:focus-visible{outline:3px solid var(--trace)}
+#hero-buddies .nm{font-size:15px;font-weight:700;color:var(--muted)}
+#hero-buddies .bubble{position:absolute;bottom:calc(100% + 12px);left:50%;width:max-content;max-width:240px;text-align:left;
+  transform:translate(-50%,6px);background:var(--text);color:var(--ground);font-size:14px;font-weight:600;line-height:1.35;
+  padding:10px 13px;border-radius:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:3}
+#hero-buddies .bubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:calc(-7px + var(--tail,0px));border:7px solid transparent;border-top-color:var(--text)}
+#hero-buddies .pal.talking{z-index:4}
+#hero-buddies .pal.talking .bubble{opacity:1;transform:translate(-50%,0)}
+.pause-buddies{min-height:34px;font-size:13px;padding:0 12px;margin-top:-6px}
+/* Monster moves (start_buddies.js). The body tilts from its feet. */
+#hero-buddies .body{display:inline-block;transform-origin:50% 100%}
+#hero-buddies .pal.walking{z-index:2}
+#hero-buddies .body.waddle{animation:waddle .5s ease-in-out infinite alternate}
+#hero-buddies .body.stomp{animation:stomp .42s ease-out}
+#hero-buddies .body.stomp-big{animation:stomp-big .7s ease-in-out}
+#hero-buddies .body.wobble{animation:wobble .5s ease-in-out}
+#hero-buddies .body.roar{animation:roar .9s ease-in-out}
+#hero-buddies .body.wiggle{animation:wobble .5s ease-in-out}
+#hero-buddies .spin{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes waddle{0%{transform:rotate(-7deg) translateY(0)}50%{transform:rotate(0) translateY(-5px)}100%{transform:rotate(7deg) translateY(0)}}
+@keyframes stomp{0%{transform:scale(1.1,.86)}60%{transform:scale(.97,1.04)}100%{transform:none}}
+@keyframes stomp-big{0%{transform:none}35%{transform:translateY(-20px) scale(.94,1.07)}55%{transform:translateY(0) scale(1.18,.78)}75%{transform:scale(.96,1.05)}100%{transform:none}}
+@keyframes wobble{0%,100%{transform:none}25%{transform:rotate(-5deg)}60%{transform:rotate(4deg)}}
+@keyframes roar{0%{transform:none}15%{transform:scale(1.1) translateY(-4px)}25%,45%,65%{transform:scale(1.1) translate(-3px,-4px)}35%,55%,75%{transform:scale(1.1) translate(3px,-4px)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){#hero-buddies .body{animation:none!important}}
+@media (max-width:640px){#hero-buddies.play{height:210px}#hero-buddies .bubble{max-width:190px;font-size:13px}}
+@media (prefers-reduced-motion:reduce){#hero-buddies .bubble{transition:none}}
+
+/* Trust ladder section (shared styles in trust.css) */
+.lp-lead{font-size:17px;margin:-6px 0 6px;max-width:640px}
+#lp-stairs{margin:22px 0 18px}
+
+.hero .facts{justify-content:center;margin:2px 0 -4px}

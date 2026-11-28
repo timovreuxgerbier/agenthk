@@ -16,8 +16,14 @@ document.addEventListener("click", function (e) {
   var st = e.target.closest("[data-state]"); if (st) showState(st.getAttribute("data-state"));
 });
 
+// Light or dark (mode.js): the switch in the title bar.
+modeButton(document.getElementById("mode"));
+// Projector mode: bigger everything. Press B (or the prototype menu).
+function toggleBig() { document.body.classList.toggle("big"); }
+document.getElementById("p-big").onclick = toggleBig;
 // Prototype menu: hidden while presenting. Press P to show or hide.
 document.addEventListener("keydown", function (e) {
+  if ((e.key === "b" || e.key === "B") && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) toggleBig();
   if ((e.key === "p" || e.key === "P") && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
     var p = document.getElementById("proto"); p.hidden = !p.hidden;
     document.body.classList.toggle("proto-on", !p.hidden);
@@ -42,7 +48,7 @@ document.getElementById("chips").onclick = function (e) {
 document.getElementById("voice").onclick = function () {
   document.getElementById("voice-note").textContent = "Prototype only: voice notes aren't built yet.";
 };
-document.getElementById("start").onclick = function () { show("s-need"); };
+document.getElementById("start").onclick = function () { show("s-spec"); };   // the spec screen comes first
 
 // ---- How it works: the longer explanations live here ----
 var WALK = [
@@ -50,27 +56,30 @@ var WALK = [
     a: function () { return '<div class="folder">Screenshots<br>For Sorting</div>'; } },
   { t: "Rick looks while you sleep", b: "Every Sunday night, on this computer, Rick guesses what each new screenshot is for. Nothing moves yet.",
     a: function () { return buddy("pip", 64, "idle"); } },
-  { t: "One colour, one meaning", b: "Yellow needs your OK. Red is Rick's suggestion. Blue is private: Zippy stops reading and locks it.",
-    a: function () { return buddy("bloop", 48, "idle b1") + buddy("pip", 56, "idle b2") + buddy("zippy", 48, "idle b3"); } },
-  { t: "You decide, nothing is deleted", b: "Only what you approve moves. Cleared files go to a To Be Deleted folder that you empty yourself.",
+  { t: "Meet Bloop, Rick and Zippy", b: "Rick suggests what to do with each screenshot. Bloop (yellow) asks for your OK when Rick isn't sure. Zippy (blue) locks private ones and stops reading.",
+    a: function () { return trio(46, true); } },
+  { t: "You decide, nothing is deleted", b: "At first, only what you approve moves. Shyft earns more one step at a time, and you can undo any move. Cleared files go to a To Be Deleted folder that you empty yourself.",
     a: function () { return '<div class="folder">Kept</div><div class="folder">To Be Deleted</div>'; } }
 ];
-var w = 0;
+// One walkthrough window for every walkthrough: How it works, and the trust ladder (trust_app.js).
+// A deck is { name, items: [{ t, b, a }], from: id of the button to return focus to }.
+var deck = { name: "How it works", items: WALK, from: "how" }, w = 0;
 function walk() {
-  var s = WALK[w];
-  document.getElementById("m-step").textContent = "How it works · " + (w + 1) + " of " + WALK.length;
+  var s = deck.items[w];
+  document.getElementById("m-step").textContent = deck.name + " · " + (w + 1) + " of " + deck.items.length;
   document.getElementById("m-title").textContent = s.t;
   document.getElementById("m-body").textContent = s.b;
   document.getElementById("m-art").innerHTML = s.a();
   document.getElementById("m-back").hidden = w === 0;
-  document.getElementById("m-next").textContent = w === WALK.length - 1 ? "Got it" : "Next";
-  document.getElementById("m-dots").innerHTML = WALK.map(function (_, k) { return "<i" + (k === w ? " class='on'" : "") + "></i>"; }).join("");
+  document.getElementById("m-next").textContent = w === deck.items.length - 1 ? "Got it" : "Next";
+  document.getElementById("m-dots").innerHTML = deck.items.map(function (_, k) { return "<i" + (k === w ? " class='on'" : "") + "></i>"; }).join("");
 }
-function closeWalk() { document.getElementById("overlay").classList.remove("open"); document.getElementById("how").focus(); }
-document.getElementById("how").onclick = function () { w = 0; walk(); document.getElementById("overlay").classList.add("open"); document.getElementById("m-next").focus(); };
+function openDeck(d) { deck = d; w = 0; walk(); document.getElementById("overlay").classList.add("open"); document.getElementById("m-next").focus(); }
+function closeWalk() { document.getElementById("overlay").classList.remove("open"); var f = document.getElementById(deck.from); if (f) f.focus(); }
+document.getElementById("how").onclick = function () { openDeck({ name: "How it works", items: WALK, from: "how" }); };
 document.getElementById("m-close").onclick = closeWalk;
 document.getElementById("m-back").onclick = function () { if (w > 0) { w--; walk(); } };
-document.getElementById("m-next").onclick = function () { if (w < WALK.length - 1) { w++; walk(); } else closeWalk(); };
+document.getElementById("m-next").onclick = function () { if (w < deck.items.length - 1) { w++; walk(); } else closeWalk(); };
 document.addEventListener("keydown", function (e) {
   if (!document.getElementById("overlay").classList.contains("open")) return;
   if (e.key === "Escape") closeWalk();
