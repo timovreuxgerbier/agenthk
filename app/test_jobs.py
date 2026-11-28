@@ -36,7 +36,7 @@ STAND_IN = textwrap.dedent('''
     if ENDING == "done":
         print("Done. Total 2.0 seconds. Trace saved to trace.jsonl")
     else:
-        print("Stopped before cat.png: Ollama's cloud is on.")
+        print("  CLOUD LOCK: Ollama's cloud is on.")
 ''')
 
 
@@ -147,6 +147,33 @@ class Sorting(Base):
         self.assertFalse(started); self.assertIn("made-up test screenshots", why)
 
 
+class OnlyOurWords(Base):   # Sphinx's review of #20: a crash's last line can hold an address or Rick's words
+    def ending(self, text):
+        script = Path(self.folder.name) / "ending.py"
+        script.write_text("print(" + repr(text) + ")\n", encoding="utf-8")
+        jobs.RUN = str(script)
+        jobs.sort(); return wait_until_idle()["message"]
+
+    def test_a_crash_shows_a_fixed_sentence(self):
+        for line in ("Traceback (most recent call last):\n  File \"C:\\Users\\ana\\Pictures\\bank.png\"",
+                     "Rick: this is Ana's bank statement for March"):
+            message = self.ending(line)
+            self.assertTrue(message.startswith(jobs.UNKNOWN_STOP), message)
+            for leak in ("Users", "bank", "Rick:"):
+                self.assertNotIn(leak, message)
+
+    def test_no_screenshots_never_shows_the_folder(self):
+        message = self.ending("No screenshots found. Put 1 to 3 .png or .jpg files in:\n  C:\\Users\\ana\\Shyft\\screenshots")
+        self.assertIn("No screenshots found.", message)
+        self.assertNotIn("Users", message)
+
+    def test_our_stops_keep_their_words(self):
+        self.assertIn("CLOUD LOCK: Ollama's cloud is ON", self.ending("  CLOUD LOCK: Ollama's cloud is ON"))
+        message = self.ending("Stopped before secret.png: time limit reached (21600 seconds per run)")
+        self.assertIn("time limit reached (21600 seconds per run).", message)
+        self.assertNotIn("secret", message)
+
+
 class ShortNames(Base):   # the Legion: the measured builds pulled under the short names
     tags = [model("gemma4:e4b", ZIPPY_ID), model("gemma4:e2b", RICK_ID)]
 
@@ -156,10 +183,11 @@ class ShortNames(Base):   # the Legion: the measured builds pulled under the sho
 
     def test_run_py_gets_the_names_they_are_under(self):
         script = Path(self.folder.name) / "names.py"
-        script.write_text('import sys\nprint("Stopped before x: " + " ".join(sys.argv[1:]))\n', encoding="utf-8")
+        script.write_text('import sys\nif sys.argv[1:] == ["gemma4:e2b", "all", "--zippy", "gemma4:e4b"]:\n'
+                          '    print("Done. Total 1.0 seconds. Trace saved to trace.jsonl")\n', encoding="utf-8")
         jobs.RUN = str(script)
         jobs.sort(); job = wait_until_idle()
-        self.assertIn("gemma4:e2b all --zippy gemma4:e4b", job["message"])
+        self.assertEqual(job["state"], "done", job["message"])   # only finishes when given exactly these names
 
 
 class CloudOn(Base):

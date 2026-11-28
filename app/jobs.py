@@ -20,6 +20,12 @@ from app import checks
 
 LABEL = re.compile(r"^\[(\d+)/(\d+)\] .+? \.\.\. (Zippy is looking|locked, Pip skips it|Pip's turn)\s*$")
 TOOK = re.compile(r"^\s+Took [\d.]+ seconds")
+# The only lines run.py prints on purpose when a run ends early (harness/pipeline.py, caps.py, run.py).
+# Only these reach the screen. Any other last line (a crash, a file's address, Rick's words) does not.
+OURS = ("CLOUD LOCK: ", "The model isn't downloaded.", "Ollama returned an error: ",
+        "Can't reach Ollama.", "No screenshots found.")
+CAPS = re.compile(r"^Stopped before .+: ((call|time) limit reached \(\d+ [a-z ]+ per run\))$")
+UNKNOWN_STOP = "The run stopped before the end, for a reason Shyft didn't expect."
 RUN = "run.py"            # the team's script, in the project folder (tests point this at a stand-in)
 NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)   # Windows: run.py works without a window of its own
 
@@ -179,13 +185,21 @@ def _follow(command):
         elif line.startswith("Done. Total "):
             finished = True
         elif line.strip():
-            last_words = line.strip()
-            if last_words.startswith("Stopped before ") and ": " in last_words:   # keep the reason, not the file name
-                last_words = last_words.split(": ", 1)[1]
+            last_words = ours(line.strip()) or last_words   # the latest of our lines; others never replace it
         _set(seconds=round(time.time() - snapshot().get("started", time.time())))
     _process.wait()
     _process.stdout.close()
     _process_end(finished, last_words)
+
+
+def ours(line):
+    """run.py's own words for an early stop, or "" for anything else. A cap keeps its reason, not the file name."""
+    if line.startswith("No screenshots found."):
+        return "No screenshots found."            # the next line is the folder's address: never shown
+    caps = CAPS.match(line)
+    if caps:
+        return caps.group(1) + "."
+    return line if line.startswith(OURS) else ""
 
 
 def _process_end(finished, last_words):
@@ -196,4 +210,4 @@ def _process_end(finished, last_words):
     if finished:
         _set(state="done", phase="done", message="Rick and Zippy looked at every made-up screenshot. Nothing was moved.")
     else:   # the team's own words for why it stopped (a cap, the cloud lock, Ollama gone)
-        _set(state="failed", message="The run stopped: " + (last_words or "no reason given") + " Nothing was moved.")
+        _set(state="failed", message=(("The run stopped: " + last_words) if last_words else UNKNOWN_STOP) + " Nothing was moved.")
