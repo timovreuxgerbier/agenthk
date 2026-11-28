@@ -11,6 +11,21 @@ function Set-PcLine($label, $value) {
   if ((Test-Path $PcTxt) -and (Select-String -Path $PcTxt -SimpleMatch -Pattern "${label}:" -Quiet)) { return }
   Add-Content -Path $PcTxt -Value "${label}: $value"
 }
+# A new install, or a test on a PC whose results folder already holds a test: the earlier folder is kept,
+# renamed with its date, so my_pc.txt starts fresh (its lines keep their first value). Nothing is deleted.
+function Move-EarlierResults($why) {
+  if (-not (Test-Path $Out)) { return }
+  if ($why -eq "test" -and -not (Test-Path (Join-Path $Out "quick_check.txt"))) { return }
+  $stamp = (Get-Item $Out).LastWriteTime.ToString("yyyy-MM-dd HHmm")
+  $name = "Shyft test results (earlier $stamp)"
+  for ($i = 2; Test-Path (Join-Path (Split-Path $Out) $name); $i++) { $name = "Shyft test results (earlier $stamp, $i)" }
+  try { Rename-Item -Path $Out -NewName $name -ErrorAction Stop; Write-Host "  Your earlier results are kept on the Desktop as: $name" }
+  catch { Write-Host "  Couldn't rename your earlier results folder (is it open?). Please close it, or rename it yourself, then start again."; Read-Host "  Press Enter to close"; exit 1 }
+  if ($why -eq "test") {   # same install, new test: the install's own check still belongs with the new results
+    $check = Join-Path (Join-Path (Split-Path $Out) $name) "install_check.txt"
+    if (Test-Path $check) { New-Item -ItemType Directory -Force -Path $Out | Out-Null; Copy-Item $check $Out }
+  }
+}
 # Creates the folder and the basic my_pc.txt lines. Safe to call again and again.
 function Ensure-Results {
   New-Item -ItemType Directory -Force -Path $Out | Out-Null

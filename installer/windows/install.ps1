@@ -20,6 +20,7 @@ Write-Host @"
 Wait-Enter "Press Enter to start (or close this window to cancel)"
 
 Say "1/6  Checking your PC"
+Move-EarlierResults "install"
 Ensure-Results
 Ok "Results folder ready: 'Shyft test results' on your Desktop"
 if ((Test-Path $ShyftHome) -and (@(Get-Record "shyft_folder").Count -eq 0)) {   # checked first, before any download
@@ -49,13 +50,15 @@ if ($ram -lt 8) {
 Say "2/6  Checking free space"
 $ol = Find-Ollama
 if ($ol -and -not (Test-OllamaUp)) { Start-OllamaApp; Wait-Ollama | Out-Null }
-$need = $MarginGB; $toGet = @()
+$need = $MarginGB; $toGet = @(); $named = @()
 foreach ($m in $Models.Keys) {
   if ($ol -and (Test-OllamaUp) -and (Test-Model $ol $m)) { continue }
+  if ($ol -and (Test-OllamaUp) -and (Test-HaveBuild $ol $m)) { $named += $m; continue }   # only a name to add: seconds
   $need += $Models[$m]; $toGet += "$m ($($Models[$m]) GB)"
 }
 if (-not $ol) { $need += $OllamaGB; $toGet += "Ollama (about $OllamaGB GB)" }
 $free = Get-FreeGB
+if ($named.Count -gt 0) { Ok ("Already here under another name (Shyft adds its own name in seconds): " + ($named -join ", ")) }
 if ($toGet.Count -gt 0) { Ok ("Still to download: " + ($toGet -join ", ")) }
 if ($toGet.Count -gt 0 -and $free -lt $need) { Stop-Shyft ("Needs about {0} GB free, this PC has {1} GB. Free up some space, then run this again." -f [math]::Ceiling($need), $free) }
 Ok ("{0} GB free, about {1} GB needed" -f $free, [math]::Ceiling($need))

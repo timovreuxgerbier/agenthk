@@ -5,6 +5,7 @@ $ScriptName = "2 Run test"
 . (Join-Path $PSScriptRoot "common.ps1")
 . (Join-Path $PSScriptRoot "results.ps1")
 Clear-Host
+Move-EarlierResults "test"
 Ensure-Results
 if (-not (Test-Path (Join-Path $ShyftHome ".shyft_kit_commit"))) { Stop-Shyft "Shyft isn't installed yet. Double-click '1 Install Shyft' first." }
 $ol = Find-Ollama; $py = Find-Python
@@ -57,10 +58,17 @@ function Make-Review {
   if ($LASTEXITCODE -eq 0) { $script:ReviewReady = $true; Ok "ready" } else { Warn "Couldn't prepare the results page (see results_page.txt)."; Note "make_review.py failed" }
 }
 function Show-Estimate($seconds) {
-  $mins = [math]::Ceiling($seconds / 3 * 91 * 2 / 60)  # per screenshot, x 91 screenshots, x 2 runs
+  # Each model loads once, on its first use (on the Legion: Zippy 6.6 s on screenshot 1, Rick 6.9 s on
+  # screenshot 2, then 0.7 s for screenshot 3). So: the quick check once (the loading), then all 2 x 91
+  # screenshots at the pace of the last one. Still rough: one screenshot is a small sample.
+  $took = @(Get-Content (Join-Path $Out "quick_check.txt") -ErrorAction SilentlyContinue |
+            Where-Object { $_ -match "^\s+Took ([\d.]+) seconds" } | ForEach-Object { [double]$Matches[1] })
+  if ($took.Count -ge 3) {
+    $mins = [math]::Ceiling(($seconds + 2 * 91 * $took[-1]) / 60)
+  } else { $mins = [math]::Ceiling($seconds / 3 * 91 * 2 / 60) }   # fallback: the old, cautious way
   $text = if ($mins -le 1) { "about 1 minute" } elseif ($mins -lt 90) { "about $mins minutes" } else { "about {0} hours" -f [math]::Round($mins / 60, 1) }
   Ok ("Quick check took {0} s. Rough estimate for the full test: {1}." -f [math]::Round($seconds), $text)
-  Write-Host "    (The quick check includes loading the models, so the real test may go a bit faster.)"
+  Write-Host "    (A rough guess from 3 screenshots: the real test can be faster or slower.)"
   Set-PcLine "Rough estimate for the full test" $text
 }
 

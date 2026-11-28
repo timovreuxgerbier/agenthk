@@ -1,4 +1,4 @@
-SHYFT TEST - READ ME FIRST (Windows, kit 3)
+SHYFT TEST - READ ME FIRST (Windows, kit 3.1)
 ===========================================
 
 Thank you for testing Shyft. It uses only made-up screenshots. Nothing of yours is
@@ -17,7 +17,10 @@ YOU NEED
 
 0. EXTRACT THE DOWNLOAD FIRST
    Right-click Shyft-Tester-Windows.zip > Extract All > Extract.
-   The files don't work from inside the zip.
+   The files don't work from inside the zip (Windows may offer to run them anyway:
+   the button then says "unzip first" and waits). The new folder is called
+   Shyft-Tester-Windows-kit3.1: if you have an older kit folder, use this one.
+   Tested before? Your earlier "Shyft test results" folder is kept, renamed with its date.
 
 1. Double-click "1 Install Shyft"
    It installs Python and Ollama (both free) only if you don't have them, then
@@ -58,7 +61,8 @@ YOU NEED
    Only yes / no / couldn't check: no folder paths and no names. Shyft only looks; it
    changes nothing.
    Open my_pc.txt, type roughly when you bought the PC, save, and send the whole folder
-   to Sphinx (right-click > Send to > Compressed (zipped) folder makes it one file).
+   to Sphinx as one file: right-click the folder > Compress to... > ZIP File (Windows 11),
+   or Send to > Compressed (zipped) folder (Windows 10).
 
 4. When you're done
    Double-click "3 Remove Shyft". It removes only what the kit brought: the models it

@@ -2,7 +2,7 @@
 # Must work in Windows PowerShell 5.1 (what Windows ships). Keep this file plain ASCII:
 # 5.1 misreads other characters in files without a BOM.
 
-$KitVersion = "kit 3"
+$KitVersion = "kit 3.1"
 $CodeCommit = "524117b648f9cbf0db445e4c43855dc028b19763"   # the ONE version of Shyft this kit tests (main, Nov 27: cloud lock, where-checks, Nook, records)
 $CodeZipPattern = "agenthk-$($CodeCommit.Substring(0, 7))*.zip"   # GitHub "Download ZIP" of that commit, kept in files/
 # Decision D27 (Nov 25): exactly these two model builds on every platform, checked by id after install.
@@ -88,6 +88,10 @@ function Get-ModelId($ol, $m) {   # the model's id from "ollama list", or $null
     if ($parts[0] -eq $m) { return $parts[1] }
   }
   return $null
+}
+function Test-HaveBuild($ol, $m) {   # the measured build is here under any name (e.g. gemma4:e4b): by id, D27
+  foreach ($line in (& $ol list 2>$null | Select-Object -Skip 1)) { if ((("$line").Trim() -split "\s+")[1] -eq $ModelIds[$m]) { return $true } }
+  return $false
 }
 function Test-Model($ol, $m) {
   foreach ($line in (& $ol list 2>$null | Select-Object -Skip 1)) { if ((("$line").Trim() -split "\s+")[0] -eq $m) { return $true } }
